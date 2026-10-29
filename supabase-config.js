@@ -12,6 +12,29 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const BUCKET = 'media'; // bucket Storage publik untuk semua foto & video
 
+/* Login Google (popup pilih akun). Isi dengan "Client ID" dari Google Cloud Console
+   (bentuk: 123456-abcdef.apps.googleusercontent.com). AMAN dipublikasikan.
+   JANGAN taruh "Client secret" di sini; secret hanya diisi di dashboard Supabase.
+   Jika dikosongkan, login tetap jalan lewat halaman login Google (OAuth redirect).
+   Lihat PANDUAN-LOGIN-GOOGLE.md. */
+const GOOGLE_CLIENT_ID = '455706883223-1c5mjtibil0dib1fhqa0a06o4evkdmdp.apps.googleusercontent.com';
+
+/* Pilihan login yang TAMPIL di lembar "Log in". true = tampil, false = disembunyikan.
+   - google, facebook, email : tampil di layar awal.
+   - apple, microsoft, chatgpt : tampil setelah menekan "Lanjutkan dengan cara lain".
+   Facebook, Apple, dan Microsoft baru berfungsi setelah diaktifkan di Supabase
+   (Authentication > Sign In / Providers) -- lihat PANDUAN-LOGIN-GOOGLE.md bagian 8.
+   chatgpt dimatikan: "Sign in with ChatGPT" saat ini hanya untuk mitra komersial OpenAI,
+   jadi belum bisa dipakai situs biasa. Nyalakan hanya bila sudah punya akses. */
+const LOGIN_PROVIDER = {
+  google: true, facebook: true, email: true,
+  apple: true, microsoft: true,
+  chatgpt: false
+};
+/* Penghubung ke nama provider di Supabase. ChatGPT memakai "custom OIDC" -> beri nama
+   pengenal yang sama persis dengan yang dibuat di Supabase (harus diawali custom:). */
+const NAMA_PROVIDER_SB = { google: 'google', facebook: 'facebook', apple: 'apple', microsoft: 'azure', chatgpt: 'custom:chatgpt' };
+
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* Gambar pengganti jika foto gagal dimuat */

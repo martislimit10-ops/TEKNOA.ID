@@ -14,21 +14,8 @@
 </head>
 <body>
 
-<!-- ===== LOGIN ===== -->
-<section id="viewLogin" class="login" hidden>
-  <form id="formLogin" class="login-kartu" autocomplete="on">
-    <img class="login-logo" src="images/logo.png" alt="TEKNOA.ID" width="816" height="95">
-    <h1>Panel Admin</h1>
-    <p class="muted">TEKNOA.ID &middot; Laptop Makassar</p>
-    <label for="email">Email</label>
-    <input id="email" type="email" autocomplete="username" required>
-    <label for="sandi">Kata sandi</label>
-    <input id="sandi" type="password" autocomplete="current-password" required>
-    <p id="loginPesan" class="pesan galat" role="alert" hidden></p>
-    <button type="submit" class="btn" id="btnMasuk">Masuk</button>
-    <a href="index.html" class="kembali">&larr; Kembali ke website</a>
-  </form>
-</section>
+<!-- Pemeriksaan peran -->
+<section id="viewCek" class="login"><p class="muted">Memeriksa akun...</p></section>
 
 <!-- ===== PANEL ===== -->
 <div id="viewPanel" hidden>
@@ -46,20 +33,18 @@
       <button role="tab" id="tab-toko"         aria-selected="false" aria-controls="pnl-toko"         data-tab="toko" tabindex="-1">Foto Toko</button>
       <button role="tab" id="tab-promo"        aria-selected="false" aria-controls="pnl-promo"        data-tab="promo" tabindex="-1">Promo 1</button>
       <button role="tab" id="tab-promo2"       aria-selected="false" aria-controls="pnl-promo2"       data-tab="promo2" tabindex="-1">Promo 2</button>
-      <button role="tab" id="tab-promo3"       aria-selected="false" aria-controls="pnl-promo3"       data-tab="promo3" tabindex="-1">Promo 3</button>
       <button role="tab" id="tab-info"         aria-selected="false" aria-controls="pnl-info"         data-tab="info" tabindex="-1">Info &amp; Kontak</button>
       <button role="tab" id="tab-produk"       aria-selected="false" aria-controls="pnl-produk"       data-tab="produk" tabindex="-1">Produk</button>
     </nav>
   </header>
 
   <main class="isi">
-    <!-- Enam tab media memakai komponen yang sama (diisi oleh admin.js) -->
+    <!-- Lima tab media memakai komponen yang sama (diisi oleh admin.js) -->
     <section id="pnl-hero_desktop" role="tabpanel" aria-labelledby="tab-hero_desktop" data-media="hero_desktop"></section>
     <section id="pnl-hero_hp"      role="tabpanel" aria-labelledby="tab-hero_hp"      data-media="hero_hp" hidden></section>
     <section id="pnl-toko"         role="tabpanel" aria-labelledby="tab-toko"         data-media="toko" hidden></section>
     <section id="pnl-promo"        role="tabpanel" aria-labelledby="tab-promo"        data-media="promo" hidden></section>
     <section id="pnl-promo2"       role="tabpanel" aria-labelledby="tab-promo2"       data-media="promo2" hidden></section>
-    <section id="pnl-promo3"       role="tabpanel" aria-labelledby="tab-promo3"       data-media="promo3" hidden></section>
 
     <!-- Info & Kontak -->
     <section id="pnl-info" role="tabpanel" aria-labelledby="tab-info" hidden>
@@ -121,6 +106,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="auth.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /* =====================================================================
    LAPTOP MAKASSAR - PANEL ADMIN
    Butuh: supabase-js -> supabase-config.js -> admin.js
-   Tab: Hero Desktop, Hero HP, Foto Toko, Promo 1, Promo 2, Promo 3, Info & Kontak, Produk.
+   Tab: Hero Desktop, Hero HP, Foto Toko, Promo 1, Promo 2, Info & Kontak, Produk.
    Sekali klik "Simpan" -> data masuk Supabase -> halaman depan
    terbarui otomatis (realtime), tanpa mengubah file di GitHub.
    ===================================================================== */
@@ -57,22 +57,23 @@ async function unggah(file, folder) {
   return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-/* ---------- Login / sesi ---------- */
-function tampilkan(session) {
-  const masuk = !!session;
-  $('#viewLogin').hidden = masuk; $('#viewPanel').hidden = !masuk;
-  if (masuk && !sudahMuat) { sudahMuat = true; muatSemuaTab(); }
-  if (!masuk) sudahMuat = false;
+/* ---------- Sesi ----------
+   Login TUNGGAL: user dan admin masuk lewat dialog Log in / Sign up di index.html.
+   Halaman ini tidak punya login sendiri. Admin dikenali dari email yang dikunci di database
+   (tabel admin_emails, fungsi is_admin). Belum login / bukan admin -> kembali ke index.html. */
+let sedangCek = false;
+async function tampilkan(session) {
+  if (!session) { location.replace('index.html'); return; }
+  if (sudahMuat || sedangCek) return;
+  sedangCek = true;
+  $('#viewCek').hidden = false;
+  const admin = await LMAuth.cekAdmin();
+  sedangCek = false;
+  if (!admin) { location.replace('index.html'); return; }          /* user biasa tetap di katalog */
+  $('#viewCek').hidden = true; $('#viewPanel').hidden = false;
+  sudahMuat = true; muatSemuaTab();
 }
-$('#formLogin').addEventListener('submit', async e => {
-  e.preventDefault();
-  const b = $('#btnMasuk'), p = $('#loginPesan'); b.disabled = true; p.hidden = true;
-  const { error } = await sb.auth.signInWithPassword({ email: $('#email').value.trim(), password: $('#sandi').value });
-  b.disabled = false;
-  if (error) { p.textContent = 'Email atau kata sandi salah.'; p.hidden = false; }
-  else $('#sandi').value = '';
-});
-$('#btnKeluar').addEventListener('click', () => sb.auth.signOut());
+$('#btnKeluar').addEventListener('click', async () => { await LMAuth.keluar(); location.replace('index.html'); });
 
 /* ---------- Tab ---------- */
 const tabs = $$('[role="tab"]');
@@ -94,7 +95,7 @@ tabs.forEach((t, i) => {
 });
 
 /* =====================================================================
-   MANAJER MEDIA (dipakai 6 tab: hero_desktop, hero_hp, toko, promo, promo2, promo3)
+   MANAJER MEDIA (dipakai 5 tab: hero_desktop, hero_hp, toko, promo, promo2)
    Perubahan ditampung dulu, baru dikirim saat klik "Simpan".
    ===================================================================== */
 const KONFIG_MEDIA = {
@@ -108,8 +109,6 @@ const KONFIG_MEDIA = {
     info: 'Khusus foto atau infografis, maksimal 10. Tampil sebagai slide geser dan utuh tidak dipotong. Disarankan POTRET 4:5 (contoh 1080x1350).' },
   promo2: { judul: 'Slide Promo 2 (di bawah Promo 1)', maks: 10, video: false, rasio: '',
     info: 'Khusus foto atau infografis, maksimal 10. Tampil sebagai slide geser kedua tepat di bawah Promo 1. Disarankan POTRET 4:5 (contoh 1080x1350).' },
-  promo3: { judul: 'Slide Promo 3 (di bawah Promo 2)', maks: 10, video: false, rasio: '',
-    info: 'Khusus foto atau infografis, maksimal 10. Tampil sebagai slide geser ketiga tepat di bawah Promo 2. Seksi ini otomatis muncul di website begitu ada minimal 1 foto yang tersimpan dan berstatus Tampilkan. Disarankan POTRET 4:5 (contoh 1080x1350).' }
 };
 
 function buatManajerMedia(root, bagian) {
@@ -350,5 +349,5 @@ function muatSemuaTab() { Object.values(manajer).forEach(m => m.muat()); muatInf
   if (tabs.some(t => t.dataset.tab === nama)) pilihTab(nama);
   const { data } = await sb.auth.getSession();
   tampilkan(data.session);
-  sb.auth.onAuthStateChange((_e, session) => tampilkan(session));
+  sb.auth.onAuthStateChange((_e, session) => { setTimeout(() => tampilkan(session), 0); });   /* jangan memanggil Supabase langsung di dalam callback ini */
 })();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Laptop Makassar | Laptop Baru dan Bekas Berkualitas</title>
+  <title>Tekno  Laptop Baru dan Bekas Berkualitas</title>
   <meta name="description" content="Toko laptop baru dan bekas berkualitas di Makassar dan Gowa. Semua unit dicek, bergaransi, harga jujur.">
   <meta name="theme-color" content="#fafafa">
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
@@ -66,6 +66,9 @@
     <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V4.5h4V7M7 7l.8 12h8.4L17 7"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 4l1.8 4.7 4.7 1.8-4.7 1.8L12 17l-1.8-4.7-4.7-1.8 4.7-1.8z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.6 3.9-5.5 7.5-5.5s6.6 1.9 7.5 5.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"/></symbol>
+    <symbol id="i-compare" viewBox="0 0 24 24"><rect x="4" y="5" width="6.5" height="14" rx="1.5"/><rect x="13.5" y="5" width="6.5" height="14" rx="1.5"/></symbol>
   </defs>
 </svg>
 
@@ -86,30 +89,109 @@
         <img class="logo-gelap" src="images/logo-gelap.png" alt="" width="816" height="95">
       </a>
 
-      <!-- Navigasi laptop (layar lebar). Di HP dipakai menu 2 garis. -->
-      <nav class="hdr-nav" aria-label="Navigasi utama">
-        <a href="#toko">Toko</a>
-        <a href="#lokasi" data-goto="#lokasi">Kunjungi Toko</a>
-        <a data-ig target="_blank" rel="noopener">Instagram</a>
-        <a data-tt target="_blank" rel="noopener">TikTok</a>
-        <a data-wa target="_blank" rel="noopener">Contact</a>
+      <!-- Navigasi laptop gaya apple.com: katalog di tengah. Item bertanda data-mega membuka panel popup di bawah bar.
+           Di HP dipakai menu 2 garis (sidebar). -->
+      <nav class="hdr-nav" id="hdrNav" aria-label="Navigasi utama">
+        <button type="button" class="nav-i" data-mega="toko" aria-expanded="false" aria-controls="mega">Toko</button>
+        <a href="#logoMerek" class="nav-i" data-goto="#logoMerek">Merek</a>
+        <button type="button" class="nav-i" data-mega="kunjungi" aria-expanded="false" aria-controls="mega">Kunjungi Toko</button>
+        <button type="button" class="nav-i" data-mega="hubungi" aria-expanded="false" aria-controls="mega">Hubungi</button>
+        <!-- Tema: teks menunjukkan mode tujuan. Terang = hitam, gelap = putih (diatur script.js + CSS) -->
+        <button type="button" id="btnTemaNav" class="nav-i nav-tema" aria-label="Ganti mode gelap / terang">Gelap</button>
+        <!-- Belum login: Sign up + Log in. Sudah login: item Akun. (id sama dengan yang dipakai script.js) -->
+        <span class="nav-auth" id="authBtns">
+          <button type="button" id="btnDaftar" class="nav-i">Sign up</button>
+          <button type="button" id="btnMasuk" class="nav-i">Log in</button>
+        </span>
+        <button type="button" id="navAkun" class="nav-i" hidden>Akun</button>
       </nav>
 
       <div class="hdr-kanan">
-        <button type="button" id="btnTemaHdr" class="ikon ikon-tema" aria-label="Ganti mode gelap / terang"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
         <button type="button" id="btnCari" class="ikon" aria-label="Cari laptop dengan AI"><svg><use href="#i-search"/></svg></button>
+        <!-- Sudah login (HP): foto/inisial akun. Di laptop, akun ada di katalog tengah (#navAkun). -->
+        <button type="button" id="btnAkun" class="ikon ikon-akun" aria-label="Akun saya" hidden>
+          <svg><use href="#i-user"/></svg>
+          <span class="avatar" hidden></span>
+        </button>
         <button type="button" id="btnToko" class="ikon" aria-label="Buka toko dan keranjang">
           <svg><use href="#i-cart"/></svg>
           <span class="badge" data-badge hidden>0</span>
         </button>
       </div>
     </div>
+
+    <!-- ============ PANEL POPUP KATALOG (gaya apple.com): turun dari bar saat item katalog diklik ============ -->
+    <div class="mega" id="mega" aria-hidden="true">
+      <section class="mega-panel" data-panel="toko" aria-label="Toko" hidden>
+        <div class="mega-isi">
+          <div class="mega-kol">
+            <p class="mega-label mi" style="--i:0">Belanja Laptop</p>
+            <ul class="mega-besar" id="megaKategori"></ul>
+          </div>
+          <div class="mega-kol">
+            <p class="mega-label mi" style="--i:1">Pilihan Cepat</p>
+            <ul class="mega-kecil">
+              <li class="mi" style="--i:2"><a href="#" data-ke-toko data-tag="promo">Promo</a></li>
+              <li class="mi" style="--i:3"><a href="#" data-ke-toko data-tag="baru">Baru masuk</a></li>
+              <li class="mi" style="--i:4"><a href="#" data-ke-toko data-tag="terlaris">Terlaris</a></li>
+            </ul>
+          </div>
+          <div class="mega-kol">
+            <p class="mega-label mi" style="--i:1">Bantuan</p>
+            <ul class="mega-kecil">
+              <li class="mi" style="--i:2"><a data-wa target="_blank" rel="noopener">Tanya lewat WhatsApp</a></li>
+              <li class="mi" style="--i:3"><a href="#lokasi" data-goto="#lokasi">Lihat lokasi toko</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="mega-panel" data-panel="kunjungi" aria-label="Kunjungi Toko" hidden>
+        <div class="mega-isi">
+          <div class="mega-kol">
+            <p class="mega-label mi" style="--i:0">Kunjungi Toko</p>
+            <ul class="mega-besar">
+              <li class="mi" style="--i:1"><a href="#lokasi" data-goto="#lokasi">Lokasi &amp; foto toko</a></li>
+              <li class="mi" style="--i:2"><a data-maps target="_blank" rel="noopener">Buka di Google Maps</a></li>
+            </ul>
+          </div>
+          <div class="mega-kol">
+            <p class="mega-label mi" style="--i:1">Cabang</p>
+            <ul class="mega-kecil">
+              <li class="mi" style="--i:2"><a href="#lokasi" data-goto="#lokasi">Makassar</a></li>
+              <li class="mi" style="--i:3"><a href="#lokasi" data-goto="#lokasi">Gowa</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="mega-panel" data-panel="hubungi" aria-label="Hubungi" hidden>
+        <div class="mega-isi">
+          <div class="mega-kol">
+            <p class="mega-label mi" style="--i:0">Hubungi Kami</p>
+            <ul class="mega-besar">
+              <li class="mi" style="--i:1"><a data-wa target="_blank" rel="noopener">WhatsApp</a></li>
+              <li class="mi" style="--i:2"><a data-ig target="_blank" rel="noopener">Instagram</a></li>
+              <li class="mi" style="--i:3"><a data-tt target="_blank" rel="noopener">TikTok</a></li>
+            </ul>
+          </div>
+          <div class="mega-kol">
+            <p class="mega-label mi" style="--i:1">Bantuan</p>
+            <ul class="mega-kecil">
+              <li class="mi" style="--i:2"><a data-mail>Kirim email</a></li>
+              <li class="mi" style="--i:3"><a href="#lokasi" data-goto="#lokasi">Datang langsung ke toko</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
   </header>
+  <div class="mega-tirai" id="megaTirai" aria-hidden="true"></div>
 
   <main id="konten">
 
     <!-- ============ HERO SLIDER (foto + video) ============ -->
-    <section id="hero" class="hero" aria-roledescription="carousel" aria-label="Promo Laptop Makassar">
+    <section id="hero" class="hero" aria-roledescription="carousel" aria-label="Promo Tekno">
       <div id="heroTrack" class="hero-track"></div>
 
       <div id="heroKontrol" class="hero-kontrol" hidden>
@@ -127,18 +209,199 @@
       </div>
     </section>
 
-    <!-- ============ LOGO MEREK ============ -->
-    <section id="merek" class="blok blok-merek" aria-labelledby="merekJudul">
-      <div class="wadah">
-        <div class="kepala">
-          <p class="eyebrow">Merek</p>
-          <h2 id="merekJudul" class="besar">Merek favoritmu. Satu toko.</h2>
-          <p class="isi-abu"><b>Dari ASUS sampai Apple,</b> laptop baru dan bekas dari merek yang sudah kamu kenal. Setiap unit kami cek dulu sebelum sampai ke tanganmu.</p>
+    <!-- ============ TEKNO: judul + strip ikon geser (gaya halaman Mac Apple). Foto dari folder images/tekno/ ============ -->
+    <section id="merek" class="ap-kepala" aria-labelledby="merekJudul">
+      <div class="ap-wadah">
+        <h2 id="merekJudul" class="ap-judul-besar">Teknoa</h2>
+        <div class="ap-strip-bungkus">
+          <button type="button" id="apStripPrev" class="ap-strip-btn ap-strip-prev" aria-label="Geser ke kiri" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <ul id="apStrip" class="ap-strip" aria-label="Kategori laptop">
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon1.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>MacBook Neo</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon2.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>MacBook Air</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon3.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>MacBook Pro</span><em class="ap-baru">Baru</em></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon4.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>iMac</span><em class="ap-baru">Baru</em></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon5.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Mac mini</span><em class="ap-baru">Baru</em></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon6.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Mac Studio</span><em class="ap-baru">Baru</em></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon7.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Layar</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-goto="#katalogBaru"><img src="images/tekno/ikon8.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Bandingkan</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-wa target="_blank" rel="noopener"><img src="images/tekno/ikon9.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Bantu Pilih</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="all"><img src="images/tekno/ikon10.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Aksesori</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon11.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Belanja Mac</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-tag="promo"><img src="images/tekno/ikon12.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Promo</span></a></li>
+          </ul>
+          <button type="button" id="apStripNext" class="ap-strip-btn ap-strip-next" aria-label="Geser ke kanan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
         </div>
-        <div class="stat-baris">
-          <div class="stat"><p class="stat-label">Merek laptop tersedia</p><p class="stat-angka"><span class="n" data-stat="merek">11</span></p></div>
-          <div class="stat"><p class="stat-label">Kategori, dari gaming sampai MacBook</p><p class="stat-angka"><span class="n" data-stat="kategori">6</span></p></div>
+      </div>
+    </section>
+
+    <!-- ============ JELAJAHI JAJARANNYA: filter + kartu geser. 100% statis (folder images/katalog/), tidak terhubung database ============ -->
+    <section id="katalogBaru" class="ap-abu ap-jelajah" aria-labelledby="jelajahJudul">
+      <div class="ap-wadah">
+        <h2 id="jelajahJudul" class="ap-h2">Jelajahi jajarannya</h2>
+        <div class="ap-pill-bungkus">
+          <div class="ap-pill" id="apPill" role="group" aria-label="Filter produk">
+            <button type="button" class="ap-pill-btn" data-filter="all" aria-pressed="true">Semua produk</button>
+            <button type="button" class="ap-pill-btn" data-filter="laptop" aria-pressed="false">Laptop</button>
+            <button type="button" class="ap-pill-btn" data-filter="desktop" aria-pressed="false">Desktop</button>
+            <button type="button" class="ap-pill-btn" data-filter="display" aria-pressed="false">Layar</button>
+          </div>
+          <button type="button" id="apPillNext" class="ap-pill-next" aria-label="Filter berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
         </div>
+        <div id="katalogList" class="ap-kartu-list" tabindex="0" aria-roledescription="carousel" aria-label="Daftar produk, geser ke samping">
+          <article class="k-kartu" data-grup="laptop">
+            <div class="k-foto"><img src="images/katalog/foto1.png" alt="MacBook Neo" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna" aria-hidden="true"><span class="k-titik" style="--c:#e3e4e6" title="Perak"></span><span class="k-titik" style="--c:#e8d0d0" title="Pink"></span><span class="k-titik" style="--c:#dddc8c" title="Kuning"></span><span class="k-titik" style="--c:#586680" title="Indigo"></span></div>
+            <div class="k-isi">
+              <p class="k-label" aria-hidden="true">&nbsp;</p>
+              <h3 class="k-judul">MacBook Neo</h3>
+              
+              <p class="k-desk">Keajaiban Mac dengan harga mengejutkan.</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="neo" aria-haspopup="dialog" aria-label="Selengkapnya: MacBook Neo">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli MacBook Neo">Beli</a>
+              </div>
+            </div>
+          </article>
+          <article class="k-kartu" data-grup="laptop">
+            <div class="k-foto"><img src="images/katalog/foto2.png" alt="MacBook Air 13″ dan 15″" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna" aria-hidden="true"><span class="k-titik" style="--c:#c7d8e0" title="Biru langit"></span><span class="k-titik" style="--c:#e3e4e6" title="Perak"></span><span class="k-titik" style="--c:#f0e5d3" title="Starlight"></span><span class="k-titik" style="--c:#2e3641" title="Midnight"></span></div>
+            <div class="k-isi">
+              <p class="k-label" aria-hidden="true">&nbsp;</p>
+              <h3 class="k-judul">MacBook Air 13 dan 15</h3>
+              
+              <p class="k-desk">Tipis. Cepat. Andal dan portabel.</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="air" aria-haspopup="dialog" aria-label="Selengkapnya: MacBook Air 13″ dan 15″">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli MacBook Air 13″ dan 15″">Beli</a>
+              </div>
+            </div>
+          </article>
+          <article class="k-kartu" data-grup="laptop">
+            <div class="k-foto"><img src="images/katalog/foto3.png" alt="MacBook Pro 14″ dan 16″" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna" aria-hidden="true"><span class="k-titik" style="--c:#2e2c2f" title="Space Black"></span><span class="k-titik" style="--c:#e3e4e6" title="Perak"></span></div>
+            <div class="k-isi">
+              <p class="k-label">14″ baru dengan M6</p>
+              <h3 class="k-judul">MacBook Pro 14 dan 16</h3>
+              
+              <p class="k-desk">Laptop bertenaga untuk tiap tipe pro.</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="pro-m6" aria-haspopup="dialog" aria-label="Selengkapnya: MacBook Pro 14″ dan 16″">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli MacBook Pro 14″ dan 16″">Beli</a>
+              </div>
+            </div>
+          </article>
+          <article class="k-kartu" data-grup="laptop">
+            <div class="k-foto"><img src="images/katalog/foto4.png" alt="MacBook Pro 14″ dan 16″ - Layar PROLED XDR" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna" aria-hidden="true"><span class="k-titik" style="--c:#2e2c2f" title="Space Black"></span><span class="k-titik" style="--c:#e3e4e6" title="Perak"></span></div>
+            <div class="k-isi">
+              <p class="k-label">Baru</p>
+              <h3 class="k-judul">MacBook Pro 14 dan 16</h3>
+              <p class="k-sub">Layar PROLED XDR</p>
+              <p class="k-desk">MacBook Pro paling canggih dengan layar laptop terbaik di dunia.</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="pro-xdr" aria-haspopup="dialog" aria-label="Selengkapnya: MacBook Pro 14″ dan 16″">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli MacBook Pro 14″ dan 16″">Beli</a>
+              </div>
+            </div>
+          </article>
+          <article class="k-kartu" data-grup="desktop">
+            <div class="k-foto"><img src="images/katalog/foto5.png" alt="iMac" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna" aria-hidden="true"><span class="k-titik" style="--c:#547eae;background:linear-gradient(90deg,#547eae 0,#547eae 38%,#abc1d8 62%,#abc1d8 100%)" title="Biru"></span><span class="k-titik" style="--c:#827eb1;background:linear-gradient(90deg,#827eb1 0,#827eb1 38%,#abb2cf 62%,#abb2cf 100%)" title="Ungu"></span><span class="k-titik" style="--c:#de5f7d;background:linear-gradient(90deg,#de5f7d 0,#de5f7d 38%,#f3b5c4 62%,#f3b5c4 100%)" title="Pink"></span><span class="k-titik" style="--c:#e47049;background:linear-gradient(90deg,#e47049 0,#e47049 38%,#f5c2a7 62%,#f5c2a7 100%)" title="Oranye"></span><span class="k-titik" style="--c:#edd142;background:linear-gradient(90deg,#edd142 0,#edd142 38%,#f5e4ae 62%,#f5e4ae 100%)" title="Kuning"></span><span class="k-titik" style="--c:#3e935c;background:linear-gradient(90deg,#3e935c 0,#3e935c 38%,#a5c2ae 62%,#a5c2ae 100%)" title="Hijau"></span><span class="k-titik" style="--c:#e3e4e6" title="Perak"></span></div>
+            <div class="k-isi">
+              <p class="k-label">Baru</p>
+              <h3 class="k-judul">iMac</h3>
+              
+              <p class="k-desk">Desktop lengkap untuk kreativitas dan produktivitas</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="imac" aria-haspopup="dialog" aria-label="Selengkapnya: iMac">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli iMac">Beli</a>
+              </div>
+            </div>
+          </article>
+          <article class="k-kartu" data-grup="desktop">
+            <div class="k-foto"><img src="images/katalog/foto6.png" alt="Mac mini" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna k-warna-kosong" aria-hidden="true"></div>
+            <div class="k-isi">
+              <p class="k-label">Baru</p>
+              <h3 class="k-judul">Mac mini</h3>
+              
+              <p class="k-desk">Desktop Mac paling mini dan terjangkau</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="mini" aria-haspopup="dialog" aria-label="Selengkapnya: Mac mini">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli Mac mini">Beli</a>
+              </div>
+            </div>
+          </article>
+          <article class="k-kartu" data-grup="desktop">
+            <div class="k-foto"><img src="images/katalog/foto7.png" alt="Mac Studio" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna k-warna-kosong" aria-hidden="true"></div>
+            <div class="k-isi">
+              <p class="k-label">Baru</p>
+              <h3 class="k-judul">Mac Studio</h3>
+              
+              <p class="k-desk">Performa dan konektivitas andal untuk profesional</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="studio" aria-haspopup="dialog" aria-label="Selengkapnya: Mac Studio">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli Mac Studio">Beli</a>
+              </div>
+            </div>
+          </article>
+          <article class="k-kartu" data-grup="display">
+            <div class="k-foto"><img src="images/katalog/foto8.png" alt="Studio Display" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna k-warna-kosong" aria-hidden="true"></div>
+            <div class="k-isi">
+              <p class="k-label" aria-hidden="true">&nbsp;</p>
+              <h3 class="k-judul">Studio Display</h3>
+              
+              <p class="k-desk">Layar Retina 5K yang sempurna untuk Mac</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="display" aria-haspopup="dialog" aria-label="Selengkapnya: Studio Display">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli Studio Display">Beli</a>
+              </div>
+            </div>
+          </article>
+          <article class="k-kartu" data-grup="display">
+            <div class="k-foto"><img src="images/katalog/foto9.png" alt="Studio Display XDR" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+            <div class="k-warna k-warna-kosong" aria-hidden="true"></div>
+            <div class="k-isi">
+              <p class="k-label" aria-hidden="true">&nbsp;</p>
+              <h3 class="k-judul">Studio Display XDR</h3>
+              
+              <p class="k-desk">Layar Retina XDR 5K terbaik untuk alur kerja kreatif dan pro</p>
+              <div class="k-aksi">
+                <button type="button" class="k-btn" data-info="display-xdr" aria-haspopup="dialog" aria-label="Selengkapnya: Studio Display XDR">Selengkapnya</button>
+                <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli Studio Display XDR">Beli</a>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="ap-panah" id="katalogNav">
+          <button type="button" id="katalogPrev" aria-label="Sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button type="button" id="katalogNext" aria-label="Berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Popup "Selengkapnya": penjelasan produk (isi di script.js, PRODUK_INFO). Tidak ke toko/keranjang. -->
+    <dialog id="infoModal" class="info-modal" aria-labelledby="infoJudul">
+      <div class="info-kotak">
+        <button type="button" class="info-tutup" id="infoTutup" aria-label="Tutup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <div class="info-foto"><img id="infoFoto" alt="" width="1200" height="800"></div>
+        <p class="info-label" id="infoLabel"></p>
+        <h3 id="infoJudul" class="info-judul"></h3>
+        <p class="info-ringkas" id="infoRingkas"></p>
+        <ul class="info-poin" id="infoPoin"></ul>
+        <p class="info-warna" id="infoWarna"></p>
+        <div class="k-aksi info-aksi">
+          <a href="#" class="k-btn info-beli" id="infoBeli" data-ke-toko data-kategori="macbook">Beli</a>
+          <button type="button" class="info-batal" id="infoBatal">Tutup</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ============ LOGO MEREK (dipertahankan) ============ -->
+    <section id="logoMerek" class="ap-abu ap-logo" aria-label="Merek laptop">
+      <div class="ap-wadah">
         <ul class="merek-list">
         <li class="merek-item"><img src="images/brands/asus.png" alt="" loading="lazy" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='https://cdn.simpleicons.org/asus/111111'}else{this.remove()}"><span>ASUS</span></li>
         <li class="merek-item"><img src="images/brands/acer.png" alt="" loading="lazy" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='https://cdn.simpleicons.org/acer/111111'}else{this.remove()}"><span>Acer</span></li>
@@ -155,116 +418,147 @@
       </div>
     </section>
 
+    <!-- ============ JELAJAHI DUNIA TEKNO (akordeon) ============ -->
+    <section class="ap-dunia" aria-labelledby="duniaJudul">
+      <div class="ap-wadah">
+        <h2 id="duniaJudul" class="ap-h2">Jelajahi dunia Teknoa </h2>
+        <a href="#lokasi" class="ap-link" data-goto="#lokasi">Lihat lokasi dan jam buka toko kami</a>
+        <div class="ap-acc">
+        <details open name="dunia">
+          <summary><span>Mac dan iPhone</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <div class="isi"><p>Menjawab panggilan atau pesan dari iPhone langsung pada Mac. Lihat dan kendalikan semua yang ada di iPhone Anda dari Mac Anda dengan Pencerminan iPhone dan Aktivitas Langsung. Gunakan Papan Klip Universal untuk menyalin gambar, video, atau teks dari iPhone, lalu tempelkan ke aplikasi lain di Mac yang berdekatan. Dan berkat iCloud, Anda bisa mengakses file dari iPhone atau Mac Anda. Dan masih banyak lagi.</p><img src="images/tekno/dunia1.png" alt="iPhone dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+        </details>
+        <details name="dunia">
+          <summary><span>Mac dan iPad</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <div class="isi"><p>Buat sketsa di iPad dan gambar itu akan langsung muncul di Mac. Atau gunakan iPad Anda sebagai layar kedua, jadi Anda dapat bekerja di satu layar sambil melihat layar lain sebagai referensi. Anda bahkan dapat memulai sesuatu di iPad — seperti presentasi atau email — dan melanjutkannya di Mac.</p><img src="images/tekno/dunia2.png" alt="iPad dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+        </details>
+        <details name="dunia">
+          <summary><span>Mac dan Apple Watch</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <div class="isi"><p>Masuk secara otomatis ke Mac ketika Anda memakai Apple Watch dengan Buka Otomatis. Tidak perlu mengetik kata sandi.</p><img src="images/tekno/dunia3.png" alt="Apple Watch dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+        </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BERALIH KE LAPTOP BARU ============ -->
+    <section class="ap-abu ap-beralih" aria-labelledby="beralihJudul">
+      <div class="ap-wadah">
+        <h2 id="beralihJudul" class="ap-h2">Upgrade laptop</h2>
+        <div class="ap-kartu-besar">
+          <h3>TEKNO bisa membantunya.</h3>
+          <p>Lihat betapa mudahnya menemukan laptop yang pas.</p>
+          <a href="#" class="ap-link" data-ke-toko data-kategori="all">Selengkapnya</a>
+          <img src="images/tekno/upgrade.png" alt="MacBook menampilkan banyak aplikasi" width="962" height="700" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SESUAI KEBUTUHANMU (kartu putih geser) ============ -->
+    <section class="ap-abu ap-esensial" aria-labelledby="esensialJudul">
+      <div class="ap-wadah">
+        <h2 id="esensialJudul" class="ap-h2">Sesuai kebutuhanmu</h2>
+        <div id="esensialList" class="ap-esensial-list" tabindex="0" aria-roledescription="carousel" aria-label="Pilihan sesuai kebutuhan, geser ke samping">
+          <article class="ap-es-kartu">
+            <h3>Kuliah &amp; Sekolah</h3>
+            <p>Laptop ringan dan awet untuk tugas, jurnal, dan kuliah daring.</p>
+            <a href="#" class="ap-link" data-ke-toko data-kategori="vivobook">Selengkapnya</a>
+            <img src="images/tekno/kebutuhan1.png" alt="" width="800" height="600" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG">
+          </article>
+          <article class="ap-es-kartu">
+            <h3>Kerja &amp; Kantor</h3>
+            <p>Laptop tangguh dan andal untuk dokumen, rapat, dan kerja seharian.</p>
+            <a href="#" class="ap-link" data-ke-toko data-kategori="hpdell">Selengkapnya</a>
+            <img src="images/tekno/kebutuhan2.png" alt="" width="800" height="600" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG">
+          </article>
+          <article class="ap-es-kartu">
+            <h3>Gaming &amp; Desain</h3>
+            <p>Tenaga besar untuk game, editing, dan desain tanpa ngelag.</p>
+            <a href="#" class="ap-link" data-ke-toko data-kategori="gaming">Selengkapnya</a>
+            <img src="images/tekno/kebutuhan3.png" alt="" width="800" height="600" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG">
+          </article>
+        </div>
+        <div class="ap-panah" id="esensialNav">
+          <button type="button" id="esensialPrev" aria-label="Sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button type="button" id="esensialNext" aria-label="Berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ KUNJUNGI TOKO KAMI ============ -->
-    <section id="lokasi" class="blok" aria-labelledby="lokasiJudul">
+    <section id="lokasi" class="blok lok-teks" aria-labelledby="lokasiJudul">
       <div class="wadah">
-        <div class="kepala">
-          <p class="eyebrow">Lokasi</p>
-          <h2 id="lokasiJudul" class="besar">Datang. Lihat. Bawa pulang.</h2>
-          <p class="isi-abu"><b>Kunjungi toko kami di Gowa dan Makassar.</b> Coba unitnya langsung, tanya apa saja, lalu pulang dengan laptop yang pas untukmu.</p>
-        </div>
-        <div class="stat-baris">
-          <div class="stat"><p class="stat-label">Cabang, di Gowa dan Makassar</p><p class="stat-angka">2</p></div>
-          <div class="stat"><p class="stat-label">Unit dicek sebelum dijual</p><p class="stat-angka">100<span>%</span></p></div>
-        </div>
+        <p class="eyebrow"></p>
+        <h2 id="lokasiJudul" class="lok-besar"><span class="lok-k">Datang</span> <span class="lok-k">Lihat</span> <span class="lok-k">Bawa pulang</span></h2>
+        <p class="lok-isi"></b> Setiap unit sudah dicek sampai tuntas sebelum dijual Coba langsung tanya apa saja lalu pulang dengan laptop yang pas untukmu</p>
         <div id="galeriToko" class="galeri" aria-label="Galeri foto toko"></div>
-      </div>
-    </section>
-
-    <!-- ============ PROMO SAAT INI (diisi dari tabel banner, bagian = promo) ============ -->
-    <section id="promo" class="blok" aria-labelledby="promoJudul">
-      <div class="wadah">
-        <div class="kepala">
-          <p class="eyebrow">Promo</p>
-          <h2 id="promoJudul" class="besar">Promo saat ini.</h2>
-          <p class="isi-abu"><b>Penawaran pilihan dengan harga jujur.</b> Geser untuk melihat semua promo, lalu tanyakan stoknya langsung lewat WhatsApp.</p>
-        </div>
-        <div class="stat-baris">
-          <div class="stat" hidden><p class="stat-label">Unit siap dipilih di katalog</p><p class="stat-angka"><span class="n" data-stat="produk">0</span></p></div>
-          <div class="stat"><p class="stat-label">Garansi toko untuk unit baru</p><p class="stat-angka">1<span>tahun</span></p></div>
-          <div class="stat"><p class="stat-label">Garansi toko untuk unit bekas</p><p class="stat-angka">1<span>bulan</span></p></div>
-        </div>
-        <div class="promo-wrap">
-          <button type="button" class="promo-btn promo-prev" aria-label="Promo sebelumnya">&#10094;</button>
-          <div id="promoList" class="promo-list" aria-label="Daftar promo"></div>
-          <button type="button" class="promo-btn promo-next" aria-label="Promo berikutnya">&#10095;</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ PROMO 2 (bagian = promo2) ============ -->
-    <section id="promo2" class="blok" aria-labelledby="promo2Judul">
-      <div class="wadah">
-        <div class="kepala">
-          <p class="eyebrow">Pilihan lainnya</p>
-          <h2 id="promo2Judul" class="besar">Ada yang pas untuk semua kebutuhan.</h2>
-          <p class="isi-abu"><b>Kuliah, kerja, sampai gaming.</b> Dari laptop harian sampai MacBook, semuanya sudah melewati pengecekan toko dan siap dipakai.</p>
-        </div>
-        <div class="promo-wrap">
-          <button type="button" class="promo-btn promo-prev" aria-label="Promo sebelumnya">&#10094;</button>
-          <div id="promoList2" class="promo-list" aria-label="Daftar promo lainnya"></div>
-          <button type="button" class="promo-btn promo-next" aria-label="Promo berikutnya">&#10095;</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ PROMO 3 (slot baru, bagian = promo3; tampil otomatis saat admin mengunggah foto) ============ -->
-    <section id="promo3" class="blok" aria-labelledby="promo3Judul" hidden>
-      <div class="wadah">
-        <div class="kepala">
-          <p class="eyebrow">Info terbaru</p>
-          <h2 id="promo3Judul" class="besar">Jangan sampai ketinggalan.</h2>
-          <p class="isi-abu"><b>Stok kami bergerak cepat.</b> Lihat penawaran terbaru di sini, lalu hubungi kami sebelum unit incaranmu habis.</p>
-          <a class="tautan-biru" data-wa target="_blank" rel="noopener">Tanya stok via WhatsApp <span aria-hidden="true">&rsaquo;</span></a>
-        </div>
-        <div class="promo-wrap">
-          <button type="button" class="promo-btn promo-prev" aria-label="Promo sebelumnya">&#10094;</button>
-          <div id="promoList3" class="promo-list" aria-label="Daftar promo terbaru"></div>
-          <button type="button" class="promo-btn promo-next" aria-label="Promo berikutnya">&#10095;</button>
-        </div>
       </div>
     </section>
   </main>
 
-  <!-- ============ FOOTER MULTI-KOLOM ============ -->
-  <footer class="foot">
-    <div class="wadah">
-      <div class="foot-grid">
-        <div>
-          <a href="#" class="foot-brand" aria-label="TEKNOA.ID, ke atas">
-            <img class="logo-terang" src="images/logo.png" alt="TEKNOA.ID" width="816" height="95" loading="lazy">
-            <img class="logo-gelap" src="images/logo-gelap.png" alt="" width="816" height="95" loading="lazy">
-          </a>
-          <p class="foot-desk" data-fill="deskripsi"></p>
-        </div>
-        <div>
-          <h3 class="foot-judul">Navigasi</h3>
-          <ul class="foot-list">
-            <li><a href="#">Beranda</a></li>
-            <li><a href="#toko">Toko &amp; Katalog</a></li>
-            <li><a href="#lokasi">Lokasi &amp; Jam Buka</a></li>
-            <li><a data-wa target="_blank" rel="noopener">Contact</a></li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="foot-judul">Kunjungi kami</h3>
-          <ul class="foot-list foot-kontak">
-            <li><svg class="ik"><use href="#i-pin"/></svg><span data-fill="alamat"></span></li>
-            <li><svg class="ik"><use href="#i-clock"/></svg><span data-fill="jam"></span></li>
-            <li><svg class="ik"><use href="#i-pin"/></svg><a data-maps target="_blank" rel="noopener">Lihat di Google Maps</a></li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="foot-judul">Ikuti kami</h3>
-          <div class="sosmed">
-            <a data-ig target="_blank" rel="noopener" aria-label="Instagram"><svg><use href="#i-ig"/></svg></a>
-            <a data-tt target="_blank" rel="noopener" aria-label="TikTok"><svg><use href="#i-tiktok"/></svg></a>
-            <a data-wa target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-wa"/></svg></a>
-          </div>
-          <a data-mail class="foot-mail"><span data-fill="email"></span></a>
-        </div>
+  <!-- ============ DIREKTORI (gaya "Mac / Think different.") ============ -->
+  <section class="ap-dir" aria-label="Jelajahi TEKNO">
+    <div class="ap-wadah">
+      <div class="ap-dir-kepala">
+        <h2 class="ap-judul-besar">Selengkapnya</h2>
       </div>
-      <div class="foot-bar">&copy; <span id="tahun"></span> Laptop Makassar. Semua hak dilindungi.</div>
+      <p class="ap-dir-label">Jelajahi</p>
+      <ul class="ap-dir-besar" id="dirKategori"></ul>
+      <ul class="ap-dir-kecil">
+        <li><a href="#lokasi" data-goto="#lokasi">Lokasi &amp; Jam Buka</a></li>
+        <li><a data-maps target="_blank" rel="noopener">Petunjuk Arah di Google Maps</a></li>
+      </ul>
+      <p class="ap-dir-label ap-dir-label2">Lainnya</p>
+      <ul class="ap-dir-kecil">
+        <li><a data-wa target="_blank" rel="noopener">Dukungan</a></li>
+        <li><a data-ig target="_blank" rel="noopener">Instagram</a></li>
+        <li><a data-tt target="_blank" rel="noopener">TikTok</a></li>
+        <li><a data-mail>Email</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER (akordeon di HP, kolom di desktop) ============ -->
+  <footer class="apf">
+    <div class="ap-wadah">
+      <div class="apf-cat">
+        <p>Harga dan ketersediaan unit dapat berubah sewaktu-waktu. Hubungi toko untuk memastikan stok.</p>
+        <p>Semua unit sudah dicek sebelum dijual.</p>
+        <p>Sebagian unit adalah barang bekas. Lihat label kondisi pada setiap produk.</p>
+      </div>
+      <div class="apf-krum">
+        <img class="logo-terang" src="images/logo.png" alt="TEKNOA.ID" width="816" height="95" loading="lazy">
+        <img class="logo-gelap" src="images/logo-gelap.png" alt="" width="816" height="95" loading="lazy">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span>Beranda</span>
+      </div>
+      <nav class="apf-kolom" aria-label="Tautan footer">
+        <details class="apf-grup"><summary><span>Belanja</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <ul id="footKategori"></ul></details>
+        <details class="apf-grup"><summary><span>Layanan</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <ul>
+            <li><a href="#" data-ke-toko data-kategori="all">Toko &amp; Katalog</a></li>
+            <li><a href="#merek" data-goto="#merek">Merek</a></li>
+            <li><a href="#lokasi" data-goto="#lokasi">Lokasi &amp; Jam Buka</a></li>
+            <li><a data-wa target="_blank" rel="noopener">Dukungan</a></li>
+          </ul></details>
+        <details class="apf-grup"><summary><span>Kunjungi Kami</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <ul>
+            <li data-fill="alamat"></li>
+            <li data-fill="jam"></li>
+            <li><a data-maps target="_blank" rel="noopener">Lihat di Google Maps</a></li>
+          </ul></details>
+        <details class="apf-grup"><summary><span>Ikuti Kami</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <ul>
+            <li><a data-ig target="_blank" rel="noopener">Instagram</a></li>
+            <li><a data-tt target="_blank" rel="noopener">TikTok</a></li>
+            <li><a data-wa target="_blank" rel="noopener">WhatsApp</a></li>
+            <li><a data-mail><span data-fill="email"></span></a></li>
+          </ul></details>
+      </nav>
+      <p class="apf-retail"><a data-maps target="_blank" rel="noopener">Temukan toko</a> di dekat Anda.</p>
+      <div class="apf-bawah">
+        <p>&copy; <span id="tahun"></span> Teknoa. Semua hak dilindungi.</p>
+        <p class="apf-tautan"><a href="#" data-ke-toko data-kategori="all">Toko</a><span aria-hidden="true">|</span><a href="#lokasi" data-goto="#lokasi">Lokasi</a><span aria-hidden="true">|</span><a data-wa target="_blank" rel="noopener">Dukungan</a></p>
+      </div>
     </div>
   </footer>
 </div>
@@ -275,29 +569,24 @@
   <nav class="sb-nav" aria-label="Navigasi utama">
     <ul class="sb-utama">
       <li style="--i:0"><a href="#toko" class="sb-besar">Toko</a></li>
-      <li style="--i:1"><a href="#promo" data-goto="#promo" class="sb-besar">Promo</a></li>
-      <li style="--i:2"><a href="#merek" data-goto="#merek" class="sb-besar">Merek</a></li>
-      <li style="--i:3"><a href="#lokasi" data-goto="#lokasi" class="sb-besar">Lokasi</a></li>
-    </ul>
-
-    <div class="sb-grup" style="--i:4">
-      <p class="sb-label">Operasional</p>
-      <ul>
-        <li><a data-maps target="_blank" rel="noopener" class="sb-sedang">Maps</a></li>
-        <li><a data-ig target="_blank" rel="noopener" class="sb-sedang">Instagram</a></li>
-        <li><a data-tt target="_blank" rel="noopener" class="sb-sedang">TikTok</a></li>
-        <li><a data-wa target="_blank" rel="noopener" class="sb-sedang">Dukungan</a></li>
-      </ul>
-    </div>
-
-    <div class="sb-grup" style="--i:5">
-      <p class="sb-label">Contact</p>
-      <div class="sb-tema">
-        <span class="sb-sedang" id="labelTema">Mode Gelap</span>
+      <li style="--i:1"><a href="#merek" data-goto="#merek" class="sb-besar">Merek</a></li>
+      <li style="--i:2"><a href="#lokasi" data-goto="#lokasi" class="sb-besar">Lokasi</a></li>
+      <li style="--i:3"><a data-maps target="_blank" rel="noopener" class="sb-besar">Maps</a></li>
+      <li style="--i:4"><a data-ig target="_blank" rel="noopener" class="sb-besar">Instagram</a></li>
+      <li style="--i:5"><a data-tt target="_blank" rel="noopener" class="sb-besar">TikTok</a></li>
+      <li style="--i:6"><a data-wa target="_blank" rel="noopener" class="sb-besar">Dukungan</a></li>
+      <li style="--i:7" class="sb-tema">
+        <span class="sb-besar" id="labelTema">Mode Gelap</span>
         <button type="button" id="saklarTema" class="saklar" role="switch" aria-checked="false" aria-labelledby="labelTema"><span></span></button>
-      </div>
-    </div>
+      </li>
+    </ul>
   </nav>
+
+  <!-- Sign up & Log in: selalu terlihat di dasar menu, rata tengah -->
+  <div class="sb-auth" id="sbAuth" style="--i:8">
+    <button type="button" id="btnDaftarMenu" class="sb-btn sb-btn-garis">Sign up</button>
+    <button type="button" id="btnMasukMenu" class="sb-btn sb-btn-isi">Log in</button>
+  </div>
 </aside>
 
 <!-- ============ HALAMAN TOKO (ikon keranjang) ============ -->
@@ -306,10 +595,20 @@
     <div class="store-bar">
       <button type="button" id="storeBack" class="ikon" aria-label="Kembali ke beranda"><svg><use href="#i-chev-l"/></svg></button>
       <h2>Toko</h2>
-      <button type="button" id="storeKeranjang" class="ikon" aria-label="Buka keranjang">
-        <svg><use href="#i-cart"/></svg>
-        <span class="badge" data-badge hidden>0</span>
-      </button>
+      <div class="store-kanan">
+        <button type="button" id="storeFavorit" class="ikon" aria-label="Buka favorit">
+          <svg><use href="#i-heart"/></svg>
+          <span class="badge" data-fav-badge hidden>0</span>
+        </button>
+        <button type="button" id="storeBandingkan" class="ikon" aria-label="Bandingkan laptop">
+          <svg><use href="#i-compare"/></svg>
+          <span class="badge" data-cmp-badge hidden>0</span>
+        </button>
+        <button type="button" id="storeKeranjang" class="ikon" aria-label="Buka keranjang">
+          <svg><use href="#i-cart"/></svg>
+          <span class="badge" data-badge hidden>0</span>
+        </button>
+      </div>
     </div>
     <div class="store-filter">
       <label class="sr" for="storeKategori">Kategori</label>
@@ -359,7 +658,7 @@
 
 <!-- ============ PENCARIAN AI ============ -->
 <dialog id="cari" class="dlg dlg-cari dlg-chat" aria-labelledby="cariJudul">
-  <div class="dlg-head"><h2 id="cariJudul">Asisten AI Laptop Makassar</h2><button type="button" class="ikon" data-tutup aria-label="Tutup"><svg><use href="#i-close"/></svg></button></div>
+  <div class="dlg-head"><h2 id="cariJudul">Asisten AI Tekno</h2><button type="button" class="ikon" data-tutup aria-label="Tutup"><svg><use href="#i-close"/></svg></button></div>
   <!-- [PATCH-CHATBOT] Aliran pesan (bubble chat) -->
   <div class="dlg-body chat-isi">
     <div id="cariHasil" class="chat-alur" role="log" aria-live="polite"></div>
@@ -381,10 +680,111 @@
   </div>
 </dialog>
 
+<!-- ============ LOG IN (lembar pilihan: 3 pilihan utama, sisanya di "cara lain") ============ -->
+<dialog id="masuk" class="dlg dlg-masuk" aria-labelledby="masukJudul">
+  <div class="dlg-head">
+    <div class="masuk-judul">
+      <button type="button" class="ikon" id="masukKembali" aria-label="Kembali" hidden><svg><use href="#i-chev-l"/></svg></button>
+      <h2 id="masukJudul">Masuk atau daftar dalam hitungan detik</h2>
+    </div>
+    <button type="button" class="ikon" data-tutup aria-label="Tutup"><svg><use href="#i-close"/></svg></button>
+  </div>
+  <div class="dlg-body masuk-isi">
+
+    <!-- Layar 1: tiga pilihan utama -->
+    <section data-lihat="awal" class="masuk-lihat">
+      <p class="isi-abu">Keranjangmu tersimpan di semua perangkat, dan kamu bisa menyimpan favorit serta membandingkan spesifikasi laptop.</p>
+      <div class="sso-daftar">
+        <button type="button" class="sso" data-p="google"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.9-3c-1.1.7-2.5 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.4 14.4a7.2 7.2 0 0 1 0-4.8V6.5H1.4a12 12 0 0 0 0 11l4-3.1z"/><path fill="#EA4335" d="M12 4.8c1.7 0 3.3.6 4.5 1.8l3.4-3.4A12 12 0 0 0 1.4 6.5l4 3.1C6.3 6.9 8.9 4.8 12 4.8z"/></svg><span>Lanjutkan dengan Google</span></button>
+        <button type="button" class="sso" data-p="facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M16.7 15.5l.5-3.5h-3.3V9.7c0-1 .5-1.9 2-1.9h1.5V4.8s-1.4-.2-2.7-.2c-2.7 0-4.5 1.7-4.5 4.700V12H7v3.500h3.200V24a12 12 0 0 0 3.700 0v-8.500h2.800z"/></svg><span>Lanjutkan dengan Facebook</span></button>
+        <button type="button" class="sso" data-p="email"><svg class="ik" aria-hidden="true"><use href="#i-mail"/></svg><span>Lanjutkan dengan email</span></button>
+      </div>
+      <button type="button" class="sso-lain" id="masukLain">Lanjutkan dengan cara lain</button>
+    </section>
+
+    <!-- Layar 2: semua pilihan -->
+    <section data-lihat="lain" class="masuk-lihat" hidden>
+      <div class="sso-daftar">
+        <button type="button" class="sso" data-p="google"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.9-3c-1.1.7-2.5 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.4 14.4a7.2 7.2 0 0 1 0-4.8V6.5H1.4a12 12 0 0 0 0 11l4-3.1z"/><path fill="#EA4335" d="M12 4.8c1.7 0 3.3.6 4.5 1.8l3.4-3.4A12 12 0 0 0 1.4 6.5l4 3.1C6.3 6.9 8.9 4.8 12 4.8z"/></svg><span>Lanjutkan dengan Google</span></button>
+        <button type="button" class="sso" data-p="facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M16.7 15.5l.5-3.5h-3.3V9.7c0-1 .5-1.9 2-1.9h1.5V4.8s-1.4-.2-2.7-.2c-2.7 0-4.5 1.7-4.5 4.700V12H7v3.500h3.200V24a12 12 0 0 0 3.700 0v-8.500h2.800z"/></svg><span>Lanjutkan dengan Facebook</span></button>
+        <button type="button" class="sso" data-p="email"><svg class="ik" aria-hidden="true"><use href="#i-mail"/></svg><span>Lanjutkan dengan email</span></button>
+        <button type="button" class="sso" data-p="apple"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg><span>Lanjutkan dengan Apple</span></button>
+        <button type="button" class="sso" data-p="microsoft"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#F25022" d="M2 2h9.500v9.500H2z"/><path fill="#7FBA00" d="M12.500 2H22v9.500h-9.500z"/><path fill="#00A4EF" d="M2 12.500h9.500V22H2z"/><path fill="#FFB900" d="M12.500 12.500H22V22h-9.500z"/></svg><span>Lanjutkan dengan Microsoft</span></button>
+        <button type="button" class="sso" data-p="chatgpt"><svg class="ik" aria-hidden="true"><use href="#i-spark"/></svg><span>Lanjutkan dengan ChatGPT</span></button>
+      </div>
+    </section>
+
+    <!-- Layar 3: email -> kirim kode -->
+    <section data-lihat="email" class="masuk-lihat" hidden>
+      <p class="isi-abu">Tanpa kata sandi. Kami kirim kode masuk ke emailmu.</p>
+      <form id="formEmail" class="masuk-form" novalidate>
+        <label class="sr" for="masukEmail">Alamat email</label>
+        <input id="masukEmail" class="field" type="email" inputmode="email" autocomplete="email" placeholder="nama@email.com" maxlength="254" required>
+        <button type="submit" class="btn btn-blok" id="btnKirimKode">Kirim kode</button>
+      </form>
+    </section>
+
+    <!-- Layar 4: masukkan kode -->
+    <section data-lihat="kode" class="masuk-lihat" hidden>
+      <p class="isi-abu">Kode sudah dikirim ke <strong id="kodeEmailTampil"></strong>. Masukkan kodenya di bawah, atau buka tautan di email itu.</p>
+      <form id="formKode" class="masuk-form" novalidate>
+        <label class="sr" for="masukKode">Kode dari email</label>
+        <input id="masukKode" class="field field-kode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Kode" maxlength="10" pattern="[0-9]*" required>
+        <button type="submit" class="btn btn-blok" id="btnVerifKode">Masuk</button>
+      </form>
+      <div class="masuk-baris">
+        <button type="button" class="sso-lain" id="kodeUlang">Kirim ulang kode</button>
+        <button type="button" class="sso-lain" id="kodeGanti">Ganti email</button>
+      </div>
+    </section>
+
+    <p id="masukPesan" class="pesan-masuk" role="alert" hidden></p>
+    <p class="kecil masuk-kecil">Browsing katalog tetap bisa tanpa login.</p>
+  </div>
+</dialog>
+
+<!-- ============ AKUN SAYA ============ -->
+<dialog id="akun" class="dlg" aria-labelledby="akunJudul">
+  <div class="dlg-head"><h2 id="akunJudul">Akun saya</h2><button type="button" class="ikon" data-tutup aria-label="Tutup"><svg><use href="#i-close"/></svg></button></div>
+  <div class="dlg-body" id="akunIsi"></div>
+</dialog>
+
+<!-- ============ FAVORIT ============ -->
+<dialog id="favorit" class="dlg dlg-side" aria-labelledby="favJudul">
+  <div class="dlg-head"><h2 id="favJudul">Favorit saya</h2><button type="button" class="ikon" data-tutup aria-label="Tutup"><svg><use href="#i-close"/></svg></button></div>
+  <div class="dlg-body" id="favIsi"></div>
+</dialog>
+
+<!-- ============ BANDINGKAN SPESIFIKASI (2 sampai 4 unit) ============ -->
+<dialog id="bandingkan" class="dlg dlg-lebar" aria-labelledby="bdgJudul">
+  <div class="dlg-head"><h2 id="bdgJudul">Bandingkan laptop</h2><button type="button" class="ikon" data-tutup aria-label="Tutup"><svg><use href="#i-close"/></svg></button></div>
+  <div class="dlg-body dlg-body-rapat" id="bdgIsi"></div>
+  <div class="dlg-foot dlg-foot-2" id="bdgFoot">
+    <button type="button" id="bdgKosongkan" class="btn btn-garis">Kosongkan</button>
+    <button type="button" class="btn" data-tutup>Tutup</button>
+  </div>
+</dialog>
+
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="auth.js"></script>
 <script src="script.js"></script>
+<script src="navbar.js"></script>
+<script src="tangan.js"></script>
+<script>
+/* Teks "Datang. Lihat. Bawa pulang." muncul halus sekali, begitu terlihat di layar */
+(function () {
+  var s = document.getElementById('lokasi');
+  if (!s || !('IntersectionObserver' in window)) return;
+  document.documentElement.classList.add('js-ok');
+  var io = new IntersectionObserver(function (es) {
+    if (es.some(function (e) { return e.isIntersecting; })) { s.classList.add('tampil'); io.disconnect(); }
+  }, { threshold: .25 });
+  io.observe(s);
+})();
+</script>
 </body>
 </html>
