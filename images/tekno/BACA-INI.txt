@@ -1,0 +1,16 @@
+FOLDER FOTO HALAMAN TEKNO (statis, tidak terhubung database / admin)
+Ganti dengan menimpa file dengan NAMA YANG SAMA. Format PNG transparan paling bagus.
+
+STRIP IKON di bawah judul TEKNO (340 x 200 px, latar transparan):
+  ikon1 = MacBook Neo   ikon2 = MacBook Air   ikon3 = MacBook Pro   ikon4 = iMac
+  ikon5 = Mac mini   ikon6 = Mac Studio   ikon7 = Layar (Studio Display)
+  ikon8 = Bandingkan   ikon9 = Bantu Pilih   ikon10 = Aksesori   ikon11 = Belanja Mac   ikon12 = Promo
+
+AKORDEON "Jelajahi dunia TEKNO" (800 x 500 px):
+  dunia1 = Mac dan iPhone   dunia2 = Mac dan iPad   dunia3 = Mac dan Apple Watch
+
+KARTU "Upgrade laptop" (1400 x 900 px, gambar penuh sampai tepi kartu):
+  upgrade.png
+
+KARTU "Sesuai kebutuhanmu" (800 x 600 px, latar transparan):
+  kebutuhan1 = Kuliah & Sekolah   kebutuhan2 = Kerja & Kantor   kebutuhan3 = Gaming & Desain

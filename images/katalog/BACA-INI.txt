@@ -1,0 +1,15 @@
+FOLDER FOTO KARTU "JELAJAHI JAJARANNYA"
+Foto di sini TIDAK terhubung ke database dan TIDAK bisa diubah dari panel admin.
+Ganti dengan menimpa file dengan NAMA YANG SAMA.
+
+Ukuran: 1200 x 800 px (3:2). Gunakan latar PUTIH POLOS, produk di tengah, PNG/JPG.
+
+  foto1 = MacBook Neo              foto6 = Mac mini
+  foto2 = MacBook Air 13" & 15"    foto7 = Mac Studio
+  foto3 = MacBook Pro 14" M6       foto8 = Studio Display
+  foto4 = MacBook Pro PROLED XDR   foto9 = Studio Display XDR
+  foto5 = iMac
+
+Bulatan warna di bawah foto hanya hiasan (tidak bisa diklik). Atur di index.html:
+cari class="k-warna", warna lewat style="--c:#hex".
+Teks popup "Selengkapnya" ada di script.js, bagian PRODUK_INFO.

@@ -1,0 +1,125 @@
+/* ===== PANEL ADMIN - STYLE ===== */
+:root{--bg:#f4f5f7;--surface:#fff;--ink:#111827;--ink-2:#4b5563;--ink-3:#6b7280;--garis:#e5e7eb;--aksen:#1f2937;--merah:#b91c1c;--hijau:#166534}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.5;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.muted{color:var(--ink-3)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 18px;border:1px solid var(--aksen);border-radius:10px;background:var(--aksen);color:#fff;font-weight:600;text-decoration:none}
+.btn:hover{opacity:.88}.btn[disabled]{opacity:.5;cursor:wait}
+.btn-garis{background:#fff;color:var(--ink);border-color:var(--garis)}
+.btn-garis:hover{border-color:var(--ink);opacity:1}
+.btn-kecil{height:34px;padding:0 12px;font-size:13px}
+.btn-bahaya{background:#fff;color:var(--merah);border-color:#f3c7c7}
+
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--garis);border-radius:10px;background:#fff;font:inherit;color:var(--ink)}
+input[type=file]{padding:8px}
+textarea{resize:vertical}
+label,.lbl{display:block;margin-bottom:6px;font-size:13px;font-weight:600}
+small{display:block;margin-top:4px;color:var(--ink-3);font-size:12px}
+.pesan{font-size:13px;color:var(--hijau)}
+.pesan.galat{color:var(--merah)}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login-kartu{width:100%;max-width:380px;display:grid;gap:6px;padding:28px;border:1px solid var(--garis);border-radius:16px;background:var(--surface)}
+.login-kartu img.login-logo{width:auto;height:22px;margin:0 0 10px}
+.login-kartu h1{font-size:20px}
+.login-kartu label{margin-top:10px}
+.login-kartu .btn{margin-top:14px}
+.kembali{margin-top:10px;font-size:13px;color:var(--ink-3);text-align:center}
+
+/* panel */
+.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--garis)}
+.top-in{max-width:1100px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top-aksi{display:flex;gap:8px}
+.tabs{max-width:1100px;margin:0 auto;padding:8px 8px 0;display:flex;gap:2px;overflow-x:auto}
+.tabs button{padding:10px 14px;border:0;border-bottom:2px solid transparent;background:none;white-space:nowrap;font-weight:600;color:var(--ink-3)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.isi{max-width:1100px;margin:0 auto;padding:20px 16px 80px}
+.bagian-kepala{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.bagian-kepala h2{font-size:18px}
+.kartu{border:1px solid var(--garis);border-radius:14px;background:var(--surface);padding:16px}
+
+/* media */
+.aturan{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:#fff;border:1px dashed var(--garis);color:var(--ink-2);font-size:13px}
+.daftar{display:grid;gap:10px}
+.media{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:12px;border:1px solid var(--garis);border-radius:14px;background:var(--surface)}
+.media.baru{border-color:#9ca3af;border-style:dashed}
+.media.hapus{opacity:.45}
+.thumb{width:96px;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#e5e7eb}
+.thumb.r-hp{aspect-ratio:9/16;width:72px}
+.thumb img,.thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.media-form{display:grid;gap:8px;min-width:0}
+.media-baris{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.media-baris .grow{flex:1;min-width:140px}
+.tag{padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:#eef0f3}
+.tag-baru{background:#fef3c7;color:#92400e}
+.sw{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;margin:0}
+.sw input{width:auto}
+.unggah{margin-top:14px;padding:16px;border:1px dashed #9ca3af;border-radius:14px;background:#fff;display:grid;gap:10px}
+.bar-simpan{position:sticky;bottom:0;margin-top:16px;padding:12px 0;background:linear-gradient(transparent,var(--bg) 30%);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.kosong{padding:28px;text-align:center;border:1px dashed var(--garis);border-radius:14px;color:var(--ink-3);background:#fff}
+
+/* form */
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.f-lebar{grid-column:1/-1}
+.f-aksi{grid-column:1/-1;display:flex;align-items:center;gap:12px}
+.cek{display:flex;flex-wrap:wrap;gap:14px;padding-top:4px}
+.cek label{display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:500}
+.cek input{width:auto}
+.preview-foto img{margin-top:8px;width:160px;aspect-ratio:4/3;object-fit:cover;border-radius:10px}
+
+/* produk */
+.prod{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;padding:10px;border:1px solid var(--garis);border-radius:14px;background:var(--surface)}
+.prod img{width:72px;height:54px;object-fit:cover;border-radius:8px;background:#e5e7eb}
+.prod b{display:block}
+.prod .muted{font-size:13px}
+.prod-aksi{display:flex;gap:6px}
+
+/* dialog */
+.dlg{width:calc(100% - 24px);max-width:720px;max-height:92vh;padding:0;border:0;border-radius:16px;overflow:hidden}
+.dlg[open]{display:flex}
+.dlg form{display:flex;flex-direction:column;width:100%;min-height:0}
+.dlg::backdrop{background:rgba(0,0,0,.5)}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--garis)}
+.dlg-head h2{font-size:16px}
+.dlg-body{padding:18px;overflow-y:auto}
+.dlg-foot{padding:14px 18px;border-top:1px solid var(--garis);display:flex;justify-content:flex-end}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);z-index:100;max-width:calc(100% - 32px);padding:10px 16px;border-radius:10px;background:var(--aksen);color:#fff;opacity:0;pointer-events:none;transition:.25s}
+.toast.tampil{opacity:1;transform:translate(-50%,0)}
+.toast.sukses{background:#166534}.toast.galat{background:#b91c1c}
+
+@media (max-width:640px){
+  .form-grid{grid-template-columns:1fr}
+  .media{grid-template-columns:72px 1fr}
+  .thumb{width:72px}
+  .prod{grid-template-columns:56px 1fr}
+  .prod img{width:56px;height:42px}
+  .prod-aksi{grid-column:1/-1}
+}
+
+/* login Google */
+.login-info{margin-top:8px;font-size:13px;color:var(--ink-2)}
+.login-kartu .gsi-slot{display:flex;justify-content:center;min-height:44px;margin-top:14px}
+.login-kartu .gsi-slot:empty{display:none}
+
+/* galeri foto produk */
+.galeri{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:10px}
+.g-item{position:relative;border:1px solid var(--garis);border-radius:10px;overflow:hidden;background:#fff}
+.g-item.utama{border-color:var(--aksen);box-shadow:0 0 0 1px var(--aksen)}
+.g-item img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#eceef1}
+.g-tag{position:absolute;top:6px;left:6px;padding:2px 8px;border-radius:999px;background:var(--aksen);color:#fff;font-size:11px;font-weight:600}
+.g-tag.baru{left:auto;right:6px;background:#166534}
+.g-aksi{display:flex;flex-wrap:wrap;gap:4px;padding:6px}
+.g-aksi button{flex:1 1 auto;padding:5px 6px;border:1px solid var(--garis);border-radius:8px;background:#fff;font-size:12px}
+.g-aksi button[data-ga=hapus]{color:var(--merah)}
+.st-badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#fee2e2;color:var(--merah);font-size:11px;font-weight:600}
+.row-admin{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;border:1px solid var(--garis);border-radius:12px;background:#fff}
+.row-admin b{flex:1 1 200px;word-break:break-all}.row-admin select{width:auto}
+@media (max-width:640px){.top-in{flex-wrap:wrap}.dlg{width:100%;max-width:100%;max-height:100dvh;border-radius:0}.galeri{grid-template-columns:repeat(2,1fr)}.prod{grid-template-columns:56px 1fr}.prod-aksi{grid-column:1/-1}}
