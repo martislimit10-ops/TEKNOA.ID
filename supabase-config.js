@@ -10,10 +10,10 @@
 const SUPABASE_URL      = 'https://yoafuzhmyhchochqkrpu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvYWZ1emhteWhjaG9jaHFrcnB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NjI5MjQsImV4cCI6MjEwNjIzODkyNH0.-oT62ybhKl04uBMIgc2EFD4p_bvdsC3aUB7sp0KWboc';
 
-/* Alamat situs (RENCANA domain; ubah bila domain final berbeda). Dipakai tautan antar-situs.
-   Kosongkan saat uji lokal. Panel admin sekarang di folder admin/ (situs terpisah). */
-const SITUS_PUBLIK = 'https://teknoa.id';
-const SITUS_ADMIN  = 'https://admin.teknoa.id';
+/* Alamat situs. Sekarang SATU situs: website utama di '/', panel admin di '/admin/'.
+   Pakai alamat relatif supaya otomatis cocok di domain mana pun (teknoa.id, localhost, preview). */
+const SITUS_PUBLIK = '/';
+const SITUS_ADMIN  = '/admin/';
 
 const BUCKET = 'media'; // bucket Storage publik untuk semua foto & video
 

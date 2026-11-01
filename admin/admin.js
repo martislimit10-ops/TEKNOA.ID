@@ -73,7 +73,7 @@ async function unggah(file, folder) {
 /* ---------- Sesi ----------
    Situs admin punya halaman login SENDIRI (viewLogin). Peran diperiksa database (AdminAuth.peran).
    - belum login        -> halaman login
-   - login, bukan admin -> ditolak + otomatis keluar + pesan jelas
+   - login, bukan admin -> ditolak + pesan jelas + diarahkan ke website (sesi tidak dihapus, dipakai bersama website)
    - gagal memeriksa    -> pesan koneksi + tombol "Coba periksa lagi" (TIDAK dianggap bukan admin)
    Keamanan sebenarnya ada di RLS database; tampilan ini hanya mengikuti hasilnya. */
 const SITUS_PUB = (typeof SITUS_PUBLIK === 'string' && SITUS_PUBLIK) || '/';
@@ -94,11 +94,12 @@ async function tampilkan(session) {
   if (peran === null) return tampilLogin('Belum bisa memeriksa akun karena koneksi bermasalah. Coba lagi.', true, true);
   if (peran !== 'admin' && peran !== 'owner') {
     const email = (session.user && session.user.email) || 'ini';
-    await AdminAuth.keluar();
+    /* Satu situs = satu sesi dengan website utama. Jangan signOut di sini, nanti user biasa ikut keluar dari website.
+       Data tetap aman: RLS database menolak semua tulis/ubah dari non-admin. */
     tampilLogin(`Akses ditolak. Akun ${email} belum terdaftar sebagai admin. Owner perlu menambahkan email ini ke tabel admin_emails di Supabase (lihat PANDUAN-DEPLOY.md), dan login harus lewat Google.`);
     toast('Akses ditolak', 'galat');
     /* bukan admin -> arahkan ke website utama (kecuali uji lokal) */
-    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /^https?:\/\//.test(SITUS_PUB)) {
+    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
       $('#loginPesan').textContent += ' Mengalihkan ke website utama...';
       setTimeout(() => location.replace(SITUS_PUB), 4000);
     }

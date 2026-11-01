@@ -1,5 +1,5 @@
 /* =====================================================================
-   TEKNOA.ID - LOGIN PANEL ADMIN (situs terpisah: admin.teknoa.id)
+   TEKNOA.ID - LOGIN PANEL ADMIN (satu situs dengan website utama: teknoa.id/admin/)
    Muat SETELAH supabase-js dan supabase-config.js, SEBELUM admin.js.
    Masuk HANYA lewat Google (redirect). Peran diperiksa DATABASE (RPC is_admin / get_my_role),
    bukan frontend. Frontend hanya menampilkan hasilnya; data tetap dijaga RLS.
@@ -26,7 +26,7 @@ const AdminAuth = (() => {
   const sha256hex = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(x => x.toString(16).padStart(2, '0')).join('');
   const tungguGsi = (ms = 6000) => new Promise(ok => { const t0 = Date.now(); (function c() { if (window.google && google.accounts && google.accounts.id) return ok(true); if (Date.now() - t0 > ms) return ok(false); setTimeout(c, 100); })(); });
   api.tidakDidukung = () => location.protocol === 'file:'
-    ? 'Halaman ini dibuka sebagai file (file://). Login Google tidak bisa jalan. Jalankan lewat alamat http(s), mis. "npx serve admin" lalu buka http://localhost:3000, atau deploy ke admin.teknoa.id.' : '';
+    ? 'Halaman ini dibuka sebagai file (file://). Login Google tidak bisa jalan. Jalankan lewat alamat http(s), mis. "npx serve ." lalu buka http://localhost:3000/admin/, atau deploy bersama website (teknoa.id/admin/).' : '';
   api.renderGoogle = async (el, saatGalat, saatMulai) => {
     if (!el || typeof GOOGLE_CLIENT_ID === 'undefined' || !GOOGLE_CLIENT_ID) return false;
     if (!(await tungguGsi())) return false;
