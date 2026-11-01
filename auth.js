@@ -43,6 +43,7 @@ const LMAuth = (() => {
 
   async function onCredential(res) {
     api.sedangProses = true;
+    api.tandai();   /* semua jalur login Google harus menandai "login baru" agar admin diarahkan ke /admin/ */
     try {
       const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token: res.credential, nonce: noncePolos });
       if (error) throw error;
@@ -142,11 +143,17 @@ const LMAuth = (() => {
     if (error) { api.hapusTanda(); throw api.ramahGalat(error, 'email'); }
   };
 
-  /* Admin atau bukan, ditentukan database (fungsi is_admin). Email admin TIDAK ada di kode. */
+  /* Admin atau bukan, ditentukan database (get_my_role, cadangan is_admin). Email admin TIDAK ada di kode.
+     Hasil: true/false, atau null bila gagal diperiksa. Peran ditulis ke Console untuk diagnosa. */
   api.cekAdmin = async () => {
     for (let i = 0; i < 3; i++) {
-      try { const { data, error } = await sb.rpc('is_admin'); if (!error) return data === true; }
-      catch (e) { /* coba lagi */ }
+      try {
+        const r = await sb.rpc('get_my_role');
+        if (!r.error && typeof r.data === 'string') { console.info('[TEKNOA] peran akun:', r.data); return r.data === 'admin' || r.data === 'owner'; }
+        const a = await sb.rpc('is_admin');
+        if (!a.error) { console.info('[TEKNOA] is_admin:', a.data); return a.data === true; }
+        console.warn('[TEKNOA] cek admin gagal:', (r.error && r.error.message) || '', (a.error && a.error.message) || '');
+      } catch (e) { console.warn('[TEKNOA] cek admin error:', e); }
       await new Promise(r => setTimeout(r, 400 * (i + 1)));
     }
     return null;   /* gagal diperiksa (jaringan/server) -- BEDA dengan false (memang bukan admin) */
