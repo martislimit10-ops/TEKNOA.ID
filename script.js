@@ -19,7 +19,7 @@ const MAKS_QTY = 5;
 const KEY_KERANJANG = 'lm_keranjang';
 const KEY_BANDING = 'lm_bandingkan';
 const MAKS_BANDING = 4;
-/* Akun user. Situs publik tidak punya jalur admin; peran admin diperiksa di panel admin + database (RLS). */
+/* Akun user. Admin yang baru login diarahkan ke /admin/ (peran dari database); keamanan data tetap di RLS. */
 let USER = null, IS_ADMIN = false;
 let FAV = [];                                   /* id produk favorit (string), terbaru di depan */
 let CMP = (() => { try { const a = JSON.parse(localStorage.getItem(KEY_BANDING) || '[]'); return Array.isArray(a) ? a.map(String).slice(0, MAKS_BANDING) : []; } catch (e) { return []; } })();
@@ -854,7 +854,7 @@ setTimeout(tutupSplash, 3000);
 
 /* ---------- 10d. Akun Google, keranjang cloud, favorit, bandingkan ---------- */
 /* Satu login untuk semua. Admin atau bukan ditentukan database (LMAuth.cekAdmin -> is_admin()).
-   Admin yang baru saja login otomatis diarahkan ke admin.html; user biasa tetap di katalog. */
+   Admin yang baru saja login otomatis diarahkan ke /admin/; user biasa tetap di katalog. */
 let sinkronUser = null;                 /* id user yang keranjangnya sudah disinkronkan */
 let snapCloud = new Map();              /* product_id -> qty di cloud (terakhir diketahui) */
 let timerSinkron = null, terakhirTarik = 0;
@@ -1182,9 +1182,17 @@ async function terapkanSesi(evt, session) {
   const loginBaru = LMAuth.tandaAktif();
   if ($('#masuk').open) $('#masuk').close();
 
-  /* Situs publik TIDAK lagi memeriksa/mengarahkan admin: panel admin ada di situs terpisah (folder admin/). */
+  /* Satu situs: admin yang BARU SAJA login dari website diarahkan ke panel (/admin/). Sesi dipakai bersama,
+     jadi panel langsung terbuka tanpa login ulang. Peran dibaca database (is_admin), bukan kode.
+     User biasa tetap di katalog. Bukan login baru (buka katalog biasa) = tidak diarahkan. */
   if (loginBaru) {
     LMAuth.hapusTanda();
+    const admin = await LMAuth.cekAdmin();
+    if (admin === true) {
+      toast('Masuk sebagai admin. Membuka panel admin...', 'sukses');
+      setTimeout(() => location.assign((typeof SITUS_ADMIN === 'string' && SITUS_ADMIN) || '/admin/'), 600);
+      return;
+    }
     toast('Berhasil masuk. Halo, ' + (namaUser(u).split(' ')[0] || 'selamat datang') + '!', 'sukses');
   }
   await Promise.all([
