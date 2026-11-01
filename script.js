@@ -1190,7 +1190,7 @@ async function terapkanSesi(evt, session) {
     const admin = await LMAuth.cekAdmin();
     if (admin === true) {
       toast('Masuk sebagai admin. Membuka panel admin...', 'sukses');
-      setTimeout(() => location.assign((typeof SITUS_ADMIN === 'string' && SITUS_ADMIN) || '/admin/'), 600);
+      setTimeout(() => location.assign((typeof SITUS_ADMIN === 'string' && SITUS_ADMIN) || 'admin/'), 600);
       return;
     }
     toast('Berhasil masuk. Halo, ' + (namaUser(u).split(' ')[0] || 'selamat datang') + '!', 'sukses');

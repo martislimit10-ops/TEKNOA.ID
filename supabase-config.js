@@ -10,10 +10,12 @@
 const SUPABASE_URL      = 'https://yoafuzhmyhchochqkrpu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvYWZ1emhteWhjaG9jaHFrcnB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NjI5MjQsImV4cCI6MjEwNjIzODkyNH0.-oT62ybhKl04uBMIgc2EFD4p_bvdsC3aUB7sp0KWboc';
 
-/* Alamat situs. Sekarang SATU situs: website utama di '/', panel admin di '/admin/'.
-   Pakai alamat relatif supaya otomatis cocok di domain mana pun (teknoa.id, localhost, preview). */
-const SITUS_PUBLIK = '/';
-const SITUS_ADMIN  = '/admin/';
+/* Alamat situs: SATU situs, website di folder utama dan panel admin di folder admin/.
+   Sengaja RELATIF (tanpa '/' di depan) supaya tetap benar di domain sendiri (teknoa.id),
+   di GitHub Pages dengan subfolder (user.github.io/TEKNOA.ID/), maupun localhost.
+   SITUS_ADMIN dipakai dari index.html (folder utama); SITUS_PUBLIK dipakai dari admin/ (naik satu folder). */
+const SITUS_PUBLIK = '../';
+const SITUS_ADMIN  = 'admin/';
 
 const BUCKET = 'media'; // bucket Storage publik untuk semua foto & video
 

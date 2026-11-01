@@ -76,7 +76,7 @@ async function unggah(file, folder) {
    - login, bukan admin -> ditolak + pesan jelas + diarahkan ke website (sesi tidak dihapus, dipakai bersama website)
    - gagal memeriksa    -> pesan koneksi + tombol "Coba periksa lagi" (TIDAK dianggap bukan admin)
    Keamanan sebenarnya ada di RLS database; tampilan ini hanya mengikuti hasilnya. */
-const SITUS_PUB = (typeof SITUS_PUBLIK === 'string' && SITUS_PUBLIK) || '/';
+const SITUS_PUB = (typeof SITUS_PUBLIK === 'string' && SITUS_PUBLIK) || '../';
 $('#lnkSitus').href = SITUS_PUB; $('#lnkPublik').href = SITUS_PUB;
 function tampilLogin(pesan, galat = true, bisaUlang = false) {
   $('#viewCek').hidden = true; $('#viewPanel').hidden = true; $('#viewLogin').hidden = false;
