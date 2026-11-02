@@ -71,38 +71,37 @@ async function unggah(file, folder) {
 }
 
 /* ---------- Sesi ----------
-   Situs admin punya halaman login SENDIRI (viewLogin). Peran diperiksa database (AdminAuth.peran).
-   - belum login        -> halaman login
-   - login, bukan admin -> ditolak + pesan jelas + diarahkan ke website (sesi tidak dihapus, dipakai bersama website)
+   Panel TIDAK punya halaman login sendiri. Login hanya lewat website utama (tombol "Log in"); sesinya dipakai bersama.
+   Peran diperiksa database (AdminAuth.peran).
+   - belum login        -> langsung ke website utama (di sana tombol "Log in")
+   - login, bukan admin -> ditolak + diarahkan ke website utama (sesi tidak dihapus, dipakai bersama website)
    - gagal memeriksa    -> pesan koneksi + tombol "Coba periksa lagi" (TIDAK dianggap bukan admin)
+   - Keluar             -> langsung ke website utama (tulisan "Admin" kembali jadi "Log in")
    Keamanan sebenarnya ada di RLS database; tampilan ini hanya mengikuti hasilnya. */
 const SITUS_PUB = (typeof SITUS_PUBLIK === 'string' && SITUS_PUBLIK) || '../';
-$('#lnkSitus').href = SITUS_PUB; $('#lnkPublik').href = SITUS_PUB;
-function tampilLogin(pesan, galat = true, bisaUlang = false) {
-  $('#viewCek').hidden = true; $('#viewPanel').hidden = true; $('#viewLogin').hidden = false;
-  const p = $('#loginPesan'); p.textContent = pesan || ''; p.hidden = !pesan; p.classList.toggle('galat', galat);
-  $('#btnCobaLagi').hidden = !bisaUlang; $('#btnGoogle').disabled = false;
+$('#lnkSitus').href = SITUS_PUB;
+const keWebsite = () => location.replace(SITUS_PUB);
+function tampilCek(pesan, bisaUlang = false) {
+  $('#viewPanel').hidden = true; $('#viewCek').hidden = false;
+  $('#cekPesan').textContent = pesan || 'Memeriksa akun...';
+  $('#btnCobaLagi').hidden = !bisaUlang;
   sudahMuat = false;
 }
 let sedangCek = false, peranSaya = null;
 async function tampilkan(session) {
-  if (!session) { if (!sedangCek) tampilLogin(AdminAuth.tidakDidukung()); return; }
+  if (!session) { if (!sedangCek) keWebsite(); return; }
   if (sudahMuat || sedangCek) return;
-  sedangCek = true; $('#viewLogin').hidden = true; $('#viewCek').hidden = false;
+  sedangCek = true; tampilCek('');
   const peran = await AdminAuth.peran();
   sedangCek = false;
-  if (peran === null) return tampilLogin('Belum bisa memeriksa akun karena koneksi bermasalah. Coba lagi.', true, true);
+  if (peran === null) return tampilCek('Belum bisa memeriksa akun karena koneksi bermasalah. Coba lagi.', true);
   if (peran !== 'admin' && peran !== 'owner') {
     const email = (session.user && session.user.email) || 'ini';
     /* Satu situs = satu sesi dengan website utama. Jangan signOut di sini, nanti user biasa ikut keluar dari website.
        Data tetap aman: RLS database menolak semua tulis/ubah dari non-admin. */
-    tampilLogin(`Akses ditolak. Akun ${email} belum terdaftar sebagai admin. Owner perlu menambahkan email ini ke tabel admin_emails di Supabase (lihat PANDUAN-DEPLOY.md), dan login harus lewat Google.`);
-    toast('Akses ditolak', 'galat');
+    tampilCek(`Akses ditolak. Akun ${email} belum terdaftar sebagai admin. Owner perlu menambahkan email ini ke tabel admin_emails di Supabase (lihat PANDUAN-DEPLOY.md).`);
     /* bukan admin -> arahkan ke website utama (kecuali uji lokal) */
-    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
-      $('#loginPesan').textContent += ' Mengalihkan ke website utama...';
-      setTimeout(() => location.replace(SITUS_PUB), 4000);
-    }
+    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) setTimeout(keWebsite, 3000);
     return;
   }
   $('#viewCek').hidden = true; $('#viewPanel').hidden = false;
@@ -110,21 +109,8 @@ async function tampilkan(session) {
   peranSaya = peran; $('#tab-admin').hidden = peran !== 'owner';
   sudahMuat = true; muatSemuaTab(); if (peran === 'owner') muatAdmin(); toast('Berhasil masuk', 'sukses');
 }
-/* Persiapan halaman login: cek lingkungan, tampilkan alamat kembali, pasang tombol Google tanpa redirect */
-(function siapkanLogin() {
-  const t = AdminAuth.tidakDidukung();
-  if (t) { $('#btnGoogle').hidden = true; tampilLogin(t); return; }
-  $('#loginInfo').textContent = 'Alamat halaman ini: ' + location.origin + ' (harus ada di Google Cloud > Authorized JavaScript origins).';
-  AdminAuth.renderGoogle($('#gsiSlot'), m => tampilLogin(m), () => { $('#loginPesan').hidden = true; })
-    .then(ok => { if (!ok) $('#loginInfo').textContent += ' Tombol Google tidak bisa dimuat; pakai "cara lain".'; });
-})();
-$('#btnGoogle').addEventListener('click', async e => {
-  const b = e.currentTarget; b.disabled = true;
-  try { await AdminAuth.masukGoogle(); }
-  catch (err) { tampilLogin(err.message); }
-});
 $('#btnCobaLagi').addEventListener('click', async () => { const { data } = await sb.auth.getSession(); tampilkan(data.session); });
-$('#btnKeluar').addEventListener('click', async () => { await AdminAuth.keluar(); tampilLogin(''); toast('Kamu berhasil keluar', 'sukses'); });
+$('#btnKeluar').addEventListener('click', async () => { $('#btnKeluar').disabled = true; await AdminAuth.keluar(); keWebsite(); });
 
 /* ---------- Tab ---------- */
 const tabs = $$('[role="tab"]');
@@ -480,8 +466,7 @@ function muatSemuaTab() { Object.values(manajer).forEach(m => m.muat()); muatInf
   tampilkan(data.session);
   sb.auth.onAuthStateChange((evt, session) => {
     setTimeout(() => {
-      if (evt === 'SIGNED_OUT' && !AdminAuth.keluarSengaja && sudahMuat) { tampilLogin('Sesi berakhir. Silakan masuk lagi.', false); toast('Sesi berakhir', 'galat'); }
-      AdminAuth.keluarSengaja = false;
+      if (evt === 'SIGNED_OUT') return keWebsite();       /* keluar (dari panel / tab lain / sesi habis) -> ke website utama */
       tampilkan(session);
     }, 0);
   });   /* jangan memanggil Supabase langsung di dalam callback ini */

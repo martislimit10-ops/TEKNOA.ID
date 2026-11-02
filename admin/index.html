@@ -14,23 +14,9 @@
 </head>
 <body>
 
-<!-- Pemeriksaan peran -->
-<section id="viewCek" class="login"><p class="muted">Memeriksa akun...</p></section>
-
-<!-- ===== LOGIN ADMIN (halaman masuk khusus owner/admin) ===== -->
-<section id="viewLogin" class="login" hidden>
-  <div class="login-kartu">
-    <img class="login-logo" src="../images/logo.png" alt="TEKNOA.ID">
-    <h1>Masuk Panel Admin</h1>
-    <p class="muted">Khusus owner dan admin. Masuk dengan akun Google yang sudah didaftarkan.</p>
-    <p id="loginPesan" class="pesan galat" role="alert" hidden></p>
-    <div id="gsiSlot" class="gsi-slot"></div>
-    <button type="button" class="btn btn-garis" id="btnGoogle">Masuk dengan Google (cara lain)</button>
-    <button type="button" class="btn btn-garis" id="btnCobaLagi" hidden>Coba periksa lagi</button>
-    <p class="login-info" id="loginInfo"></p>
-    <p class="login-info">Bukan admin? <a id="lnkPublik" href="#">Kembali ke website</a></p>
-  </div>
-</section>
+<!-- Pemeriksaan akun. Login hanya satu, di website utama (tombol "Log in"); panel ini tidak punya halaman login sendiri. -->
+<section id="viewCek" class="login"><div><p class="muted" id="cekPesan">Memeriksa akun...</p>
+  <button type="button" class="btn btn-garis" id="btnCobaLagi" hidden>Coba periksa lagi</button></div></section>
 
 <!-- ===== PANEL ===== -->
 <div id="viewPanel" hidden>
@@ -138,7 +124,6 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase-config.js"></script>
 <script src="admin-auth.js"></script>

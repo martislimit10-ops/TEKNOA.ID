@@ -166,22 +166,5 @@ const LMAuth = (() => {
     return sb.auth.signOut();
   };
 
-  /* ---------- Halaman PANEL ADMIN: login hanya satu, di website utama ----------
-     - Layar "Masuk Panel Admin" tidak pernah ditampilkan lagi: tanpa sesi login -> langsung ke tampilan awal website.
-     - Setelah "Keluar" (cara apa pun panel memanggilnya) -> langsung ke tampilan awal website; tulisan "Admin" jadi "Log in".
-     Berlaku otomatis untuk halaman yang alamatnya berisi /admin/. Halaman website biasa tidak terpengaruh. */
-  if (/\/admin(\/|$)/.test(location.pathname)) {
-    const rumah = () => location.pathname.replace(/\/admin(\/.*)?$/, '/');
-    const sedangMasuk = /[?&#](code|access_token|error)=/.test(location.search + location.hash);   /* kembali dari halaman login penyedia */
-    const html = document.documentElement;
-    html.style.visibility = 'hidden';                                  /* jangan sempat tampil layar login panel */
-    const tampil = () => { html.style.visibility = ''; };
-    const jaga = setTimeout(tampil, 5000);                             /* cadangan: panel tidak boleh blank selamanya */
-    sb.auth.onAuthStateChange((evt, sesi) => {
-      if (sesi) { clearTimeout(jaga); tampil(); return; }
-      if (evt === 'SIGNED_OUT' || (evt === 'INITIAL_SESSION' && !sedangMasuk)) { clearTimeout(jaga); location.replace(rumah()); }
-    });
-  }
-
   return api;
 })();

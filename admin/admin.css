@@ -24,13 +24,8 @@ small{display:block;margin-top:4px;color:var(--ink-3);font-size:12px}
 .pesan{font-size:13px;color:var(--hijau)}
 .pesan.galat{color:var(--merah)}
 
-/* login */
-.login{min-height:100vh;display:grid;place-items:center;padding:20px}
-.login-kartu{width:100%;max-width:380px;display:grid;gap:6px;padding:28px;border:1px solid var(--garis);border-radius:16px;background:var(--surface)}
-.login-kartu img.login-logo{width:auto;height:22px;margin:0 0 10px}
-.login-kartu h1{font-size:20px}
-.login-kartu label{margin-top:10px}
-.login-kartu .btn{margin-top:14px}
+/* layar pemeriksaan akun (tanpa login sendiri) */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;text-align:center}
 .kembali{margin-top:10px;font-size:13px;color:var(--ink-3);text-align:center}
 
 /* panel */
@@ -103,11 +98,6 @@ small{display:block;margin-top:4px;color:var(--ink-3);font-size:12px}
   .prod img{width:56px;height:42px}
   .prod-aksi{grid-column:1/-1}
 }
-
-/* login Google */
-.login-info{margin-top:8px;font-size:13px;color:var(--ink-2)}
-.login-kartu .gsi-slot{display:flex;justify-content:center;min-height:44px;margin-top:14px}
-.login-kartu .gsi-slot:empty{display:none}
 
 /* galeri foto produk */
 .galeri{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:10px}
