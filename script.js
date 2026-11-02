@@ -20,7 +20,9 @@ const KEY_KERANJANG = 'lm_keranjang';
 const KEY_BANDING = 'lm_bandingkan';
 const MAKS_BANDING = 4;
 /* Akun user. Admin yang baru login diarahkan ke /admin/ (peran dari database); keamanan data tetap di RLS. */
-let USER = null, IS_ADMIN = false;
+let USER = null, IS_ADMIN = false, PERAN_PASTI = false;   /* PERAN_PASTI: peran (admin/user) sudah diketahui -> baru tampilkan fitur user */
+const modeUser = () => !!USER && !IS_ADMIN && PERAN_PASTI;  /* fitur user (Like, Akun saya, favorit) HANYA untuk user biasa, tidak untuk admin */
+function bukaPanelAdmin() { location.assign((typeof SITUS_ADMIN === 'string' && SITUS_ADMIN) || 'admin/'); }
 let FAV = [];                                   /* id produk favorit (string), terbaru di depan */
 let CMP = (() => { try { const a = JSON.parse(localStorage.getItem(KEY_BANDING) || '[]'); return Array.isArray(a) ? a.map(String).slice(0, MAKS_BANDING) : []; } catch (e) { return []; } })();
 const adaFav = id => !!USER && FAV.includes(String(id));
@@ -482,7 +484,7 @@ function kartuProduk(p) {
     <div class="kartu-foto">
       <img src="${esc(p.foto)}" alt="${esc(nama)}" loading="lazy" ${fotoErr}>
       ${lencana ? `<div class="lencana">${lencana}</div>` : ''}
-      <button type="button" class="kartu-fav${adaFav(p.id) ? ' aktif' : ''}" data-fav="${esc(p.id)}" aria-pressed="${adaFav(p.id)}" aria-label="Simpan ${esc(nama)} ke favorit"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></button>
+      ${modeUser() ? `<button type="button" class="kartu-fav${adaFav(p.id) ? ' aktif' : ''}" data-fav="${esc(p.id)}" aria-pressed="${adaFav(p.id)}" aria-label="Simpan ${esc(nama)} ke favorit"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></button>` : ''}
     </div>
     <div class="kartu-isi">
       <h3>${esc(nama)}</h3>
@@ -634,7 +636,7 @@ function bukaDetail(id) {
       <p class="detail-harga">${rupiah(p.harga)}${hemat ? `<s>${rupiah(p.hargaNormal)}</s>` : ''}</p>
       ${hemat ? `<p class="hemat">Hemat ${rupiah(p.hargaNormal - p.harga)}</p>` : ''}
       <div class="detail-aksi">
-        <button type="button" class="btn btn-kecil btn-garis${adaFav(p.id) ? ' aktif' : ''}" data-fav="${esc(p.id)}" aria-pressed="${adaFav(p.id)}"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg>Favorit</button>
+        ${modeUser() ? `<button type="button" class="btn btn-kecil btn-garis${adaFav(p.id) ? ' aktif' : ''}" data-fav="${esc(p.id)}" aria-pressed="${adaFav(p.id)}"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg>Favorit</button>` : ''}
         <button type="button" class="btn btn-kecil btn-garis${adaBanding(p.id) ? ' aktif' : ''}" data-cmp="${esc(p.id)}">${adaBanding(p.id) ? 'Batal bandingkan' : '+ Bandingkan'}</button>
       </div>
       <p class="detail-slogan">Dicek menyeluruh. Bergaransi toko. Harga jujur.</p>
@@ -868,13 +870,18 @@ const avatarHtml = u => fotoUser(u)
 
 /* ----- tampilan akun ----- */
 function renderAkun() {
-  const b = $('#btnAkun'), av = $('.avatar', b), ik = $('svg', b);
+  const b = $('#btnAkun'), av = $('.avatar', b), ik = $('svg', b), nav = $('#navAkun');
+  const adm = !!USER && IS_ADMIN;
   $('#authBtns').hidden = !!USER;            /* belum login: Sign up + Log in; sudah login: foto akun */
-  $('#navAkun').hidden = !USER;              /* laptop: item "Akun" di katalog tengah */
+  nav.hidden = !USER || !PERAN_PASTI;        /* laptop: item "Akun" (admin: "Admin") di katalog tengah */
+  nav.textContent = adm ? 'Admin' : 'Akun';
   $('#sbAuth').hidden = !!USER;              /* menu HP: Sign up + Log in hanya saat belum login */
-  b.hidden = !USER;
-  if (USER) { av.innerHTML = avatarHtml(USER); av.hidden = false; ik.hidden = true; b.setAttribute('aria-label', 'Akun saya: ' + namaUser(USER)); }
-  else { av.innerHTML = ''; av.hidden = true; ik.hidden = false; b.setAttribute('aria-label', 'Akun saya'); }
+  b.hidden = false;                          /* ikon orang selalu tampil: belum login = buka Log in */
+  document.documentElement.dataset.masuk = USER ? '1' : '0';
+  document.documentElement.dataset.peran = adm ? 'admin' : '';
+  $('#storeFavorit').hidden = !modeUser();   /* tombol Like hanya untuk user yang sudah login (bukan admin) */
+  if (USER) { av.innerHTML = avatarHtml(USER); av.hidden = false; ik.hidden = true; b.setAttribute('aria-label', adm ? 'Panel admin' : 'Akun saya: ' + namaUser(USER)); }
+  else { av.innerHTML = ''; av.hidden = true; ik.hidden = false; b.setAttribute('aria-label', 'Masuk'); }
   isiAkunDialog(); renderBadgeAkun();
 }
 function renderBadgeAkun() {
@@ -884,7 +891,7 @@ function renderBadgeAkun() {
 }
 function isiAkunDialog() {
   const el = $('#akunIsi');
-  if (!USER) { el.innerHTML = ''; return; }
+  if (!modeUser()) { el.innerHTML = ''; return; }
   if (window.AkunUser) AkunUser.render();            /* area akun lengkap: akun.js */
   else el.innerHTML = '<div class="akun-menu"><button type="button" class="btn btn-garis btn-blok" data-akun="keluar">Keluar</button></div>';
 }
@@ -892,7 +899,7 @@ function isiAkunDialog() {
 /* ----- masuk / keluar -----
    Sign up  = popup pilih akun Google (One Tap); bila tidak muncul, lembar Log in terbuka.
    Log in   = lembar pilihan: Google, Facebook, Email di layar awal; sisanya di "Lanjutkan dengan cara lain". */
-const MASUK = { lihat: 'awal', asal: 'awal', email: '', timerUlang: null };
+const MASUK = { lihat: 'lain', asal: 'lain', email: '', timerUlang: null };
 const JUDUL_MASUK = { awal: 'Masuk atau daftar dalam hitungan detik', lain: 'Lanjutkan ke Laptop Makassar', email: 'Masuk dengan email', kode: 'Cek emailmu' };
 const providerAktif = p => typeof LOGIN_PROVIDER === 'undefined' || LOGIN_PROVIDER[p] !== false;
 const pesanMasuk = (teks, info) => { const e = $('#masukPesan'); e.textContent = teks || ''; e.hidden = !teks; e.classList.toggle('info', !!info); };
@@ -903,7 +910,7 @@ function tampilLihat(nama) {
   MASUK.lihat = nama;
   $$('[data-lihat]', $('#masuk')).forEach(sec => { sec.hidden = sec.dataset.lihat !== nama; });
   $('#masukJudul').textContent = JUDUL_MASUK[nama] || JUDUL_MASUK.awal;
-  $('#masukKembali').hidden = nama === 'awal';
+  $('#masukKembali').hidden = nama === 'awal' || nama === 'lain';
   pesanMasuk('');
   if (nama === 'email') setTimeout(() => $('#masukEmail').focus(), 60);
   if (nama === 'kode') setTimeout(() => $('#masukKode').focus(), 60);
@@ -912,11 +919,10 @@ function resetMasuk() {
   clearInterval(MASUK.timerUlang); MASUK.timerUlang = null;
   $('#masukEmail').value = ''; $('#masukKode').value = ''; MASUK.email = ''; $('#kodeUlang').textContent = 'Kirim ulang kode';
   $$('#masuk .sso, #masuk .btn, #masuk .sso-lain').forEach(b => { b.disabled = false; });
-  tampilLihat('awal');
+  tampilLihat('lain');
 }
-function bukaMasuk(lihat = 'awal') {
+function bukaMasuk(lihat = 'lain') {
   $$('#masuk .sso[data-p]').forEach(b => { b.hidden = !providerAktif(b.dataset.p); });
-  $('#masukLain').hidden = !['apple', 'microsoft', 'chatgpt'].some(providerAktif);   /* tidak ada pilihan tambahan -> sembunyikan */
   tampilLihat(lihat);
   bukaDialog($('#masuk'));
 }
@@ -937,18 +943,15 @@ LMAuth.onGalat = e => {
 };
 $('#btnDaftar').addEventListener('click', () => mulaiLogin());
 $('#btnMasuk').addEventListener('click', () => bukaMasuk());
-$('#btnAkun').addEventListener('click', () => bukaDialog($('#akun')));
-$('#navAkun').addEventListener('click', () => bukaDialog($('#akun')));
+$('#btnAkun').addEventListener('click', () => { if (!USER) bukaMasuk(); else if (IS_ADMIN) bukaPanelAdmin(); else if (PERAN_PASTI) bukaDialog($('#akun')); });
+$('#navAkun').addEventListener('click', () => { if (IS_ADMIN) bukaPanelAdmin(); else if (modeUser()) bukaDialog($('#akun')); });
 /* Tombol Sign up / Log in di dalam menu HP: tutup menu dulu, lalu jalankan alur yang sama dengan header */
 $('#btnDaftarMenu').addEventListener('click', () => { tutupSidebar(false); mulaiLogin(); });
 $('#btnMasukMenu').addEventListener('click', () => { tutupSidebar(false); bukaMasuk(); });
 
 $('#masuk').addEventListener('close', resetMasuk);
-$('#masukLain').addEventListener('click', () => tampilLihat('lain'));
 $('#masukKembali').addEventListener('click', () => {
-  if (MASUK.lihat === 'kode') tampilLihat('email');
-  else if (MASUK.lihat === 'email') tampilLihat(MASUK.asal === 'lain' ? 'lain' : 'awal');
-  else tampilLihat('awal');
+  if (MASUK.lihat === 'kode') tampilLihat('email'); else tampilLihat('lain');
 });
 $('#masuk').addEventListener('click', e => {
   const b = e.target.closest('.sso[data-p]'); if (!b) return;
@@ -1166,7 +1169,7 @@ async function terapkanSesi(evt, session) {
   const idLama = USER ? USER.id : null;
   USER = u;
   if (!u) {
-    IS_ADMIN = false; FAV = []; sinkronUser = null; clearTimeout(timerSinkron); timerSinkron = null;
+    IS_ADMIN = false; PERAN_PASTI = false; FAV = []; sinkronUser = null; clearTimeout(timerSinkron); timerSinkron = null;
     if (idLama && evt === 'SIGNED_OUT') {
       const sengaja = LMAuth.keluarSengaja; LMAuth.keluarSengaja = false;
       if (!sengaja) toast('Sesi kamu berakhir. Silakan masuk lagi.', 'info');   /* bukan tombol Keluar -> sesi habis / keluar dari tab lain */
@@ -1176,25 +1179,44 @@ async function terapkanSesi(evt, session) {
     renderAkun(); renderKatalog(); segarkanTanda();
     return;
   }
+  /* Peran terakhir yang diketahui (cache, hanya untuk TAMPILAN agar tidak sempat tampil sebagai user lalu berganti).
+     Penentu sebenarnya tetap database (get_my_role / is_admin) dan RLS. */
+  if (idLama !== u.id) {
+    let p = null; try { p = localStorage.getItem('lm_peran_' + u.id); } catch (e) {}
+    IS_ADMIN = p === 'admin'; PERAN_PASTI = p === 'admin' || p === 'user';
+  }
   renderAkun();
   if (sinkronUser === u.id) return;                                  /* event ulang (refresh token, dll.) */
   sinkronUser = u.id;
   const loginBaru = LMAuth.tandaAktif();
   if ($('#masuk').open) $('#masuk').close();
+  if (loginBaru) LMAuth.hapusTanda();
+  await tetapkanPeran(u, loginBaru, 0);
+}
 
-  /* Satu situs: admin yang BARU SAJA login dari website diarahkan ke panel (/admin/). Sesi dipakai bersama,
-     jadi panel langsung terbuka tanpa login ulang. Peran dibaca database (is_admin), bukan kode.
-     User biasa tetap di katalog. Bukan login baru (buka katalog biasa) = tidak diarahkan. */
-  if (loginBaru) {
-    LMAuth.hapusTanda();
-    const admin = await LMAuth.cekAdmin();
-    if (admin === true) {
-      toast('Masuk sebagai admin. Membuka panel admin...', 'sukses');
-      setTimeout(() => location.assign((typeof SITUS_ADMIN === 'string' && SITUS_ADMIN) || 'admin/'), 600);
-      return;
-    }
-    toast('Berhasil masuk. Halo, ' + (namaUser(u).split(' ')[0] || 'selamat datang') + '!', 'sukses');
+/* Tentukan peran dari database SETIAP kali sesi dibuka (bukan hanya saat login baru).
+   ADMIN  : bukan akun user. Tidak memuat favorit/riwayat/notifikasi user, tombol Like hilang, teks "Akun" jadi "Admin"
+            yang membuka panel admin. Admin yang BARU login langsung diarahkan ke panel; bila hanya membuka website
+            (mis. kembali dari panel) tidak dilempar, jadi bisa bolak-balik website <-> panel.
+   LAINNYA: user biasa -> fitur user (favorit, banding, riwayat, notifikasi). */
+async function tetapkanPeran(u, loginBaru, percobaan) {
+  const admin = await LMAuth.cekAdmin();                             /* true / false / null (gagal diperiksa) */
+  if (!USER || USER.id !== u.id) return;                             /* user berganti/keluar saat memeriksa */
+  if (admin !== null) {
+    IS_ADMIN = admin === true; PERAN_PASTI = true;
+    try { localStorage.setItem('lm_peran_' + u.id, IS_ADMIN ? 'admin' : 'user'); } catch (e) {}
   }
+  if (IS_ADMIN) {
+    if (loginBaru) { toast('Masuk sebagai admin. Membuka panel admin...', 'sukses'); setTimeout(bukaPanelAdmin, 250); }   /* dahulukan: tidak boleh gagal karena render lain */
+    renderAkun(); renderKatalog(); segarkanTanda();
+    return;
+  }
+  if (admin === null && percobaan < 2) {                             /* gagal periksa (jaringan): jangan dulu dianggap user, coba lagi */
+    setTimeout(() => { if (USER && USER.id === u.id) tetapkanPeran(u, loginBaru, percobaan + 1); }, 4000);
+    return;
+  }
+  PERAN_PASTI = true;
+  if (loginBaru && admin === false) toast('Berhasil masuk. Halo, ' + (namaUser(u).split(' ')[0] || 'selamat datang') + '!', 'sukses');
   await Promise.all([
     muatFavorit().catch(e => console.warn('Favorit belum bisa dimuat:', e)),
     window.AkunUser ? AkunUser.muat().catch(e => console.warn('Data akun belum bisa dimuat:', e)) : null,

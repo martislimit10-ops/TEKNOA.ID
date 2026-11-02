@@ -4,50 +4,77 @@
    Data di Supabase (tabel profiles, view_history, saved_comparisons, notifications, wishlist);
    isolasi antar-user dijaga RLS (lihat sql/02-fitur-user.sql), bukan oleh kode ini.
    Memakai global dari script.js: USER, FAV, CMP, esc, rupiah, cariProduk, namaLengkap, toast, dst.
+
+   [REVISI-7]
+   - Enam tab sekarang berupa slider: klik tab -> panel bergeser mulus (CSS: .akun-track).
+   - Tidak ada lagi pesan error database. Bila tabel Supabase belum ada / tidak bisa dihubungi,
+     akun.js diam-diam memakai penyimpanan lokal perangkat (localStorage) sebagai cadangan.
    ===================================================================== */
 (function () {
   'use strict';
-  const S = { profil: null, riwayat: [], tersimpan: [], notif: [], tab: 'profil', tabelAda: true, galat: '', terakhir: 0 };
+  const S = { profil: null, riwayat: [], tersimpan: [], notif: [], tab: 'profil', lokal: false, terakhir: 0 };
   const api = { S };
   const TAB = [['profil', 'Profil'], ['favorit', 'Favorit'], ['riwayat', 'Riwayat'], ['banding', 'Banding'], ['notif', 'Notifikasi'], ['atur', 'Pengaturan']];
-  const belumAda = e => !!e && (e.code === '42P01' || e.code === 'PGRST205' || /does not exist|schema cache|could not find the table/i.test(e.message || ''));
   const waktu = t => { try { return new Date(t).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
   const belumDibaca = () => S.notif.filter(n => !n.dibaca).length;
 
+  /* ---------- penyimpanan lokal (cadangan) ---------- */
+  const kunciLs = k => 'lm_akun_' + (USER ? USER.id : 'x') + '_' + k;
+  const bacaLs = (k, d) => { try { const v = JSON.parse(localStorage.getItem(kunciLs(k))); return v == null ? d : v; } catch (e) { return d; } };
+  const tulisLs = (k, v) => { try { localStorage.setItem(kunciLs(k), JSON.stringify(v)); } catch (e) {} };
+  function muatLokal() {
+    S.profil = bacaLs('profil', null);
+    S.riwayat = bacaLs('riwayat', []);
+    S.tersimpan = bacaLs('banding', []);
+    let n = bacaLs('notif', null);
+    if (!Array.isArray(n)) {
+      n = [{ id: 'sambutan', judul: 'Selamat datang!', isi: 'Simpan laptop favorit dan bandingkan spesifikasi laptop.', dibaca: false, created_at: new Date().toISOString() }];
+      tulisLs('notif', n);
+    }
+    S.notif = n;
+  }
+
   api.namaTampil = () => (S.profil && S.profil.display_name) || '';
   api.fotoTampil = () => (S.profil && S.profil.avatar_url) || '';
-  api.bersih = () => { Object.assign(S, { profil: null, riwayat: [], tersimpan: [], notif: [], tab: 'profil', tabelAda: true, galat: '', terakhir: 0 }); };
+  api.bersih = () => { Object.assign(S, { profil: null, riwayat: [], tersimpan: [], notif: [], tab: 'profil', lokal: false, terakhir: 0 }); };
 
   /* ---------- data ---------- */
+  const KOLOM_NOTIF = 'id,judul,isi,dibaca,created_at';
   api.muat = async () => {
-    if (!USER) return;
+    if (!USER || IS_ADMIN) return;                              /* admin bukan akun user */
     const uid = USER.id;
-    const [p, r, t, n] = await Promise.all([
-      sb.from('profiles').select('display_name,avatar_url').eq('user_id', uid).maybeSingle(),
-      sb.from('view_history').select('product_id,viewed_at').eq('user_id', uid).order('viewed_at', { ascending: false }).limit(30),
-      sb.from('saved_comparisons').select('id,nama,product_ids,created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(30),
-      sb.from('notifications').select('id,judul,isi,dibaca,created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(30)
-    ]);
+    let hasil = null;
+    try {
+      hasil = await Promise.all([
+        sb.from('profiles').select('display_name,avatar_url').eq('user_id', uid).maybeSingle(),
+        sb.from('view_history').select('product_id,viewed_at').eq('user_id', uid).order('viewed_at', { ascending: false }).limit(30),
+        sb.from('saved_comparisons').select('id,nama,product_ids,created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(30),
+        sb.from('notifications').select(KOLOM_NOTIF).eq('user_id', uid).order('created_at', { ascending: false }).limit(30)
+      ]);
+    } catch (err) { console.warn('Data akun: tidak bisa terhubung, memakai penyimpanan lokal.', err); }
     if (!USER || USER.id !== uid) return;                       /* user berganti/keluar saat memuat */
-    const e = [p, r, t, n].map(x => x.error).find(Boolean);
     S.terakhir = Date.now();
+    const e = hasil ? hasil.map(x => x.error).find(Boolean) : true;
     if (e) {
-      S.tabelAda = !belumAda(e);
-      S.galat = S.tabelAda ? 'Data akun belum bisa dimuat. Periksa koneksi lalu coba lagi.' : 'Fitur akun belum diaktifkan di database (admin perlu menjalankan sql/02-fitur-user.sql).';
-    } else { S.tabelAda = true; S.galat = ''; }
-    S.profil = p.data || null; S.riwayat = r.data || []; S.tersimpan = t.data || []; S.notif = n.data || [];
-    if (!e && !S.notif.length) {                                /* sambutan sekali per user (fungsi server, idempotent) */
-      const w = await sb.rpc('notif_selamat_datang');
-      if (!w.error) { const n2 = await sb.from('notifications').select('id,judul,isi,dibaca,created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(30); if (!n2.error) S.notif = n2.data || []; }
+      if (e !== true) console.warn('Data akun: tabel belum siap, memakai penyimpanan lokal.', e.message || e);
+      S.lokal = true; muatLokal();
+    } else {
+      S.lokal = false;
+      S.profil = hasil[0].data || null; S.riwayat = hasil[1].data || []; S.tersimpan = hasil[2].data || []; S.notif = hasil[3].data || [];
+      if (!S.notif.length) {                                    /* sambutan sekali per user (fungsi server, idempotent) */
+        const w = await sb.rpc('notif_selamat_datang');
+        if (!w.error) { const n2 = await sb.from('notifications').select(KOLOM_NOTIF).eq('user_id', uid).order('created_at', { ascending: false }).limit(30); if (!n2.error) S.notif = n2.data || []; }
+      }
     }
     renderAkun();
   };
 
   api.catatLihat = id => {                                      /* dipanggil bukaDetail(); gagal diam-diam (bukan fitur kritis) */
-    if (!USER || !S.tabelAda) return;
+    if (!USER || IS_ADMIN) return;
     const pid = Number(id); if (!Number.isInteger(pid)) return;
     const sekarang = new Date().toISOString();
     S.riwayat = [{ product_id: pid, viewed_at: sekarang }, ...S.riwayat.filter(r => Number(r.product_id) !== pid)].slice(0, 30);
+    if (S.lokal) { tulisLs('riwayat', S.riwayat); return; }
     sb.from('view_history').upsert({ user_id: USER.id, product_id: pid, viewed_at: sekarang }, { onConflict: 'user_id,product_id' })
       .then(({ error }) => { if (error) console.warn('Riwayat belum tersimpan:', error.message); });
   };
@@ -58,8 +85,12 @@
     if (S.tersimpan.length >= 20) return toast('Maksimal 20 perbandingan tersimpan. Hapus yang lama dulu.', 'info');
     const ids = CMP.map(Number).filter(Number.isInteger);
     const nm = (nama || '').trim().slice(0, 80) || ids.map(i => { const p = cariProduk(i); return p ? namaLengkap(p) : ''; }).filter(Boolean).join(' vs ').slice(0, 80) || 'Perbandingan';
+    if (S.lokal) {
+      S.tersimpan.unshift({ id: 'l' + Date.now(), nama: nm, product_ids: ids, created_at: new Date().toISOString() });
+      tulisLs('banding', S.tersimpan); toast('Perbandingan tersimpan', 'sukses'); renderAkun(); return;
+    }
     const { data, error } = await sb.from('saved_comparisons').insert({ user_id: USER.id, nama: nm, product_ids: ids }).select('id,nama,product_ids,created_at').single();
-    if (error) { console.warn(error); return toast(belumAda(error) ? 'Fitur ini belum aktif di database' : 'Perbandingan belum tersimpan, coba lagi', 'galat'); }
+    if (error) { console.warn(error); return toast('Perbandingan belum tersimpan, coba lagi', 'galat'); }
     S.tersimpan.unshift(data); toast('Perbandingan tersimpan', 'sukses'); renderAkun();
   };
 
@@ -71,7 +102,6 @@
   const kosong = t => `<p class="kr-kosong">${t}</p>`;
 
   api.isiTab = tab => {
-    if (!S.tabelAda && ['profil', 'riwayat', 'banding', 'notif'].includes(tab)) return kosong(esc(S.galat));
     if (tab === 'profil') return `<form class="akun-form" id="akunProfilForm" novalidate>
         <label class="akun-lbl" for="apNama">Nama tampilan</label>
         <input id="apNama" name="nama" class="field" maxlength="60" autocomplete="name" value="${esc(S.profil && S.profil.display_name || '')}" placeholder="${esc((USER.user_metadata && (USER.user_metadata.full_name || USER.user_metadata.name)) || 'Nama kamu')}">
@@ -108,40 +138,83 @@
       <button type="button" class="btn btn-blok" data-akun="keluar">Keluar</button></div>`;
   };
 
+  /* Semua panel dirender sekaligus di dalam satu "track"; yang tampil ditentukan translateX (lihat pilihTab). */
   api.html = () => {
     const nama = namaUser(USER), kepala = `<div class="akun-kepala"><span class="avatar avatar-besar">${avatarHtml(USER)}</span>
       <div><p class="akun-nama">${esc(nama)}</p><p class="akun-email">${esc(USER.email || '')}</p></div></div>`;
-    const tabs = `<div class="akun-tabs" role="tablist" aria-label="Bagian akun">${TAB.map(([id, l]) => {
+    const idx = Math.max(0, TAB.findIndex(t => t[0] === S.tab));
+    const tabs = `<div class="akun-tabs" role="tablist" aria-label="Bagian akun">${TAB.map(([id, l], i) => {
       const n = id === 'notif' ? belumDibaca() : id === 'favorit' ? FAV.length : 0;
-      return `<button type="button" role="tab" class="akun-tab" aria-selected="${S.tab === id}" data-tab-akun="${id}">${l}${n ? ` (${n})` : ''}</button>`;
+      return `<button type="button" role="tab" id="akunTab-${id}" aria-controls="akunPanel-${id}" class="akun-tab" aria-selected="${i === idx}" tabindex="${i === idx ? 0 : -1}" data-tab-akun="${id}">${l}${n ? ` (${n})` : ''}</button>`;
     }).join('')}</div>`;
-    return kepala + (S.galat && S.tabelAda ? `<p class="pesan-akun galat">${esc(S.galat)}</p>` : '') + tabs + `<div class="akun-isi">${api.isiTab(S.tab)}</div>`;
+    const panel = TAB.map(([id], i) => `<section class="akun-panel" role="tabpanel" id="akunPanel-${id}" aria-labelledby="akunTab-${id}" aria-hidden="${i !== idx}"${i !== idx ? ' inert' : ''}>${api.isiTab(id)}</section>`).join('');
+    return kepala + tabs + `<div class="akun-viewport"><div class="akun-track">${panel}</div></div>`;
   };
-  api.render = () => { const el = $('#akunIsi'); if (!USER) { el.innerHTML = ''; return; } el.innerHTML = api.html(); };
+
+  /* Tinggi area slider mengikuti panel yang aktif (panel lain bisa lebih tinggi) */
+  function aturTinggi() {
+    const vp = $('#akunIsi .akun-viewport'); if (!vp) return;
+    const p = $('.akun-panel[aria-hidden="false"]', vp);
+    vp.style.height = p && p.offsetHeight ? p.offsetHeight + 'px' : '';   /* dialog tertutup (tinggi 0) -> biarkan auto */
+  }
+  let ro = null;
+  function pasangRO(el) {
+    if (!('ResizeObserver' in window)) return;
+    if (!ro) ro = new ResizeObserver(aturTinggi);
+    ro.disconnect();
+    $$('.akun-panel', el).forEach(p => ro.observe(p));                    /* juga terpicu saat dialog baru dibuka */
+  }
+
+  api.pilihTab = (id, animasi = true) => {
+    const i = TAB.findIndex(t => t[0] === id); if (i < 0) return;
+    S.tab = id;
+    const root = $('#akunIsi'), track = $('.akun-track', root); if (!track) return;
+    track.classList.toggle('tanpa-anim', !animasi);
+    track.style.transform = 'translateX(-' + (i * 100) + '%)';
+    const bar = $('.akun-tabs', root);
+    $$('.akun-tab', root).forEach(b => {
+      const a = b.dataset.tabAkun === id;
+      b.setAttribute('aria-selected', String(a)); b.tabIndex = a ? 0 : -1;
+      if (a && bar) bar.scrollTo({ left: b.offsetLeft - (bar.clientWidth - b.offsetWidth) / 2, behavior: animasi ? 'smooth' : 'auto' });
+    });
+    $$('.akun-panel', root).forEach((p, k) => { p.setAttribute('aria-hidden', String(k !== i)); p.toggleAttribute('inert', k !== i); });
+    aturTinggi();
+  };
+
+  api.render = () => {
+    const el = $('#akunIsi'); if (!USER) { el.innerHTML = ''; return; }
+    el.innerHTML = api.html();
+    pasangRO(el);
+    api.pilihTab(S.tab, false);                                           /* posisi awal tanpa animasi */
+  };
 
   /* ---------- interaksi ---------- */
   const akunIsi = $('#akunIsi');
   akunIsi.addEventListener('click', async e => {
     const q = a => e.target.closest(a);
     let b;
-    if ((b = q('[data-tab-akun]'))) { S.tab = b.dataset.tabAkun; api.render(); return; }
+    if ((b = q('[data-tab-akun]'))) { api.pilihTab(b.dataset.tabAkun); return; }
     if ((b = q('[data-akun-tambah]'))) { tambahKeranjang(b.dataset.akunTambah); return; }
     if ((b = q('[data-akun-buka]'))) { $('#akun').close(); bukaDetail(b.dataset.akunBuka); return; }
     if ((b = q('[data-akun-fav]'))) { toggleFav(b.dataset.akunFav); return; }
     if (q('[data-akun-hapusriwayat]')) {
+      if (S.lokal) { S.riwayat = []; tulisLs('riwayat', []); toast('Riwayat dihapus', 'sukses'); api.render(); return; }
       const { error } = await sb.from('view_history').delete().eq('user_id', USER.id);
       if (error) return toast('Riwayat belum terhapus, coba lagi', 'galat');
       S.riwayat = []; toast('Riwayat dihapus', 'sukses'); api.render(); return;
     }
     if (q('[data-akun-bacasemua]')) {
+      if (S.lokal) { S.notif.forEach(n => { n.dibaca = true; }); tulisLs('notif', S.notif); api.render(); return; }
       const { error } = await sb.from('notifications').update({ dibaca: true }).eq('user_id', USER.id).eq('dibaca', false);
       if (error) return toast('Belum berhasil, coba lagi', 'galat');
       S.notif.forEach(n => { n.dibaca = true; }); api.render(); return;
     }
     if ((b = q('[data-akun-bdghapus]'))) {
-      const { error } = await sb.from('saved_comparisons').delete().eq('id', Number(b.dataset.akunBdghapus)).eq('user_id', USER.id);
+      const idb = b.dataset.akunBdghapus;
+      if (S.lokal) { S.tersimpan = S.tersimpan.filter(t => String(t.id) !== idb); tulisLs('banding', S.tersimpan); api.render(); return; }
+      const { error } = await sb.from('saved_comparisons').delete().eq('id', Number(idb)).eq('user_id', USER.id);
       if (error) return toast('Belum terhapus, coba lagi', 'galat');
-      S.tersimpan = S.tersimpan.filter(t => String(t.id) !== b.dataset.akunBdghapus); api.render(); return;
+      S.tersimpan = S.tersimpan.filter(t => String(t.id) !== idb); api.render(); return;
     }
     if ((b = q('[data-akun-bdgbuka]'))) {
       const t = S.tersimpan.find(x => String(x.id) === b.dataset.akunBdgbuka); if (!t) return;
@@ -150,6 +223,15 @@
       CMP = ada; simpanBanding(); segarkanTanda(); $('#akun').close(); bukaBanding();
     }
   });
+  /* Panah kiri/kanan berpindah tab (aksesibilitas keyboard) */
+  akunIsi.addEventListener('keydown', e => {
+    const t = e.target.closest('[data-tab-akun]'); if (!t) return;
+    const arah = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!arah) return;
+    e.preventDefault();
+    const i = (TAB.findIndex(x => x[0] === t.dataset.tabAkun) + arah + TAB.length) % TAB.length;
+    api.pilihTab(TAB[i][0]);
+    const b = $('[data-tab-akun="' + TAB[i][0] + '"]', akunIsi); if (b) b.focus();
+  });
   akunIsi.addEventListener('submit', async e => {
     e.preventDefault();
     const f = e.target;
@@ -157,10 +239,14 @@
       const pesan = $('#apPesan'), tampil = (t, g) => { pesan.textContent = t; pesan.hidden = !t; pesan.classList.toggle('galat', !!g); };
       const nama = f.nama.value.trim().slice(0, 60), foto = f.foto.value.trim();
       if (foto && !/^https:\/\/\S+$/i.test(foto)) return tampil('Link foto harus diawali https://', true);
+      if (S.lokal) {
+        S.profil = { display_name: nama || null, avatar_url: foto || null }; tulisLs('profil', S.profil);
+        toast('Profil tersimpan', 'sukses'); renderAkun(); return;
+      }
       const btn = f.querySelector('button[type=submit]'); btn.disabled = true; tampil('Menyimpan...');
       const { error } = await sb.from('profiles').upsert({ user_id: USER.id, display_name: nama || null, avatar_url: foto || null, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
       btn.disabled = false;
-      if (error) return tampil(belumAda(error) ? 'Fitur profil belum aktif di database.' : 'Profil belum tersimpan. Coba lagi.', true);
+      if (error) return tampil('Profil belum tersimpan. Coba lagi.', true);
       S.profil = { display_name: nama || null, avatar_url: foto || null };
       toast('Profil tersimpan', 'sukses'); renderAkun();
     } else if (f.id === 'akunBdgForm') { await api.simpanBanding(f.nama.value); }

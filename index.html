@@ -33,7 +33,7 @@
     window.aturSkala();
   })();
   </script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261102">
 </head>
 <body>
 
@@ -48,6 +48,7 @@
   <defs>
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5.5 8h13l-1 11.5a1 1 0 0 1-1 .9H7.5a1 1 0 0 1-1-.9L5.5 8z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></symbol>
     <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2.2l1.9 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L19.5 8H6"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
     <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
@@ -100,7 +101,7 @@
         <button type="button" id="btnTemaNav" class="nav-i nav-tema" aria-label="Ganti mode gelap / terang">Gelap</button>
         <!-- Belum login: Sign up + Log in. Sudah login: item Akun. (id sama dengan yang dipakai script.js) -->
         <span class="nav-auth" id="authBtns">
-          <button type="button" id="btnDaftar" class="nav-i">Sign up</button>
+          <button type="button" id="btnDaftar" class="nav-i" hidden>Sign up</button>
           <button type="button" id="btnMasuk" class="nav-i">Log in</button>
         </span>
         <button type="button" id="navAkun" class="nav-i" hidden>Akun</button>
@@ -108,15 +109,8 @@
 
       <div class="hdr-kanan">
         <button type="button" id="btnCari" class="ikon" aria-label="Cari laptop dengan AI"><svg><use href="#i-search"/></svg></button>
-        <!-- Sudah login (HP): foto/inisial akun. Di laptop, akun ada di katalog tengah (#navAkun). -->
-        <button type="button" id="btnAkun" class="ikon ikon-akun" aria-label="Akun saya" hidden>
-          <svg><use href="#i-user"/></svg>
-          <span class="avatar" hidden></span>
-        </button>
-        <button type="button" id="btnToko" class="ikon" aria-label="Buka toko dan keranjang">
-          <svg><use href="#i-cart"/></svg>
-          <span class="badge" data-badge hidden>0</span>
-        </button>
+        <button type="button" id="btnToko" class="ikon" aria-label="Buka tas belanja"><svg><use href="#i-bag"/></svg><span class="badge" data-badge hidden>0</span></button>
+        <button type="button" id="btnAkun" class="ikon ikon-akun" aria-label="Masuk"><svg><use href="#i-user"/></svg><span class="avatar" hidden></span></button>
       </div>
     </div>
 
@@ -597,7 +591,7 @@
       <button type="button" id="storeBack" class="ikon" aria-label="Kembali ke beranda"><svg><use href="#i-chev-l"/></svg></button>
       <h2>Toko</h2>
       <div class="store-kanan">
-        <button type="button" id="storeFavorit" class="ikon" aria-label="Buka favorit">
+        <button type="button" id="storeFavorit" class="ikon" aria-label="Buka favorit" hidden>
           <svg><use href="#i-heart"/></svg>
           <span class="badge" data-fav-badge hidden>0</span>
         </button>
@@ -606,7 +600,7 @@
           <span class="badge" data-cmp-badge hidden>0</span>
         </button>
         <button type="button" id="storeKeranjang" class="ikon" aria-label="Buka keranjang">
-          <svg><use href="#i-cart"/></svg>
+          <svg><use href="#i-bag"/></svg>
           <span class="badge" data-badge hidden>0</span>
         </button>
       </div>
@@ -686,22 +680,11 @@
   <div class="dlg-head">
     <div class="masuk-judul">
       <button type="button" class="ikon" id="masukKembali" aria-label="Kembali" hidden><svg><use href="#i-chev-l"/></svg></button>
-      <h2 id="masukJudul">Masuk atau daftar dalam hitungan detik</h2>
+      <h2 id="masukJudul">Lanjutkan ke Laptop Makassar</h2>
     </div>
     <button type="button" class="ikon" data-tutup aria-label="Tutup"><svg><use href="#i-close"/></svg></button>
   </div>
   <div class="dlg-body masuk-isi">
-
-    <!-- Layar 1: tiga pilihan utama -->
-    <section data-lihat="awal" class="masuk-lihat">
-      <p class="isi-abu">Keranjangmu tersimpan di semua perangkat, dan kamu bisa menyimpan favorit serta membandingkan spesifikasi laptop.</p>
-      <div class="sso-daftar">
-        <button type="button" class="sso" data-p="google"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.9-3c-1.1.7-2.5 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.4 14.4a7.2 7.2 0 0 1 0-4.8V6.5H1.4a12 12 0 0 0 0 11l4-3.1z"/><path fill="#EA4335" d="M12 4.8c1.7 0 3.3.6 4.5 1.8l3.4-3.4A12 12 0 0 0 1.4 6.5l4 3.1C6.3 6.9 8.9 4.8 12 4.8z"/></svg><span>Lanjutkan dengan Google</span></button>
-        <button type="button" class="sso" data-p="facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M16.7 15.5l.5-3.5h-3.3V9.7c0-1 .5-1.9 2-1.9h1.5V4.8s-1.4-.2-2.7-.2c-2.7 0-4.5 1.7-4.5 4.700V12H7v3.500h3.200V24a12 12 0 0 0 3.700 0v-8.500h2.800z"/></svg><span>Lanjutkan dengan Facebook</span></button>
-        <button type="button" class="sso" data-p="email"><svg class="ik" aria-hidden="true"><use href="#i-mail"/></svg><span>Lanjutkan dengan email</span></button>
-      </div>
-      <button type="button" class="sso-lain" id="masukLain">Lanjutkan dengan cara lain</button>
-    </section>
 
     <!-- Layar 2: semua pilihan -->
     <section data-lihat="lain" class="masuk-lihat" hidden>
@@ -773,8 +756,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="auth.js"></script>
-<script src="script.js"></script>
-<script src="akun.js"></script>
+<script src="script.js?v=20261102"></script>
+<script src="akun.js?v=20261102"></script>
 <script src="navbar.js"></script>
 <script src="tangan.js"></script>
 <script>
