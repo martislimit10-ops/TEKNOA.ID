@@ -1195,9 +1195,9 @@ async function terapkanSesi(evt, session) {
 }
 
 /* Tentukan peran dari database SETIAP kali sesi dibuka (bukan hanya saat login baru).
-   ADMIN  : bukan akun user. Tidak memuat favorit/riwayat/notifikasi user, tombol Like hilang, teks "Akun" jadi "Admin"
-            yang membuka panel admin. Admin yang BARU login langsung diarahkan ke panel; bila hanya membuka website
-            (mis. kembali dari panel) tidak dilempar, jadi bisa bolak-balik website <-> panel.
+   ADMIN  : bukan akun user. Tidak memuat favorit/riwayat/notifikasi user, tombol Like hilang, teks "Log in" jadi "Admin"
+            yang membuka panel admin saat diklik. Admin TIDAK dilempar otomatis ke panel (baru login atau kembali dari panel),
+            jadi bisa bolak-balik website <-> panel dengan klik "Admin" / "Lihat website".
    LAINNYA: user biasa -> fitur user (favorit, banding, riwayat, notifikasi). */
 async function tetapkanPeran(u, loginBaru, percobaan) {
   const admin = await LMAuth.cekAdmin();                             /* true / false / null (gagal diperiksa) */
@@ -1207,8 +1207,10 @@ async function tetapkanPeran(u, loginBaru, percobaan) {
     try { localStorage.setItem('lm_peran_' + u.id, IS_ADMIN ? 'admin' : 'user'); } catch (e) {}
   }
   if (IS_ADMIN) {
-    if (loginBaru) { toast('Masuk sebagai admin. Membuka panel admin...', 'sukses'); setTimeout(bukaPanelAdmin, 250); }   /* dahulukan: tidak boleh gagal karena render lain */
     renderAkun(); renderKatalog(); segarkanTanda();
+    /* Admin yang baru login TIDAK dilempar ke panel: tetap di tampilan awal, tulisan "Log in" berubah jadi "Admin".
+       Panel dibuka hanya saat "Admin" diklik. */
+    if (loginBaru) toast('Masuk sebagai admin. Klik "Admin" untuk membuka panel.', 'sukses');
     return;
   }
   if (admin === null && percobaan < 2) {                             /* gagal periksa (jaringan): jangan dulu dianggap user, coba lagi */

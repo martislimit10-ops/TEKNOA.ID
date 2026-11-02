@@ -163,7 +163,10 @@ const LMAuth = (() => {
     try { if (gsiAda()) google.accounts.id.disableAutoSelect(); } catch (e) {}
     api.hapusTanda();
     api.keluarSengaja = true;
-    return sb.auth.signOut();
+    const hasil = await sb.auth.signOut();
+    /* Keluar dari PANEL ADMIN -> langsung ke tampilan awal website (tulisan "Admin" kembali jadi "Log in"). */
+    if (!(hasil && hasil.error) && /\/admin(\/|$)/.test(location.pathname)) location.assign(location.pathname.replace(/\/admin(\/.*)?$/, '/'));
+    return hasil;
   };
 
   return api;
