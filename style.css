@@ -323,33 +323,11 @@ html[data-device="hp"] .dlg{margin:auto auto 0;width:min(100%,var(--kolom));max-
   html[data-device="desktop"] .dlg-body{padding:28px}
   html[data-device="desktop"] .sb{left:0;width:340px}
   html[data-device="desktop"] .dlg-side{margin:0 0 0 auto;width:420px;max-width:100%;height:100%;max-height:100%;border-radius:0}
-  html[data-device="desktop"] .dlg-cari{margin-top:10vh}
 }
 @media (min-width:640px) and (max-width:899px){
   html[data-device="desktop"] .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 
-/* [PATCH-CHATBOT] Tampilan bubble chat */
-.dlg-chat{height:min(680px,calc(var(--vh100,100svh) - 32px))}
-html[data-device="desktop"] .dlg-chat{margin-top:auto}
-.chat-isi{padding:16px;background:var(--bg)}
-.chat-alur{display:flex;flex-direction:column;gap:10px}
-.gel{max-width:86%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;animation:gelMasuk .2s ease}
-.gel-bot{align-self:flex-start;background:var(--surface-2);border:1px solid var(--garis);border-bottom-left-radius:6px}
-.gel-user{align-self:flex-end;background:var(--aksen);color:var(--aksen-ink);border-bottom-right-radius:6px}
-.gel-ketik{display:flex;align-items:center;gap:5px;padding:14px 16px}
-.gel-ketik span{width:7px;height:7px;border-radius:50%;background:var(--ink-3);animation:gelKetik 1s infinite ease-in-out}
-.gel-ketik span:nth-child(2){animation-delay:.15s}
-.gel-ketik span:nth-child(3){animation-delay:.3s}
-.gel-kartu{align-self:flex-start;width:min(100%,380px);display:grid;gap:8px}
-.chat-alur .cari-kartu{background:var(--surface)}
-.chat-foot{gap:8px;padding:10px 12px 12px}
-.chat-foot .chips{margin:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-.chat-foot .chips::-webkit-scrollbar{display:none}
-.chat-foot .chip{flex:none;white-space:nowrap}
-.chat-foot .cari-baris{margin-top:0}
-@keyframes gelMasuk{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-@keyframes gelKetik{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 
 /* =====================================================================
    [PATCH-LAYOUT] Logo merek, Kunjungi toko kami, Promo Saat Ini
@@ -964,7 +942,6 @@ body:has(.info-modal[open]){overflow:hidden}
 .akun-panel{flex:0 0 100%;min-width:0;padding:2px}
 
 /* ---------- 3. Navbar HP: ikon Search disembunyikan (elemennya tetap ada agar script.js aman) ---------- */
-html[data-device="hp"] #btnCari{display:none}
 
 /* ---------- 4. Navbar laptop: sudah login = ikon profil (bukan teks "Akun") ---------- */
 @media (min-width:900px){
@@ -977,3 +954,19 @@ html[data-device="hp"] #btnCari{display:none}
   html:not([data-device="hp"])[data-peran="admin"] #navAkun{display:inline-flex!important}
   html:not([data-device="hp"])[data-peran="admin"] #btnAkun{display:none}
 }
+
+/* ---------- [REVISI-8] ---------- */
+/* Spesifikasi besar di jendela detail: ukuran angka tidak ikut ukuran halaman desktop, tidak melebar keluar */
+.spek-besar{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.spek-besar .stat{min-width:0}
+html[data-device] .spek-besar .stat-angka{font-size:clamp(30px,3.4vw,44px);width:auto;max-width:100%;overflow-wrap:anywhere;line-height:1.1}
+html[data-device] .spek-besar .stat-angka span{font-size:.4em}
+#detailBody{overflow-x:hidden}
+/* Admin: tombol belanja & bandingkan tidak dipakai */
+html[data-peran="admin"] .kartu-aksi,
+html[data-peran="admin"] #btnToko,
+html[data-peran="admin"] #storeBandingkan,
+html[data-peran="admin"] #storeKeranjang,
+html[data-peran="admin"] #cartbar,
+html[data-peran="admin"] #detailTambah,
+html[data-peran="admin"] #detailBody [data-cmp]{display:none!important}

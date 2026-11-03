@@ -3,7 +3,7 @@
    Butuh (urutan): supabase-js -> supabase-config.js -> script.js
    Data (produk, info toko, slider) semua dari Supabase + realtime.
    Daftar isi:
-   1. Keadaan & pembantu     5. Foto toko + carousel katalog   9. Pencarian AI
+   1. Keadaan & pembantu     5. Foto toko + carousel katalog
    2. Info toko              6. Halaman Toko                  10. Data Supabase
    3. Tema & sidebar         7. Keranjang                     11. Mulai
    4. Hero slider            8. Detail produk
@@ -660,119 +660,6 @@ $('#detailBody').addEventListener('click', e => {
   if (g) { $('#detailFotoUtama').src = g.dataset.galeri; $$('.detail-thumb', $('#detailBody')).forEach(t => t.classList.toggle('aktif', t === g)); return; }
   const f = e.target.closest('[data-fav]'); if (f) { toggleFav(f.dataset.fav); return; }
   const c = e.target.closest('[data-cmp]'); if (c) toggleBanding(c.dataset.cmp);
-});
-
-/* ---------- 9. Pencarian AI (Gemini lewat Supabase Edge Function) ---------- */
-const dialogCari = $('#cari'), cariInput = $('#cariInput'), cariHasil = $('#cariHasil');
-function bukaCari() { bukaDialog(dialogCari); setTimeout(() => cariInput.focus(), 50); }
-$('#btnCari').addEventListener('click', bukaCari);
-$('#cariContoh').addEventListener('click', e => {
-  const c = e.target.closest('.chip'); if (!c) return;
-  cariInput.value = c.textContent; jalankanCari();
-});
-$('#cariKirim').addEventListener('click', jalankanCari);
-cariInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); jalankanCari(); } });
-
-const KATA_KUNCI = {
-  gaming: ['gaming', 'rog', 'tuf', 'nitro', 'legion', 'rtx', 'gtx', 'geforce'],
-  game: ['gaming', 'rog', 'tuf', 'nitro', 'legion', 'rtx', 'gtx', 'geforce'],
-  edit: ['rtx', 'gtx', 'ryzen 7', 'i7', 'i5', '16 gb', '32 gb', 'macbook', 'm1', 'm2'],
-  video: ['rtx', 'gtx', 'ryzen 7', 'i7', 'i5', '16 gb', '32 gb', 'macbook', 'm1', 'm2'],
-  desain: ['rtx', 'gtx', 'ryzen 7', 'i7', '16 gb', 'macbook', 'm1', 'm2'],
-  kantor: ['thinkpad', 'latitude', 'elitebook', 'probook', 'vivobook', 'i5'],
-  kerja: ['thinkpad', 'latitude', 'elitebook', 'probook', 'vivobook', 'i5'],
-  kuliah: ['celeron', 'vivobook', 'aspire', 'i3', 'i5'],
-  sekolah: ['celeron', 'vivobook', 'aspire', 'i3'],
-  murah: ['celeron', 'i3', 'aspire']
-};
-function cariLokal(q) {
-  const t = q.toLowerCase();
-  let maks = null;
-  const m = t.match(/(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb)/);
-  if (m) { const n = parseFloat(m[1].replace(',', '.')); maks = /^j/.test(m[2]) ? n * 1e6 : n * 1e3; }
-  const kata = t.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(k => k.length > 2);
-  const istilah = new Set(); kata.forEach(k => { istilah.add(k); (KATA_KUNCI[k] || []).forEach(x => istilah.add(x)); });
-  const hasil = PRODUK.filter(p => !maks || p.harga <= maks).map(p => {
-    const jerami = [namaLengkap(p), p.kategori, ...Object.values(p.spek || {})].join(' ').toLowerCase();
-    let skor = 0; istilah.forEach(k => { if (jerami.includes(k)) skor++; });
-    return { p, skor };
-  }).filter(x => x.skor > 0 || (maks && !istilah.size)).sort((a, b) => b.skor - a.skor || a.p.harga - b.p.harga).slice(0, 5);
-  return {
-    ringkasan: 'Hasil pencarian kata kunci (asisten AI sedang tidak tersedia).',
-    hasil: hasil.map(x => ({ id: String(x.p.id), alasan: [x.p.spek?.processor, x.p.spek?.ram && `RAM ${x.p.spek.ram}`, x.p.spek?.storage].filter(Boolean).join(', ') }))
-  };
-}
-/* [PATCH-CHATBOT] Chatbot percakapan (Gemini lewat Edge Function "cari-ai", mode riwayat) */
-const chat = { riwayat: [], sibuk: false };   // riwayat: [{ role: 'user' | 'model', text }]
-const CHAT_MAKS_RIWAYAT = 10;
-function gulirChat() { const b = cariHasil.closest('.dlg-body'); if (b) b.scrollTop = b.scrollHeight; }
-function gelembung(role, teks) {
-  const d = document.createElement('div');
-  d.className = 'gel ' + (role === 'user' ? 'gel-user' : 'gel-bot');
-  d.textContent = teks;                       /* textContent: aman dari XSS */
-  cariHasil.appendChild(d); gulirChat();
-}
-function kartuChat(daftar) {
-  const l = (daftar || []).map(h => ({ p: cariProduk(h.id), alasan: h.alasan })).filter(x => x.p);
-  if (!l.length) return;
-  const w = document.createElement('div'); w.className = 'gel-kartu';
-  w.innerHTML = l.map(({ p, alasan }) => `
-    <div class="cari-kartu">
-      <div class="kr-foto"><img src="${esc(p.foto)}" alt="" ${fotoErr}></div>
-      <div>
-        <p class="kr-nama">${esc(namaLengkap(p))}</p>
-        <p class="kr-harga"><b>${rupiah(p.harga)}</b></p>
-        <p class="cari-alasan">${esc(alasan)}</p>
-        <div class="cari-aksi">
-          <button type="button" class="btn btn-kecil btn-garis" data-open="${esc(p.id)}">Pelajari</button>
-          <button type="button" class="btn btn-kecil" data-tambah="${esc(p.id)}">Tambah</button>
-        </div>
-      </div>
-    </div>`).join('');
-  cariHasil.appendChild(w); gulirChat();
-}
-async function jalankanCari() {
-  const q = cariInput.value.trim();
-  if (!q) { cariInput.focus(); return; }
-  if (chat.sibuk) return;
-  chat.sibuk = true; $('#cariKirim').disabled = true;
-  cariInput.value = '';
-  gelembung('user', q);
-  const ketik = document.createElement('div');
-  ketik.className = 'gel gel-bot gel-ketik'; ketik.innerHTML = '<span></span><span></span><span></span>';
-  cariHasil.appendChild(ketik); gulirChat();
-  try {
-    await siapProduk;
-    const kirim = chat.riwayat.concat({ role: 'user', text: q }).slice(-CHAT_MAKS_RIWAYAT);
-    let data;
-    try {
-      /* "q" ikut dikirim agar Edge Function versi lama tetap bisa menjawab (mode pencarian) */
-      const r = await sb.functions.invoke('cari-ai', { body: { q, riwayat: kirim } });
-      if (r.error || !r.data || r.data.error) throw r.error || new Error(r.data?.error || 'kosong');
-      data = r.data;
-    } catch (e) {
-      console.warn('Chatbot AI gagal, memakai pencarian lokal:', e);
-      const lokal = cariLokal(q);
-      data = {
-        jawaban: lokal.hasil.length ? 'Asisten AI sedang sibuk kak. Ini hasil pencarian cepat dari stok kami:' : 'Maaf kak, asisten AI sedang tidak tersedia. Silakan tanya langsung lewat WhatsApp ya.',
-        rekomendasi: lokal.hasil
-      };
-    }
-    ketik.remove();
-    const jawaban = String(data.jawaban || data.ringkasan || '').trim() || 'Maaf kak, saya belum bisa menjawab itu.';
-    gelembung('model', jawaban);
-    kartuChat(data.rekomendasi || data.hasil);
-    chat.riwayat = chat.riwayat.concat({ role: 'user', text: q }, { role: 'model', text: jawaban }).slice(-CHAT_MAKS_RIWAYAT);
-  } finally {
-    if (ketik.parentNode) ketik.remove();
-    chat.sibuk = false; $('#cariKirim').disabled = false; cariInput.focus();
-  }
-}
-gelembung('model', 'Halo kak! Saya asisten Laptop Makassar. Boleh tanya soal rekomendasi laptop sesuai budget, gaming atau edit video, perbandingan spek, garansi, sampai jam buka toko. Mau cari laptop yang seperti apa?');
-
-cariHasil.addEventListener('click', e => {
-  const t = e.target.closest('[data-tambah]'); if (t) { tambahKeranjang(t.dataset.tambah); return; }
-  const o = e.target.closest('[data-open]'); if (o) { dialogCari.close(); bukaDetail(o.dataset.open); }
 });
 
 /* ---------- 10. Data dari Supabase ---------- */
