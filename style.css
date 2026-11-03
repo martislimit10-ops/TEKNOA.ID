@@ -979,3 +979,17 @@ html[data-peran="admin"] #detailBody [data-cmp]{display:none!important}
 .spec-box[open] dl{position:absolute;left:-6px;right:-6px;top:100%;z-index:30;margin:2px 0 0;padding:4px 12px 8px;
   background:var(--surface);border:1px solid var(--garis);border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.4)}
 .spec-box[open] dl div:last-child{border-bottom:0}
+
+/* ikon tas di navbar beranda (#btnToko) tetap ada untuk semua orang; yang disembunyikan hanya yang di halaman Toko */
+/* ---------- [REVISI-9] Tombol "Beli" hijau; keranjang & bandingkan hanya untuk yang sudah login ---------- */
+.btn-beli{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:600}
+.btn-beli:hover{background:#15803d;border-color:#15803d}
+.btn-beli[disabled]{opacity:.45}
+html:not([data-masuk="1"]) .kartu-aksi{grid-template-columns:1fr}
+html:not([data-masuk="1"]) .kartu-aksi [data-tambah],
+html:not([data-masuk="1"]) .kartu-aksi .cmp-toggle,
+html:not([data-masuk="1"]) #storeKeranjang,
+html:not([data-masuk="1"]) #storeBandingkan,
+html:not([data-masuk="1"]) #cartbar,
+html:not([data-masuk="1"]) #detailTambah,
+html:not([data-masuk="1"]) #detailBody [data-cmp]{display:none!important}
