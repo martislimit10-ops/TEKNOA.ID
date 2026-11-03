@@ -968,3 +968,7 @@ html[data-peran="admin"] #storeBandingkan,
 html[data-peran="admin"] #storeKeranjang,
 html[data-peran="admin"] #detailTambah,
 html[data-peran="admin"] #detailBody [data-cmp]{display:none!important}
+
+/* Kartu tidak saling menyamakan tinggi: buka "Spesifikasi lengkap" satu kartu, kartu lain tetap */
+.grid{align-items:start}
+.grid .kartu{align-self:start}
