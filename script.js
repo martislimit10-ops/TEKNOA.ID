@@ -1132,3 +1132,11 @@ document.addEventListener('toggle', e => {
   if (!d || !d.matches || !d.matches('.spec-box') || !d.open) return;
   document.querySelectorAll('.spec-box[open]').forEach(x => { if (x !== d) x.open = false; });
 }, true);
+
+/* Klik di luar panel spesifikasi / tekan Esc: panel menutup */
+document.addEventListener('click', e => {
+  document.querySelectorAll('.spec-box[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.spec-box[open]').forEach(d => { d.open = false; });
+});

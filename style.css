@@ -972,3 +972,10 @@ html[data-peran="admin"] #detailBody [data-cmp]{display:none!important}
 /* Kartu tidak saling menyamakan tinggi: buka "Spesifikasi lengkap" satu kartu, kartu lain tetap */
 .grid{align-items:start}
 .grid .kartu{align-self:start}
+
+/* Spesifikasi lengkap = panel melayang: tidak menambah tinggi kartu, tidak menggeser kartu/baris lain.
+   Panel menimpa apa pun yang ada di bawahnya, hanya di area panel itu sendiri. */
+.spec-box{position:relative}
+.spec-box[open] dl{position:absolute;left:-6px;right:-6px;top:100%;z-index:30;margin:2px 0 0;padding:4px 12px 8px;
+  background:var(--surface);border:1px solid var(--garis);border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.4)}
+.spec-box[open] dl div:last-child{border-bottom:0}
