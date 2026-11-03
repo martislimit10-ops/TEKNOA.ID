@@ -993,3 +993,8 @@ html:not([data-masuk="1"]) #storeBandingkan,
 html:not([data-masuk="1"]) #cartbar,
 html:not([data-masuk="1"]) #detailTambah,
 html:not([data-masuk="1"]) #detailBody [data-cmp]{display:none!important}
+
+/* Jendela detail: "Beli" hijau di baris paling bawah; belum login = hanya "Tanya stok" + "Beli" */
+#detail .dlg-foot-2 #detailBeli{grid-column:1/-1}
+html:not([data-masuk="1"]) #detail .dlg-foot-2{grid-template-columns:1fr}
+html[data-peran="admin"] #detailBeli{display:none!important}

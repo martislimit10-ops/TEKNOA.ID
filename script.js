@@ -497,7 +497,7 @@ function kartuProduk(p) {
       ${hemat ? `<p class="hemat">Hemat ${rupiah(hemat)}</p>` : ''}
       <div class="kartu-aksi">
         <button type="button" class="btn btn-kecil" data-tambah="${esc(p.id)}" aria-label="Tambah ${esc(nama)} ke keranjang" ${p.tersedia ? '' : 'disabled'}>${p.tersedia ? '+ Keranjang' : 'Tidak tersedia'}</button>
-        <button type="button" class="btn btn-kecil btn-beli" data-beli="${esc(p.id)}" aria-label="Beli ${esc(nama)} lewat WhatsApp" ${p.tersedia ? '' : 'disabled'}>Beli</button>
+        <button type="button" class="btn btn-kecil" data-open="${esc(p.id)}">Lihat</button>
         <button type="button" class="cmp-toggle${adaBanding(p.id) ? ' aktif' : ''}" data-cmp="${esc(p.id)}">${adaBanding(p.id) ? 'Batal bandingkan' : '+ Bandingkan'}</button>
       </div>
     </div>
@@ -534,7 +534,6 @@ $('#grid').addEventListener('click', e => {
   const f = e.target.closest('[data-fav]'); if (f) { toggleFav(f.dataset.fav); return; }
   const c = e.target.closest('[data-cmp]'); if (c) { toggleBanding(c.dataset.cmp); return; }
   const t = e.target.closest('[data-tambah]'); if (t) { tambahKeranjang(t.dataset.tambah); return; }
-  const bl = e.target.closest('[data-beli]'); if (bl) { beliSekarang(bl.dataset.beli); return; }
   const o = e.target.closest('[data-open]'); if (o) bukaDetail(o.dataset.open);
 });
 
@@ -544,7 +543,7 @@ const keranjang = $('#keranjang');
 const cariProduk = id => PRODUK.find(p => String(p.id) === String(id));
 function simpanLokal() { try { localStorage.setItem(KEY_KERANJANG, JSON.stringify(KERANJANG)); } catch (e) {} }
 function simpanKeranjang() { simpanLokal(); renderKeranjang(); jadwalSinkronKeranjang(); }
-/* Tombol hijau "Beli": langsung chat WhatsApp toko untuk satu produk (tanpa login, tanpa keranjang) */
+/* Tombol hijau "Beli" di dalam jendela detail: chat WhatsApp toko untuk produk yang sedang dilihat */
 function beliSekarang(id) {
   const p = cariProduk(id); if (!p) return;
   if (p.tersedia === false) { toast('Maaf, produk ini sedang tidak tersedia', 'info'); return; }
@@ -659,9 +658,11 @@ function bukaDetail(id) {
   </div>`;
   $('#detailWa').href = waLink(`Halo kak, ${nama} masih ada?`);
   $('#detailTambah').disabled = !p.tersedia;
+  $('#detailBeli').disabled = !p.tersedia;
   $('#detailBody').scrollTop = 0;
   bukaDialog(detail);
 }
+$('#detailBeli').addEventListener('click', () => { if (detailId !== null) beliSekarang(detailId); });
 $('#detailTambah').addEventListener('click', () => { if (detailId !== null) { tambahKeranjang(detailId); detail.close(); } });
 $('#detailBody').addEventListener('click', e => {
   const g = e.target.closest('[data-galeri]');
