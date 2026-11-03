@@ -1125,3 +1125,10 @@ isiStatistik();
 renderKeranjang();
 muatSemua();
 sinkronToko();
+
+/* Spesifikasi lengkap di kartu: hanya satu yang terbuka sekaligus */
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (!d || !d.matches || !d.matches('.spec-box') || !d.open) return;
+  document.querySelectorAll('.spec-box[open]').forEach(x => { if (x !== d) x.open = false; });
+}, true);

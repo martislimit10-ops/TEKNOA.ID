@@ -962,7 +962,9 @@ body:has(.info-modal[open]){overflow:hidden}
 html[data-device] .spek-besar .stat-angka{font-size:clamp(30px,3.4vw,44px);width:auto;max-width:100%;overflow-wrap:anywhere;line-height:1.1}
 html[data-device] .spek-besar .stat-angka span{font-size:.4em}
 #detailBody{overflow-x:hidden}
-/* Admin: hanya tombol di dalam kartu/detail produk yang disembunyikan; ikon tas di navbar tetap ada */
+/* Admin: hanya tombol di dalam kartu/detail produk yang disembunyikan; ikon tas di navbar utama tetap ada; di halaman Toko ikon tas & bandingkan disembunyikan */
 html[data-peran="admin"] .kartu-aksi,
+html[data-peran="admin"] #storeBandingkan,
+html[data-peran="admin"] #storeKeranjang,
 html[data-peran="admin"] #detailTambah,
 html[data-peran="admin"] #detailBody [data-cmp]{display:none!important}
