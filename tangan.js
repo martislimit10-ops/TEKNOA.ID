@@ -172,34 +172,23 @@
     return terbaik;
   }
 
-  function mulaiIkut() {
-    token++; hentikan(); mode = 'ikut'; pulihkanSemua();
-    const lebarB = bungkus.clientWidth;
-    const p = ujungJari(itemTengah(), .5, .72);
-    hand.classList.remove('ikut');
-    Object.assign(pos, { x: lebarB * .5 - TX, y: p.y + 6, r: 0, s: .95, o: 0 }); terapkan();
-    requestAnimationFrame(() => { hand.classList.add('ikut'); pos.o = 1; terapkan(); });
-  }
-  function ikutiGeseran(dx) {
-    const lebarB = bungkus.clientWidth;
-    pos.x = jepit(pos.x - dx, lebarB * .12 - TX, lebarB * .88 - TX);   /* jari bergerak berlawanan arah isi */
-    pos.r = jepit(-dx * 1.1, -14, 14);
-    terapkan();
-  }
-
   async function selesaiGeser() {
     if (menyentuh) { timerAkhir = setTimeout(selesaiGeser, 120); return; }   /* jari masih menempel: tunggu */
     mode = 'ketuk'; const t = ++token;
     hand.classList.remove('ikut');
     const s = strip.getBoundingClientRect();
     const terlihat = semuaItem().filter(a => { const r = a.getBoundingClientRect(), c = (r.left + r.right) / 2; return c > s.left + s.width * .14 && c < s.right - s.width * .14; });   /* hanya yang terlihat utuh */
-    let target = terlihat.filter(a => tagDari(a));
+    let target = terlihat.filter(a => tagDari(a)).slice(0, 1);   /* SATU target saja */
     target.forEach(sembunyikanTag);
+    if (target.length) {                                          /* tangan muncul dekat target, bukan dari posisi jari */
+      const a0 = ujungJari(target[0]);
+      Object.assign(pos, { x: a0.x + 70, y: a0.y + 120, r: 12, s: 1, o: 0 }); terapkan();
+    }
     let jatahTerpakai = target.length > 0;   /* item ke-3 belum terlihat: tangan pergi, animasi menunggu geseran berikutnya */
     try {
       for (let i = 0; i < target.length; i++) {
         const it = target[i], p = ujungJari(it);
-        await gerak({ x: p.x, y: p.y, r: -5, s: 1 }, i === 0 ? 380 : 440);
+        await gerak({ x: p.x, y: p.y, r: -5, s: 1, o: 1 }, 520);
         await ketuk(it);
         await gerak({ x: p.x + 26, y: p.y + 38, r: 8 }, 160, 'ease-in');
         tulisTag(it);
@@ -219,8 +208,10 @@
     if (hpSelesai || mode === 'ketuk') return;     /* sudah pernah / sedang mengetuk: geseran berikutnya tidak memicu apa pun */
     if (!dx || !modeHP() || kurangGerak()) return;
     if (Date.now() - gestur > 1800) return;      /* bukan geseran jari (mis. panah / posisi dipulihkan): abaikan */
-    if (mode !== 'ikut') mulaiIkut();
-    ikutiGeseran(dx);
+    if (mode !== 'geser') {          /* saat digeser tangan TIDAK ikut jari: disembunyikan, muncul lagi di titik target setelah berhenti */
+      token++; hentikan(); mode = 'geser';
+      hand.classList.remove('ikut'); pos.o = 0; terapkan();
+    }
     clearTimeout(timerAkhir); timerAkhir = setTimeout(selesaiGeser, 170);
   }, { passive: true });
 })();

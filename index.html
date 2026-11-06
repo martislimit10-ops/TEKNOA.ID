@@ -30,6 +30,10 @@
     } catch (e) {}
     d.setAttribute('data-device', hp ? 'hp' : 'desktop');
     window.LM_HP = hp;
+    /* [FIX-DESKTOP] Bila perangkat HP, atribut data-device dikunci: script lain tidak bisa mengubahnya jadi "desktop" */
+    if (hp && window.MutationObserver) new MutationObserver(function () {
+      if (d.getAttribute('data-device') !== 'hp') d.setAttribute('data-device', 'hp');
+    }).observe(d, { attributes: true, attributeFilter: ['data-device'] });
     /* [FIX-MOBILE] Tanpa zoom. Bila HP membuka "Desktop Site" (lebar halaman ~980px), kolom dibuat selebar layar
        lewat atribut data-skala="lebar" (diatur di CSS). Tinggi layar TIDAK lagi dihitung dari innerHeight,
        karena nilainya berubah saat address bar HP muncul/hilang dan membuat banner goyang. */

@@ -14,13 +14,20 @@
       ada = !!(av.querySelector('img') || av.textContent.trim() ||
         (av.style && av.style.backgroundImage) || getComputedStyle(av).backgroundImage !== 'none');
     }
-    return ada || !!(nav && !nav.hidden) || !!(au && au.hidden);
+    return d.getAttribute('data-masuk') === '1' || ada || !!(nav && !nav.hidden) || !!(au && au.hidden);
   };
   const sinkron = () => {
     const v = sudahLogin() ? '1' : '0';
     if (d.getAttribute('data-login') !== v) d.setAttribute('data-login', v);
   };
   sinkron();
+  /* Laptop: tombol "Akun" (non-admin) membuka jendela akun yang sama dengan ikon profil sebelumnya */
+  const na = document.getElementById('navAkun');
+  if (na) na.addEventListener('click', e => {
+    if (d.getAttribute('data-peran') === 'admin') return;
+    const b = document.getElementById('btnAkun');
+    if (b) { e.preventDefault(); e.stopImmediatePropagation(); b.click(); }
+  }, true);
   const h = document.querySelector('.hdr');
   if (h && window.MutationObserver) {
     new MutationObserver(sinkron).observe(h, { subtree: true, childList: true, characterData: true,
