@@ -1,8 +1,9 @@
 /* =====================================================================
    ANIMASI TANGAN di strip kategori TEKNO (gaya halaman Mac apple.com)
 
-   LAPTOP : tiap halaman di-refresh, begitu strip terlihat di layar, tangan muncul, "mengetuk" gambar
-            satu per satu. Setelah tangan beranjak, tulisan "Baru" ditinggalkan di bawah gambar itu.
+   LAPTOP : tiap halaman di-refresh, begitu strip terlihat di layar, tangan muncul dan mengetuk
+            SATU KALI saja pada gambar ke-3 (MacBook Pro), lalu meninggalkan tulisan "Baru" di bawahnya.
+            Hanya item ke-3 yang punya tag <em class="ap-baru"> di index.html.
    HP     : animasi jalan SATU KALI saja, saat strip pertama kali digeser. Tangan ikut bergerak mengikuti
             geseran, lalu mengetuk gambar yang terlihat dan meninggalkan tulisan "Baru". Sesudah itu
             geseran berikutnya tidak memunculkan tangan lagi (tangan dibuang dari halaman). Animasi baru
@@ -25,12 +26,12 @@
   if (!berTag().length) return;
 
   /* ---------- gambar tangan ---------- */
-  const TX = 46, TY = 3;                          /* posisi ujung jari telunjuk di dalam gambar (px) */
+  const TX = 51, TY = 2;                          /* posisi ujung jari telunjuk di dalam gambar (px) */
   const hand = document.createElement('div');
   hand.className = 'tangan';
   hand.setAttribute('aria-hidden', 'true');
   hand.innerHTML = `
-    <img src="images/tangan.png" alt="" width="78" height="146" draggable="false">
+    <img src="images/tangan.png?v=20261106c" alt="" width="88" height="146" draggable="false">
     <span class="tangan-riak"></span>`;
   bungkus.appendChild(hand);
   const riak = hand.querySelector('.tangan-riak');
@@ -193,8 +194,8 @@
     const s = strip.getBoundingClientRect();
     const terlihat = semuaItem().filter(a => { const r = a.getBoundingClientRect(), c = (r.left + r.right) / 2; return c > s.left + s.width * .14 && c < s.right - s.width * .14; });   /* hanya yang terlihat utuh */
     let target = terlihat.filter(a => tagDari(a));
-    if (!target.length && terlihat.length) target = [terlihat[Math.floor(terlihat.length / 2)]];   /* tak ada tag: tetap mengetuk satu gambar */
     target.forEach(sembunyikanTag);
+    let jatahTerpakai = target.length > 0;   /* item ke-3 belum terlihat: tangan pergi, animasi menunggu geseran berikutnya */
     try {
       for (let i = 0; i < target.length; i++) {
         const it = target[i], p = ujungJari(it);
@@ -207,9 +208,9 @@
       await gerak({ y: pos.y + 40, o: 0 }, 320);
     } catch (e) { if (e !== ABORT) console.error(e); }
     finally {                       /* selesai (atau gagal): matikan animasi HP selamanya, tulisan "Baru" tetap tampil */
-      hpSelesai = true; mode = 'diam';
+      hpSelesai = jatahTerpakai; mode = 'diam';
       clearTimeout(timerAkhir); hentikan(); pulihkanSemua();
-      hand.remove();
+      if (hpSelesai) hand.remove(); else { pos.o = 0; terapkan(); }
     }
   }
 

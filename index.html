@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- Dijalankan sebelum halaman digambar: tema + deteksi HP (anti-kedip) -->
   <script>
@@ -33,7 +33,7 @@
     window.aturSkala();
   })();
   </script>
-  <link rel="stylesheet" href="style.css?v=20261104f">
+  <link rel="stylesheet" href="style.css?v=20261106c">
 </head>
 <body>
 
@@ -204,16 +204,15 @@
     <!-- ============ TEKNO: judul + strip ikon geser (gaya halaman Mac Apple). Foto dari folder images/tekno/ ============ -->
     <section id="merek" class="ap-kepala" aria-labelledby="merekJudul">
       <div class="ap-wadah">
-        <h2 id="merekJudul" class="ap-judul-besar">TEKNO</h2>
         <div class="ap-strip-bungkus">
           <button type="button" id="apStripPrev" class="ap-strip-btn ap-strip-prev" aria-label="Geser ke kiri" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
           <ul id="apStrip" class="ap-strip" aria-label="Kategori laptop">
           <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon1.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>MacBook Neo</span></a></li>
           <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon2.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>MacBook Air</span></a></li>
           <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon3.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>MacBook Pro</span><em class="ap-baru">Baru</em></a></li>
-          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon4.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>iMac</span><em class="ap-baru">Baru</em></a></li>
-          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon5.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Mac mini</span><em class="ap-baru">Baru</em></a></li>
-          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon6.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Mac Studio</span><em class="ap-baru">Baru</em></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon4.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>iMac</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon5.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Mac mini</span></a></li>
+          <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon6.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Mac Studio</span></a></li>
           <li><a href="#" class="ap-strip-item" data-ke-toko data-kategori="macbook"><img src="images/tekno/ikon7.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Layar</span></a></li>
           <li><a href="#" class="ap-strip-item" data-goto="#katalogBaru"><img src="images/tekno/ikon8.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Bandingkan</span></a></li>
           <li><a href="#" class="ap-strip-item" data-wa target="_blank" rel="noopener"><img src="images/tekno/ikon9.png" alt="" width="340" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"><span>Bantu Pilih</span></a></li>
@@ -229,7 +228,6 @@
     <!-- ============ JELAJAHI JAJARANNYA: filter + kartu geser. 100% statis (folder images/katalog/), tidak terhubung database ============ -->
     <section id="katalogBaru" class="ap-abu ap-jelajah" aria-labelledby="jelajahJudul">
       <div class="ap-wadah">
-        <h2 id="jelajahJudul" class="ap-h2">Jelajahi jajarannya.</h2>
         <div class="ap-pill-bungkus">
           <div class="ap-pill" id="apPill" role="group" aria-label="Filter produk">
             <button type="button" class="ap-pill-btn" data-filter="all" aria-pressed="true">Semua produk</button>
@@ -247,7 +245,7 @@
               <p class="k-label" aria-hidden="true">&nbsp;</p>
               <h3 class="k-judul">MacBook Neo</h3>
               
-              <p class="k-desk">Keajaiban Mac dengan harga mengejutkan.</p>
+              <p class="k-desk">Keajaiban Mac dengan harga mengejutkan</p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="neo" aria-haspopup="dialog" aria-label="Selengkapnya: MacBook Neo">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli MacBook Neo">Beli</a>
@@ -259,9 +257,9 @@
             <div class="k-warna" aria-hidden="true"><span class="k-titik" style="--c:#c7d8e0" title="Biru langit"></span><span class="k-titik" style="--c:#e3e4e6" title="Perak"></span><span class="k-titik" style="--c:#f0e5d3" title="Starlight"></span><span class="k-titik" style="--c:#2e3641" title="Midnight"></span></div>
             <div class="k-isi">
               <p class="k-label" aria-hidden="true">&nbsp;</p>
-              <h3 class="k-judul">MacBook Air 13″ dan 15″</h3>
+              <h3 class="k-judul">MacBook Air</h3>
               
-              <p class="k-desk">Tipis. Cepat. Andal dan portabel.</p>
+              <p class="k-desk">Tipis. Cepat. Andal dan portabel</p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="air" aria-haspopup="dialog" aria-label="Selengkapnya: MacBook Air 13″ dan 15″">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli MacBook Air 13″ dan 15″">Beli</a>
@@ -272,10 +270,12 @@
             <div class="k-foto"><img src="images/katalog/foto3.png" alt="MacBook Pro 14″ dan 16″" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
             <div class="k-warna" aria-hidden="true"><span class="k-titik" style="--c:#2e2c2f" title="Space Black"></span><span class="k-titik" style="--c:#e3e4e6" title="Perak"></span></div>
             <div class="k-isi">
-              <p class="k-label">14″ baru dengan M6</p>
-              <h3 class="k-judul">MacBook Pro 14″ dan 16″</h3>
+              <p class="k-label">14 baru dengan M6</p>
+              <h3 class="k-judul">MacBook Pro</h3>
               
-              <p class="k-desk">Laptop bertenaga untuk tiap tipe pro.</p>
+              <p class="k-desk">Laptop bertenaga untuk tiap tipe pro
+
+              </p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="pro-m6" aria-haspopup="dialog" aria-label="Selengkapnya: MacBook Pro 14″ dan 16″">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli MacBook Pro 14″ dan 16″">Beli</a>
@@ -287,9 +287,9 @@
             <div class="k-warna" aria-hidden="true"><span class="k-titik" style="--c:#2e2c2f" title="Space Black"></span><span class="k-titik" style="--c:#e3e4e6" title="Perak"></span></div>
             <div class="k-isi">
               <p class="k-label">Baru</p>
-              <h3 class="k-judul">MacBook Pro 14″ dan 16″</h3>
+              <h3 class="k-judul">MacBook Pro 14</h3>
               <p class="k-sub">Layar PROLED XDR</p>
-              <p class="k-desk">MacBook Pro paling canggih dengan layar laptop terbaik di dunia.</p>
+              <p class="k-desk">MacBook Pro paling canggih dengan layar laptop terbaik di dunia</p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="pro-xdr" aria-haspopup="dialog" aria-label="Selengkapnya: MacBook Pro 14″ dan 16″">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli MacBook Pro 14″ dan 16″">Beli</a>
@@ -303,7 +303,7 @@
               <p class="k-label">Baru</p>
               <h3 class="k-judul">iMac</h3>
               
-              <p class="k-desk">Desktop lengkap untuk kreativitas dan produktivitas.</p>
+              <p class="k-desk">Desktop lengkap untuk kreativitas dan produktivitas</p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="imac" aria-haspopup="dialog" aria-label="Selengkapnya: iMac">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli iMac">Beli</a>
@@ -317,7 +317,7 @@
               <p class="k-label">Baru</p>
               <h3 class="k-judul">Mac mini</h3>
               
-              <p class="k-desk">Desktop Mac paling mini dan terjangkau.</p>
+              <p class="k-desk">Desktop Mac paling mini dan terjangkau</p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="mini" aria-haspopup="dialog" aria-label="Selengkapnya: Mac mini">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli Mac mini">Beli</a>
@@ -331,7 +331,7 @@
               <p class="k-label">Baru</p>
               <h3 class="k-judul">Mac Studio</h3>
               
-              <p class="k-desk">Performa dan konektivitas andal untuk profesional.</p>
+              <p class="k-desk">Performa dan konektivitas andal untuk profesional</p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="studio" aria-haspopup="dialog" aria-label="Selengkapnya: Mac Studio">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli Mac Studio">Beli</a>
@@ -345,7 +345,7 @@
               <p class="k-label" aria-hidden="true">&nbsp;</p>
               <h3 class="k-judul">Studio Display</h3>
               
-              <p class="k-desk">Layar Retina 5K yang sempurna untuk Mac.</p>
+              <p class="k-desk">Layar Retina 5K yang sempurna untuk Mac</p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="display" aria-haspopup="dialog" aria-label="Selengkapnya: Studio Display">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli Studio Display">Beli</a>
@@ -359,7 +359,7 @@
               <p class="k-label" aria-hidden="true">&nbsp;</p>
               <h3 class="k-judul">Studio Display XDR</h3>
               
-              <p class="k-desk">Layar Retina XDR 5K terbaik untuk alur kerja kreatif dan pro.</p>
+              <p class="k-desk">Layar Retina XDR 5K terbaik untuk alur kerja kreatif dan pro</p>
               <div class="k-aksi">
                 <button type="button" class="k-btn" data-info="display-xdr" aria-haspopup="dialog" aria-label="Selengkapnya: Studio Display XDR">Selengkapnya</button>
                 <a href="#" class="k-beli" data-ke-toko data-kategori="macbook" aria-label="Beli Studio Display XDR">Beli</a>
@@ -413,20 +413,20 @@
     <!-- ============ JELAJAHI DUNIA TEKNO (akordeon) ============ -->
     <section class="ap-dunia" aria-labelledby="duniaJudul">
       <div class="ap-wadah">
-        <h2 id="duniaJudul" class="ap-h2">Jelajahi dunia TEKNO.</h2>
+        <h2 id="duniaJudul" class="ap-h2">Jelajahi</h2>
         <a href="#lokasi" class="ap-link" data-goto="#lokasi">Lihat lokasi dan jam buka toko kami</a>
         <div class="ap-acc">
         <details open name="dunia">
           <summary><span>Mac dan iPhone</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
-          <div class="isi"><p>Menjawab panggilan atau pesan dari iPhone langsung pada Mac. Lihat dan kendalikan semua yang ada di iPhone Anda dari Mac Anda dengan Pencerminan iPhone dan Aktivitas Langsung. Gunakan Papan Klip Universal untuk menyalin gambar, video, atau teks dari iPhone, lalu tempelkan ke aplikasi lain di Mac yang berdekatan. Dan berkat iCloud, Anda bisa mengakses file dari iPhone atau Mac Anda. Dan masih banyak lagi.</p><img src="images/tekno/dunia1.png" alt="iPhone dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+          <div class="isi"><p>Menjawab panggilan atau pesan dari iPhone langsung pada Mac Lihat dan kendalikan semua yang ada di iPhone Anda dari Mac Anda dengan Pencerminan iPhone dan Aktivitas Langsung. Gunakan Papan Klip Universal untuk menyalin gambar video atau teks dari iPhone lalu tempelkan ke aplikasi lain di Mac yang berdekatan Dan berkat iCloud Anda bisa mengakses file dari iPhone atau Mac Anda Dan masih banyak lagi</p><img src="images/tekno/dunia1.png" alt="iPhone dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
         </details>
         <details name="dunia">
           <summary><span>Mac dan iPad</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
-          <div class="isi"><p>Buat sketsa di iPad dan gambar itu akan langsung muncul di Mac. Atau gunakan iPad Anda sebagai layar kedua, jadi Anda dapat bekerja di satu layar sambil melihat layar lain sebagai referensi. Anda bahkan dapat memulai sesuatu di iPad — seperti presentasi atau email — dan melanjutkannya di Mac.</p><img src="images/tekno/dunia2.png" alt="iPad dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+          <div class="isi"><p>Buat sketsa di iPad dan gambar itu akan langsung muncul di Mac Atau gunakan iPad Anda sebagai layar kedua jadi Anda dapat bekerja di satu layar sambil melihat layar lain sebagai referensi Anda bahkan dapat memulai sesuatu di iPad seperti presentasi atau email dan melanjutkannya di Mac</p><img src="images/tekno/dunia2.png" alt="iPad dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
         </details>
         <details name="dunia">
           <summary><span>Mac dan Apple Watch</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
-          <div class="isi"><p>Masuk secara otomatis ke Mac ketika Anda memakai Apple Watch dengan Buka Otomatis. Tidak perlu mengetik kata sandi.</p><img src="images/tekno/dunia3.png" alt="Apple Watch dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+          <div class="isi"><p>Masuk secara otomatis ke Mac ketika Anda memakai Apple Watch dengan Buka Otomatis Tidak perlu mengetik kata sandi</p><img src="images/tekno/dunia3.png" alt="Apple Watch dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
         </details>
         </div>
       </div>
@@ -435,10 +435,10 @@
     <!-- ============ BERALIH KE LAPTOP BARU ============ -->
     <section class="ap-abu ap-beralih" aria-labelledby="beralihJudul">
       <div class="ap-wadah">
-        <h2 id="beralihJudul" class="ap-h2">Upgrade laptop.</h2>
+        <h2 id="beralihJudul" class="ap-h2">Upgrade laptop</h2>
         <div class="ap-kartu-besar">
-          <h3>TEKNO bisa membantunya.</h3>
-          <p>Lihat betapa mudahnya menemukan laptop yang pas.</p>
+          <h3>TEKNO bisa membantunya</h3>
+          <p>Lihat betapa mudahnya menemukan laptop yang pas</p>
           <a href="#" class="ap-link" data-ke-toko data-kategori="all">Selengkapnya</a>
           <img src="images/tekno/upgrade.png" alt="MacBook menampilkan banyak aplikasi" width="962" height="700" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG">
         </div>
@@ -448,23 +448,23 @@
     <!-- ============ SESUAI KEBUTUHANMU (kartu putih geser) ============ -->
     <section class="ap-abu ap-esensial" aria-labelledby="esensialJudul">
       <div class="ap-wadah">
-        <h2 id="esensialJudul" class="ap-h2">Sesuai kebutuhanmu.</h2>
+        <h2 id="esensialJudul" class="ap-h2">Sesuai kebutuhanmu</h2>
         <div id="esensialList" class="ap-esensial-list" tabindex="0" aria-roledescription="carousel" aria-label="Pilihan sesuai kebutuhan, geser ke samping">
           <article class="ap-es-kartu">
             <h3>Kuliah &amp; Sekolah</h3>
-            <p>Laptop ringan dan awet untuk tugas, jurnal, dan kuliah daring.</p>
+            <p>Laptop ringan dan awet untuk tugas, jurnal, dan kuliah daring</p>
             <a href="#" class="ap-link" data-ke-toko data-kategori="vivobook">Selengkapnya</a>
             <img src="images/tekno/kebutuhan1.png" alt="" width="800" height="600" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG">
           </article>
           <article class="ap-es-kartu">
             <h3>Kerja &amp; Kantor</h3>
-            <p>Laptop tangguh dan andal untuk dokumen, rapat, dan kerja seharian.</p>
+            <p>Laptop tangguh dan andal untuk dokumen, rapat, dan kerja seharian</p>
             <a href="#" class="ap-link" data-ke-toko data-kategori="hpdell">Selengkapnya</a>
             <img src="images/tekno/kebutuhan2.png" alt="" width="800" height="600" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG">
           </article>
           <article class="ap-es-kartu">
             <h3>Gaming &amp; Desain</h3>
-            <p>Tenaga besar untuk game, editing, dan desain tanpa ngelag.</p>
+            <p>Tenaga besar untuk game, editing, dan desain tanpa ngelag</p>
             <a href="#" class="ap-link" data-ke-toko data-kategori="gaming">Selengkapnya</a>
             <img src="images/tekno/kebutuhan3.png" alt="" width="800" height="600" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG">
           </article>
@@ -479,9 +479,6 @@
     <!-- ============ KUNJUNGI TOKO KAMI ============ -->
     <section id="lokasi" class="blok lok-teks" aria-labelledby="lokasiJudul">
       <div class="wadah">
-        <p class="eyebrow">Lokasi</p>
-        <h2 id="lokasiJudul" class="lok-besar"><span class="lok-k">Datang.</span> <span class="lok-k">Lihat.</span> <span class="lok-k">Bawa pulang.</span></h2>
-        <p class="lok-isi"><b>Dua cabang, di Gowa dan Makassar.</b> Setiap unit sudah dicek sampai tuntas sebelum dijual. Coba langsung, tanya apa saja, lalu pulang dengan laptop yang pas untukmu.</p>
         <div id="galeriToko" class="galeri" aria-label="Galeri foto toko"></div>
       </div>
     </section>
@@ -491,16 +488,16 @@
   <section class="ap-dir" aria-label="Jelajahi TEKNO">
     <div class="ap-wadah">
       <div class="ap-dir-kepala">
-        <h2 class="ap-judul-besar">TEKNO</h2>
-        <p class="ap-dir-slogan">Laptop Makassar.</p>
+        <h2 class="ap-judul-besar"></h2>
+        <p class="ap-dir-slogan"></p>
       </div>
-      <p class="ap-dir-label">Jelajahi TEKNO</p>
+      <p class="ap-dir-label">Jelajahi</p>
       <ul class="ap-dir-besar" id="dirKategori"></ul>
       <ul class="ap-dir-kecil">
         <li><a href="#lokasi" data-goto="#lokasi">Lokasi &amp; Jam Buka</a></li>
         <li><a data-maps target="_blank" rel="noopener">Petunjuk Arah di Google Maps</a></li>
       </ul>
-      <p class="ap-dir-label ap-dir-label2">Lainnya dari TEKNO</p>
+      <p class="ap-dir-label ap-dir-label2">Lainnya</p>
       <ul class="ap-dir-kecil">
         <li><a data-wa target="_blank" rel="noopener">Dukungan</a></li>
         <li><a data-ig target="_blank" rel="noopener">Instagram</a></li>
@@ -514,9 +511,9 @@
   <footer class="apf">
     <div class="ap-wadah">
       <div class="apf-cat">
-        <p>Harga dan ketersediaan unit dapat berubah sewaktu-waktu. Hubungi toko untuk memastikan stok.</p>
-        <p>Semua unit sudah dicek sebelum dijual.</p>
-        <p>Sebagian unit adalah barang bekas. Lihat label kondisi pada setiap produk.</p>
+        <p>Harga dan ketersediaan unit dapat berubah sewaktu-waktu. Hubungi toko untuk memastikan stok</p>
+        <p>Semua unit sudah dicek sebelum dijual</p>
+        <p>Sebagian unit adalah barang bekas. Lihat label kondisi pada setiap produk</p>
       </div>
       <div class="apf-krum">
         <img class="logo-terang" src="images/logo.png" alt="TEKNOA.ID" width="816" height="95" loading="lazy">
@@ -547,9 +544,9 @@
             <li><a data-mail><span data-fill="email"></span></a></li>
           </ul></details>
       </nav>
-      <p class="apf-retail"><a data-maps target="_blank" rel="noopener">Temukan toko</a> di dekat Anda.</p>
+      <p class="apf-retail"><a data-maps target="_blank" rel="noopener">Temukan toko</a> di dekat Anda</p>
       <div class="apf-bawah">
-        <p>&copy; <span id="tahun"></span> Laptop Makassar. Semua hak dilindungi.</p>
+        <p>&copy; <span id="tahun"></span>Semua hak dilindungi</p>
         <p class="apf-tautan"><a href="#" data-ke-toko data-kategori="all">Toko</a><span aria-hidden="true">|</span><a href="#lokasi" data-goto="#lokasi">Lokasi</a><span aria-hidden="true">|</span><a data-wa target="_blank" rel="noopener">Dukungan</a></p>
       </div>
     </div>
@@ -604,22 +601,89 @@
       </div>
     </div>
     <div class="store-filter">
-      <label class="sr" for="storeKategori">Kategori</label>
-      <select id="storeKategori" class="field"></select>
       <label class="sr" for="storeCari">Cari di katalog</label>
       <input id="storeCari" type="search" class="field" placeholder="Cari merek, seri, spesifikasi" autocomplete="off">
     </div>
   </div>
 
   <div class="wadah store-isi">
-    <div class="kepala kepala-toko">
-      <p class="eyebrow">Katalog</p>
-      <h3 class="besar">Temukan laptop yang pas untukmu.</h3>
-      <p class="isi-abu"><b>Baru atau bekas,</b> semua unit dicek dan bergaransi toko. Pilih kategori, bandingkan spesifikasi, lalu checkout lewat WhatsApp.</p>
+    <div class="toko-tata">
+      <!-- HP / layar sempit: tombol untuk membuka sidebar filter -->
+      <button type="button" id="btnFilter" class="filter-toggle" aria-expanded="false" aria-controls="tokoSide">
+        <span>Filter<b id="filterJml" hidden></b></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-r"/></svg>
+      </button>
+
+      <div class="toko-wrap">
+        <!-- Sidebar filter: kategori, ketersediaan, rentang harga, label -->
+        <aside id="tokoSide" class="toko-side" aria-label="Filter produk">
+          <section class="fcard">
+            <div class="fhead">
+              <button type="button" class="fjudul" data-lipat aria-expanded="true">Kategori<i class="tri" aria-hidden="true"></i></button>
+              <button type="button" class="freset" data-reset="kat">Reset</button>
+            </div>
+            <ul class="flist fbody" id="fKategori"></ul>
+          </section>
+
+          <section class="fcard">
+            <div class="fhead">
+              <button type="button" class="fjudul" data-lipat aria-expanded="true">Ketersediaan<i class="tri" aria-hidden="true"></i></button>
+              <button type="button" class="freset" data-reset="stok">Reset</button>
+            </div>
+            <ul class="flist fbody" id="fStok">
+              <li><label class="fcek"><input type="checkbox" name="f-stok" value="ada"><span class="kotak" aria-hidden="true"></span><span class="teks">Tersedia</span><span class="jml" data-jml="ada">(0)</span></label></li>
+              <li><label class="fcek"><input type="checkbox" name="f-stok" value="habis"><span class="kotak" aria-hidden="true"></span><span class="teks">Tidak tersedia</span><span class="jml" data-jml="habis">(0)</span></label></li>
+            </ul>
+          </section>
+
+          <section class="fcard">
+            <div class="fhead">
+              <button type="button" class="fjudul" data-lipat aria-expanded="true">Harga<i class="tri" aria-hidden="true"></i></button>
+              <button type="button" class="freset" data-reset="harga">Reset</button>
+            </div>
+            <div class="fbody">
+              <div class="hslider">
+                <div class="trek"><div class="isi" id="hIsi"></div></div>
+                <input type="range" id="hRMin" aria-label="Harga minimum">
+                <input type="range" id="hRMax" aria-label="Harga maksimum">
+              </div>
+              <p class="hcap" id="hCap">Harga tertinggi</p>
+              <div class="hinput">
+                <input type="number" id="hMin" class="hpil" inputmode="numeric" aria-label="Harga minimum (Rp)">
+                <span class="strip" aria-hidden="true"></span>
+                <input type="number" id="hMax" class="hpil" inputmode="numeric" aria-label="Harga maksimum (Rp)">
+              </div>
+            </div>
+          </section>
+
+          <section class="fcard">
+            <div class="fhead">
+              <button type="button" class="fjudul" data-lipat aria-expanded="true">Label<i class="tri" aria-hidden="true"></i></button>
+              <button type="button" class="freset" data-reset="tag">Reset</button>
+            </div>
+            <ul class="flist fbody" id="fLabel"></ul>
+          </section>
+        </aside>
+
+        <!-- Area produk: jumlah, urutkan, grid 3 kolom -->
+        <div class="toko-main">
+          <div class="toko-bar">
+            <p id="status" class="status" aria-live="polite"></p>
+            <label class="urut"><span>Urutkan</span>
+              <select id="storeUrut" class="urut-sel">
+                <option value="terbaru">Terbaru</option>
+                <option value="terlaris">Terlaris</option>
+                <option value="termurah">Harga terendah</option>
+                <option value="termahal">Harga tertinggi</option>
+                <option value="nama">Nama A-Z</option>
+              </select>
+            </label>
+          </div>
+          <div id="grid" class="grid"></div>
+          <div id="more" class="more"></div>
+        </div>
+      </div>
     </div>
-    <p id="status" class="status" aria-live="polite"></p>
-    <div id="grid" class="grid"></div>
-    <div id="more" class="more"></div>
   </div>
 
   <button type="button" id="cartbar" class="cartbar" hidden>
@@ -731,10 +795,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="auth.js"></script>
-<script src="script.js?v=20261104f"></script>
+<script src="script.js?v=20261106c"></script>
 <script src="akun.js?v=20261104f"></script>
 <script src="navbar.js"></script>
-<script src="tangan.js"></script>
+<script src="tangan.js?v=20261106c"></script>
 <script>
 /* Teks "Datang. Lihat. Bawa pulang." muncul halus sekali, begitu terlihat di layar */
 (function () {

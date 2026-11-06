@@ -14,7 +14,7 @@ const CONFIG = { ...CONFIG_AWAL };
 let PRODUK = [];
 let BANNER = [];
 const DEVICE = window.LM_HP ? 'hp' : 'desktop';
-const PAGE = 8;
+const PAGE = 12;   /* kelipatan 3: grid 3 kolom di laptop */
 const MAKS_QTY = 5;
 const KEY_KERANJANG = 'lm_keranjang';
 const KEY_BANDING = 'lm_bandingkan';
@@ -378,8 +378,7 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-ke-toko]'); if (!el) return;
   e.preventDefault();
   const k = el.dataset.kategori;
-  storeSelect.value = el.dataset.tag ? 'tag:' + el.dataset.tag : (k && k !== 'all' ? 'kategori:' + k : 'all');
-  storeSelect.dispatchEvent(new Event('change'));
+  aturFilterDari(el.dataset.tag ? { tag: el.dataset.tag } : (k && k !== 'all' ? { kat: k } : {}));
   bukaToko();
 });
 /* Tautan gulir di dalam halaman (Lokasi, Merek) di luar sidebar */
@@ -421,8 +420,9 @@ window.addEventListener('load', perbaruiSemuaGeser);
 })();
 
 /* ---------- 6. Halaman Toko (#toko) ---------- */
-const storePage = $('#storePage'), storeSelect = $('#storeKategori'), storeCari = $('#storeCari');
-const state = { mode: 'all', key: null, q: '', semua: false };
+const storePage = $('#storePage'), storeCari = $('#storeCari');
+/* Filter sidebar: kat/tag = himpunan pilihan; stok = 'ada' | 'habis'; hMin/hMax = null (tanpa batas) */
+const state = { kat: new Set(), tag: new Set(), stok: new Set(), hMin: null, hMax: null, urut: 'terbaru', q: '', semua: false };
 let tokoDariDalam = false;
 
 function sinkronToko() {
@@ -446,27 +446,122 @@ $('#btnToko').addEventListener('click', bukaToko);
 $('#storeBack').addEventListener('click', tutupToko);
 $$('a[href="#toko"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); bukaToko(); }));
 
-storeSelect.innerHTML =
-  '<option value="all">Semua laptop</option>' +
-  '<optgroup label="Kategori">' + KATEGORI.map(k => `<option value="kategori:${k.id}">${esc(k.label)}</option>`).join('') + '</optgroup>' +
-  '<optgroup label="Label">' + Object.entries(LABEL_TAG).map(([id, t]) => `<option value="tag:${id}">${esc(t)}</option>`).join('') + '</optgroup>';
-storeSelect.addEventListener('change', () => {
-  const v = storeSelect.value;
-  if (v === 'all') { state.mode = 'all'; state.key = null; }
-  else { const [m, k] = v.split(':'); state.mode = m; state.key = k; }
-  state.semua = false; renderKatalog(); 
-});
 storeCari.addEventListener('input', () => { state.q = storeCari.value.trim(); state.semua = false; renderKatalog(); });
 
+/* ---- Sidebar filter (gaya referensi): kategori, ketersediaan, harga, label ---- */
+const fKat = $('#fKategori'), fTag = $('#fLabel'), fStok = $('#fStok');
+const hRMin = $('#hRMin'), hRMax = $('#hRMax'), hMin = $('#hMin'), hMax = $('#hMax');
+let HARGA_BATAS = [0, 0];
+const cek = (grup, nilai, teks, on, jml) => `<li><label class="fcek"><input type="checkbox" name="${grup}" value="${esc(nilai)}"${on ? ' checked' : ''}><span class="kotak" aria-hidden="true"></span><span class="teks">${esc(teks)}</span>${jml == null ? '' : `<span class="jml">(${jml})</span>`}</label></li>`;
+
+function renderFilter() {
+  const sebelum = fKat.scrollTop;
+  fKat.innerHTML = cek('f-kat', 'all', 'Semua', !state.kat.size, PRODUK.length)
+    + KATEGORI.map(k => cek('f-kat', k.id, k.label, state.kat.has(k.id), PRODUK.filter(p => p.kategori === k.id).length)).join('');
+  fTag.innerHTML = Object.entries(LABEL_TAG).map(([id, t]) => cek('f-tag', id, t, state.tag.has(id), PRODUK.filter(p => p.tags.includes(id)).length)).join('');
+  $$('input', fStok).forEach(i => { i.checked = state.stok.has(i.value); });
+  $('[data-jml="ada"]').textContent = `(${PRODUK.filter(p => p.tersedia).length})`;
+  $('[data-jml="habis"]').textContent = `(${PRODUK.filter(p => !p.tersedia).length})`;
+  fKat.scrollTop = sebelum;
+  /* Rentang harga dari data produk asli (Rupiah) */
+  const hrg = PRODUK.map(p => p.harga).filter(h => h > 0);
+  const lo = hrg.length ? Math.floor(Math.min(...hrg) / 10000) * 10000 : 0;
+  const hi = hrg.length ? Math.ceil(Math.max(...hrg) / 10000) * 10000 : 0;
+  HARGA_BATAS = [lo, hi];
+  [hRMin, hRMax].forEach(r => { r.min = lo; r.max = hi; r.step = 10000; r.disabled = lo === hi; });
+  hMin.placeholder = String(lo); hMax.placeholder = String(hi);
+  $('#hCap').textContent = hi ? `Harga tertinggi ${rupiah(hi)}` : 'Harga tertinggi';
+  sinkronHarga();
+  sinkronJmlFilter();
+}
+function sinkronHarga() {
+  const [lo, hi] = HARGA_BATAS;
+  const a = state.hMin == null ? lo : state.hMin, b = state.hMax == null ? hi : state.hMax;
+  hRMin.value = a; hRMax.value = b;
+  if (document.activeElement !== hMin) hMin.value = state.hMin == null ? '' : state.hMin;
+  if (document.activeElement !== hMax) hMax.value = state.hMax == null ? '' : state.hMax;
+  const rentang = hi - lo || 1;
+  const isi = $('#hIsi'); isi.style.left = ((a - lo) / rentang * 100) + '%'; isi.style.right = (100 - (b - lo) / rentang * 100) + '%';
+}
+function sinkronCek() {   /* sinkron centang tanpa menggambar ulang (fokus keyboard tetap) */
+  $$('input', fKat).forEach(i => { i.checked = i.value === 'all' ? !state.kat.size : state.kat.has(i.value); });
+  $$('input', fTag).forEach(i => { i.checked = state.tag.has(i.value); });
+  $$('input', fStok).forEach(i => { i.checked = state.stok.has(i.value); });
+}
+function sinkronJmlFilter() {
+  const n = state.kat.size + state.tag.size + state.stok.size + (state.hMin != null || state.hMax != null ? 1 : 0);
+  const b = $('#filterJml'); b.hidden = !n; b.textContent = n ? ` (${n})` : '';
+}
+function terapkanFilter() { state.semua = false; sinkronCek(); sinkronHarga(); sinkronJmlFilter(); renderKatalog(); }
+function aturFilterDari({ kat, tag } = {}) {
+  state.kat = new Set(kat ? [kat] : []); state.tag = new Set(tag ? [tag] : []);
+  state.stok = new Set(); state.hMin = state.hMax = null; state.q = ''; storeCari.value = '';
+  state.semua = false; renderFilter(); renderKatalog();
+}
+
+fKat.addEventListener('change', e => {
+  const i = e.target.closest('input'); if (!i) return;
+  if (i.value === 'all') state.kat.clear();
+  else if (i.checked) state.kat.add(i.value); else state.kat.delete(i.value);
+  terapkanFilter();
+});
+fTag.addEventListener('change', e => {
+  const i = e.target.closest('input'); if (!i) return;
+  if (i.checked) state.tag.add(i.value); else state.tag.delete(i.value);
+  terapkanFilter();
+});
+fStok.addEventListener('change', e => {
+  const i = e.target.closest('input'); if (!i) return;
+  if (i.checked) state.stok.add(i.value); else state.stok.delete(i.value);
+  terapkanFilter();
+});
+function hargaDariInput(el, kunci) {
+  const v = el.value.trim(); const n = v === '' ? null : Math.max(0, Number(v));
+  state[kunci] = (n == null || isNaN(n)) ? null : n;
+  terapkanFilter();
+}
+hMin.addEventListener('input', () => hargaDariInput(hMin, 'hMin'));
+hMax.addEventListener('input', () => hargaDariInput(hMax, 'hMax'));
+hRMin.addEventListener('input', () => { const v = Math.min(Number(hRMin.value), Number(hRMax.value)); state.hMin = v <= HARGA_BATAS[0] ? null : v; hMin.value = state.hMin ?? ''; terapkanFilter(); });
+hRMax.addEventListener('input', () => { const v = Math.max(Number(hRMax.value), Number(hRMin.value)); state.hMax = v >= HARGA_BATAS[1] ? null : v; hMax.value = state.hMax ?? ''; terapkanFilter(); });
+
+$('#tokoSide').addEventListener('click', e => {
+  const r = e.target.closest('[data-reset]');
+  if (r) {
+    const k = r.dataset.reset;
+    if (k === 'kat') state.kat.clear(); else if (k === 'tag') state.tag.clear(); else if (k === 'stok') state.stok.clear();
+    else { state.hMin = state.hMax = null; hMin.value = hMax.value = ''; }
+    terapkanFilter(); return;
+  }
+  const l = e.target.closest('[data-lipat]');
+  if (l) { const buka = l.getAttribute('aria-expanded') !== 'true'; l.setAttribute('aria-expanded', buka); l.closest('.fcard').classList.toggle('lipat', !buka); }
+});
+$('#btnFilter').addEventListener('click', () => {
+  const buka = $('#tokoSide').classList.toggle('buka');
+  $('#btnFilter').setAttribute('aria-expanded', buka);
+});
+$('#storeUrut').addEventListener('change', e => { state.urut = e.target.value; state.semua = false; renderKatalog(); });
+
 function daftarTerfilter() {
-  let l = PRODUK;
-  if (state.mode === 'kategori') l = l.filter(p => p.kategori === state.key);
-  else if (state.mode === 'tag') l = l.filter(p => p.tags.includes(state.key));
+  let l = PRODUK.filter(p => {
+    if (state.kat.size && !state.kat.has(p.kategori)) return false;
+    if (state.tag.size && !p.tags.some(t => state.tag.has(t))) return false;
+    if (state.stok.size === 1 && state.stok.has('ada') !== !!p.tersedia) return false;
+    if (state.hMin != null && p.harga < state.hMin) return false;
+    if (state.hMax != null && p.harga > state.hMax) return false;
+    return true;
+  });
   if (state.q) {
     const q = state.q.toLowerCase();
     l = l.filter(p => [namaLengkap(p), p.kategori, ...Object.values(p.spek || {})].join(' ').toLowerCase().includes(q));
   }
-  return l;
+  const u = state.urut, urut = {
+    terlaris: (a, b) => (b.tags.includes('terlaris') - a.tags.includes('terlaris')),
+    termurah: (a, b) => a.harga - b.harga,
+    termahal: (a, b) => b.harga - a.harga,
+    nama: (a, b) => namaLengkap(a).localeCompare(namaLengkap(b), 'id')
+  }[u];
+  return urut ? [...l].sort(urut) : l;   /* "terbaru" = urutan dari database (created_at menurun) */
 }
 function rincianSpek(p) {
   const sp = p.spek || {};
@@ -481,20 +576,20 @@ function kartuProduk(p) {
   const hemat = p.hargaNormal && p.hargaNormal > p.harga ? p.hargaNormal - p.harga : 0;
   return `
   <article class="kartu">
-    <div class="kartu-foto">
+    <div class="kartu-foto" data-open="${esc(p.id)}">
       <img src="${esc(p.foto)}" alt="${esc(nama)}" loading="lazy" ${fotoErr}>
       ${lencana ? `<div class="lencana">${lencana}</div>` : ''}
       ${modeUser() ? `<button type="button" class="kartu-fav${adaFav(p.id) ? ' aktif' : ''}" data-fav="${esc(p.id)}" aria-pressed="${adaFav(p.id)}" aria-label="Simpan ${esc(nama)} ke favorit"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></button>` : ''}
     </div>
     <div class="kartu-isi">
-      <h3>${esc(nama)}</h3>
+      <h3 data-open="${esc(p.id)}">${esc(nama)}</h3>
       <p class="ringkas">${ringkas}</p>
       <details class="spec-box">
         <summary>Spesifikasi lengkap<svg viewBox="0 0 24 24"><use href="#i-chev-r"/></svg></summary>
         <dl>${rincianSpek(p) || '<p class="ringkas">Belum ada rincian.</p>'}</dl>
       </details>
       <p class="harga">${rupiah(p.harga)}${hemat ? `<s>${rupiah(p.hargaNormal)}</s>` : ''}</p>
-      ${hemat ? `<p class="hemat">Hemat ${rupiah(hemat)}</p>` : ''}
+      ${hemat ? `<p class="hemat">Hemat ${rupiah(hemat)}</p>` : '<p class="hemat" aria-hidden="true">&nbsp;</p>'}
       <div class="kartu-aksi">
         <button type="button" class="btn btn-kecil" data-tambah="${esc(p.id)}" aria-label="Tambah ${esc(nama)} ke keranjang" ${p.tersedia ? '' : 'disabled'}>${p.tersedia ? '+ Keranjang' : 'Tidak tersedia'}</button>
         <button type="button" class="btn btn-kecil" data-open="${esc(p.id)}">Lihat</button>
@@ -715,7 +810,7 @@ async function muatSemua() {
   hasil.forEach(h => { if (h.status === 'rejected') console.error('Gagal memuat dari Supabase:', h.reason); });
   gagalMemuat = hasil[0].status === 'rejected';
   sedangMemuat = false; terakhirMuat = Date.now();
-  renderKatalog(); terapkanConfig(); renderHero(); renderSliderToko(); isiStatistik(); bersihkanKeranjang();
+  renderFilter(); renderKatalog(); terapkanConfig(); renderHero(); renderSliderToko(); isiStatistik(); bersihkanKeranjang();
   tutupSplash();
 }
 document.addEventListener('visibilitychange', () => {
