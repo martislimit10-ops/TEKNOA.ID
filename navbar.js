@@ -1,4 +1,36 @@
 /* =====================================================================
+   SINKRON STATUS LOGIN -> html[data-login="1"] (dipakai CSS di index.html)
+   Membaca status dari tampilan header (foto profil / tombol Akun), jadi tidak perlu mengubah auth.js.
+   ===================================================================== */
+(function () {
+  'use strict';
+  const d = document.documentElement;
+  const sudahLogin = () => {
+    const av = document.querySelector('.ikon-akun .avatar');
+    const nav = document.getElementById('navAkun');
+    const au = document.getElementById('authBtns');
+    let ada = false;
+    if (av && !av.hidden) {
+      ada = !!(av.querySelector('img') || av.textContent.trim() ||
+        (av.style && av.style.backgroundImage) || getComputedStyle(av).backgroundImage !== 'none');
+    }
+    return ada || !!(nav && !nav.hidden) || !!(au && au.hidden);
+  };
+  const sinkron = () => {
+    const v = sudahLogin() ? '1' : '0';
+    if (d.getAttribute('data-login') !== v) d.setAttribute('data-login', v);
+  };
+  sinkron();
+  const h = document.querySelector('.hdr');
+  if (h && window.MutationObserver) {
+    new MutationObserver(sinkron).observe(h, { subtree: true, childList: true, characterData: true,
+      attributes: true, attributeFilter: ['hidden', 'class', 'style', 'src'] });
+  }
+  ['load', 'pageshow', 'focus'].forEach(e => window.addEventListener(e, sinkron));
+  setTimeout(sinkron, 500); setTimeout(sinkron, 1500); setTimeout(sinkron, 3500);
+})();
+
+/* =====================================================================
    NAVBAR LAPTOP GAYA apple.com - panel popup katalog
    Klik item katalog (tombol bertanda data-mega) -> panel turun dari bar.
    Tutup: klik item yang sama, klik area gelap, tombol Esc, gulir jauh, atau klik tautan di panel.
