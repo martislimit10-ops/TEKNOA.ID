@@ -20,14 +20,19 @@
   hand.innerHTML = `
     <img src="images/tangan.png?v=20261106c" alt="" width="88" height="146" draggable="false">
     <span class="tangan-riak"></span>`;
-  bungkus.appendChild(hand);
+  const klip = document.createElement('div');          /* "jendela" tangan: apa pun di luar area strip terpotong */
+  klip.className = 'tangan-klip';
+  klip.appendChild(hand);
+  bungkus.appendChild(klip);
+  if (!kurangGerak()) bungkus.classList.add('ap-ruang-tangan');   /* sediakan ruang kosong di bawah tulisan "Baru" */
   const riak = hand.querySelector('.tangan-riak');
 
   /* ---------- mesin gerak ---------- */
   const ABORT = 'batal';
   const EASE = 'cubic-bezier(.45,.05,.25,1)';
   const TF = p => `translate(${p.x}px,${p.y}px) rotate(${p.r}deg) scale(${p.s})`;
-  const pos = { x: 0, y: 0, r: 0, s: 1, o: 0 };
+  const S0 = .6;          /* ukuran dasar tangan (lebih kecil) */
+  const pos = { x: 0, y: 0, r: 0, s: S0, o: 0 };
   let token = 0;          /* naik setiap kali urutan lama harus dibatalkan */
   let cur = null;         /* animasi WAAPI yang sedang jalan */
 
@@ -72,17 +77,23 @@
   function pulihkanSemua() { berTag().forEach(it => { const b = tagDari(it); b.classList.remove('tunggu'); }); }
 
   /* ---------- bantuan posisi ---------- */
+  const bawah = () => bungkus.getBoundingClientRect().height + 6;   /* tangan bersembunyi tepat di bawah tepi klip */
   function ujungJari(item, fx, fy) {
     const img = item.querySelector('img') || item;
     const r = img.getBoundingClientRect(), b = bungkus.getBoundingClientRect();
     return { x: r.left - b.left + r.width * (fx ?? .5) - TX, y: r.top - b.top + r.height * (fy ?? .62) - TY };
   }
-  async function ketuk(item) {
+  function ujungTag(item) {                   /* ujung jari tepat di tulisan "Baru" (bukan di ikon laptop) */
+    const t = tagDari(item) || item, r = t.getBoundingClientRect(), b = bungkus.getBoundingClientRect();
+    return { x: r.left - b.left + r.width * .5 - TX, y: r.top - b.top + r.height * .62 - TY };
+  }
+  async function ketuk(item, saatTekan) {
     item.classList.add('tekan');
     riak.animate([{ opacity: .75, transform: 'scale(.25)' }, { opacity: 0, transform: 'scale(1.7)' }], { duration: 560, easing: 'ease-out' });
     try {
-      await gerak({ s: .86 }, 110, 'ease-out');
-      await gerak({ s: 1 }, 170, 'ease-in-out');
+      await gerak({ s: S0 * .86 }, 110, 'ease-out');
+      if (saatTekan) saatTekan();                 /* tulisan "Baru" langsung muncul saat jari menekan */
+      await gerak({ s: S0 }, 170, 'ease-in-out');
     } finally { item.classList.remove('tekan'); }
   }
   async function bawaKeLayar(item) {          /* strip meluber: geser dulu sampai item terlihat */
@@ -104,23 +115,21 @@
     const items = berTag();
     hand.classList.remove('ikut');
     items.forEach(sembunyikanTag);
-    const awal = ujungJari(items[0]);
-    Object.assign(pos, { x: awal.x + 110, y: awal.y + 130, r: 14, s: 1, o: 0 }); terapkan();
+    const awal = ujungTag(items[0]);        /* muncul dari bawah tulisan "Baru" (dari dalam kartu), bukan dari luar */
+    Object.assign(pos, { x: awal.x, y: bawah(), r: 0, s: S0, o: 1 }); terapkan();
     try {
       await tunggu(300);
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
         await bawaKeLayar(it);
-        const p = ujungJari(it);
-        await gerak({ x: p.x, y: p.y, r: -6, o: 1 }, i === 0 ? 950 : 620);
-        await ketuk(it);
-        await gerak({ x: p.x + 30, y: p.y + 44, r: 8 }, 170, 'ease-in');   /* tangan beranjak ... */
-        tulisTag(it);                                                          /* ... dan meninggalkan tulisan */
+        const p = ujungTag(it);
+        await gerak({ x: p.x, y: p.y, r: -4, s: S0, o: 1 }, i === 0 ? 800 : 620);
+        await ketuk(it, () => tulisTag(it));
+        await gerak({ x: p.x, y: bawah(), r: 0 }, 380, 'ease-in');   /* tangan turun lagi ke dalam */
       }
-      await tunggu(750);
-      await gerak({ y: pos.y + 44, r: 12, o: 0 }, 420);
+      await tunggu(300);
       desktopSelesai = true;
-    } catch (e) { if (e !== ABORT) console.error(e); pulihkanSemua(); }
+    } catch (e) { if (e !== ABORT) console.error(e); pulihkanSemua(); pos.o = 0; terapkan(); }
   }
 
   /* Mulai begitu strip terlihat (halaman bisa dibuka di posisi atas, strip ada di bawah hero) dan layar muat sudah hilang */
@@ -168,20 +177,18 @@
     let target = terlihat.filter(a => tagDari(a)).slice(0, 1);   /* SATU target saja */
     target.forEach(sembunyikanTag);
     if (target.length) {                                          /* tangan muncul dekat target, bukan dari posisi jari */
-      const a0 = ujungJari(target[0]);
-      Object.assign(pos, { x: a0.x + 70, y: a0.y + 120, r: 12, s: 1, o: 0 }); terapkan();
+      const a0 = ujungTag(target[0]);
+      Object.assign(pos, { x: a0.x, y: bawah(), r: 0, s: S0, o: 1 }); terapkan();
     }
     let jatahTerpakai = target.length > 0;   /* item ke-3 belum terlihat: tangan pergi, animasi menunggu geseran berikutnya */
     try {
       for (let i = 0; i < target.length; i++) {
-        const it = target[i], p = ujungJari(it);
-        await gerak({ x: p.x, y: p.y, r: -5, s: 1, o: 1 }, 520);
-        await ketuk(it);
-        await gerak({ x: p.x + 26, y: p.y + 38, r: 8 }, 160, 'ease-in');
-        tulisTag(it);
+        const it = target[i], p = ujungTag(it);
+        await gerak({ x: p.x, y: p.y, r: -4, s: S0, o: 1 }, 520);
+        await ketuk(it, () => tulisTag(it));
+        await gerak({ x: p.x, y: bawah(), r: 0 }, 340, 'ease-in');
       }
-      await tunggu(520);
-      await gerak({ y: pos.y + 40, o: 0 }, 320);
+      await tunggu(200);
     } catch (e) { if (e !== ABORT) console.error(e); }
     finally {                       /* selesai (atau gagal): matikan animasi HP selamanya, tulisan "Baru" tetap tampil */
       hpSelesai = jatahTerpakai; mode = 'diam';

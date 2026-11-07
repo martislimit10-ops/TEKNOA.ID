@@ -494,7 +494,7 @@ html[data-tema="gelap"] .nav-tema{color:#fff}
 .ap-baru{position:absolute;left:0;right:0;top:100%;margin-top:6px;text-align:center;font-style:normal;font-size:12px;font-weight:600;line-height:1.2;color:var(--ap-oranye)}
 @media (min-width:900px){.ap-baru{font-size:13px;margin-top:8px}}
 .ap-baru.tunggu{opacity:0}
-.ap-baru.tulis{animation:tulisBaru .65s cubic-bezier(.35,.55,.3,1) both}
+.ap-baru.tulis{animation:tulisBaru .3s cubic-bezier(.35,.55,.3,1) both}
 @keyframes tulisBaru{0%{opacity:1;clip-path:inset(-6px 100% -6px -2px);text-shadow:0 0 10px color-mix(in srgb,var(--ap-oranye) 55%,transparent)}100%{opacity:1;clip-path:inset(-6px -4px -6px -2px);text-shadow:0 0 0 transparent}}
 .ap-strip-item img{transition:transform .16s ease,opacity .15s}
 .ap-strip-item.tekan img{transform:scale(.93)}
@@ -1134,3 +1134,12 @@ html[data-device="hp"] .urut span{display:none}
 /* Harga & tombol sejajar antar kartu dalam satu baris (seperti referensi) */
 .kartu .hemat{min-height:1.5em;margin:0}
 html[data-device="hp"] .kartu .harga{min-height:46px}
+
+/* ---------- ruang & jendela tangan (tangan.js) ---------- */
+.tangan-klip{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:6}
+.ap-strip-bungkus.ap-ruang-tangan .ap-strip{padding-bottom:92px}
+@media (min-width:900px){.ap-strip-bungkus.ap-ruang-tangan .ap-strip{padding-bottom:100px}}
+
+/* tulisan "Baru" statis (tanpa animasi), dipasang manual di HTML */
+.ap-baru-diam{position:absolute;left:0;right:0;top:100%;margin-top:6px;text-align:center;font-style:normal;font-size:12px;font-weight:600;line-height:1.2;color:var(--ap-oranye)}
+@media (min-width:900px){.ap-baru-diam{font-size:13px;margin-top:8px}}
