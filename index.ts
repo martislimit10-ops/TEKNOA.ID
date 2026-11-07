@@ -1,15 +1,3 @@
-// =====================================================================
-// Edge Function "cari-ai" - Pencarian laptop bahasa alami dengan Gemini
-// Kunci Gemini disimpan sebagai SECRET di server, TIDAK ada di website.
-//
-// Deploy (pilih salah satu):
-//  A. Dashboard: Supabase > Edge Functions > Deploy a new function >
-//     nama "cari-ai" > tempel isi file ini > Deploy.
-//  B. CLI: supabase functions deploy cari-ai
-// Lalu: Edge Functions > Secrets > tambah  GEMINI_API_KEY = (kunci dari
-//       https://aistudio.google.com/apikey)
-// Opsional secret: GEMINI_MODEL (bawaan: gemini-2.5-flash)
-// =====================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CORS = {

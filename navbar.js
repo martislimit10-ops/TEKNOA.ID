@@ -1,7 +1,3 @@
-/* =====================================================================
-   SINKRON STATUS LOGIN -> html[data-login="1"] (dipakai CSS di index.html)
-   Membaca status dari tampilan header (foto profil / tombol Akun), jadi tidak perlu mengubah auth.js.
-   ===================================================================== */
 (function () {
   'use strict';
   const d = document.documentElement;

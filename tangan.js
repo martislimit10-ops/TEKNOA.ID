@@ -1,17 +1,4 @@
-/* =====================================================================
-   ANIMASI TANGAN di strip kategori TEKNO (gaya halaman Mac apple.com)
 
-   LAPTOP : tiap halaman di-refresh, begitu strip terlihat di layar, tangan muncul dan mengetuk
-            SATU KALI saja pada gambar ke-3 (MacBook Pro), lalu meninggalkan tulisan "Baru" di bawahnya.
-            Hanya item ke-3 yang punya tag <em class="ap-baru"> di index.html.
-   HP     : animasi jalan SATU KALI saja, saat strip pertama kali digeser. Tangan ikut bergerak mengikuti
-            geseran, lalu mengetuk gambar yang terlihat dan meninggalkan tulisan "Baru". Sesudah itu
-            geseran berikutnya tidak memunculkan tangan lagi (tangan dibuang dari halaman). Animasi baru
-            bisa terlihat lagi setelah halaman di-refresh.
-
-   Gambar tangan: images/tangan.png (PNG transparan, ujung telunjuk di bagian atas; ganti file ini untuk mengganti tangan). Tag "Baru" = elemen <em class="ap-baru"> di index.html.
-   Tanpa JS / dengan "kurangi gerakan", tulisan "Baru" tetap tampil biasa.
-   ===================================================================== */
 (function () {
   'use strict';
   const strip = document.getElementById('apStrip');

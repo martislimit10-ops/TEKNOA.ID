@@ -1,19 +1,3 @@
-/* =====================================================================
-   LAPTOP MAKASSAR - LOGIN GOOGLE (dipakai index.html & admin.html)
-   Muat SETELAH supabase-config.js dan SEBELUM script.js / admin.js.
-
-   Satu pintu login untuk semua orang. Peran ditentukan database:
-   email yang ada di tabel admin_emails = admin, selain itu = user biasa.
-   (lihat migrasi.sql: fungsi public.is_admin()).
-   Pilihan login: Google (One Tap), Facebook, Email (kode), Apple, Microsoft, ChatGPT.
-   Admin HANYA bisa masuk lewat Google -- dijaga di database, bukan di sini.
-
-   Cara kerja:
-   1. Popup pilih akun Google (Google One Tap) -> token dikirim ke Supabase
-      lewat signInWithIdToken.
-   2. Cadangan bila popup tidak muncul / GOOGLE_CLIENT_ID kosong:
-      tombol resmi Google, atau login lewat halaman Google (OAuth redirect).
-   ===================================================================== */
 const LMAuth = (() => {
   const KEY_TANDA = 'lm_login_baru';
   let gsiSiap = false, noncePolos = '';

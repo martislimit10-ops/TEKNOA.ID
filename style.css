@@ -1,8 +1,3 @@
-/* =====================================================================
-   LAPTOP MAKASSAR - STYLE (vanilla CSS, tanpa framework)
-   Prinsip: HP dikunci kolom 480px di tengah; laptop/PC selebar layar.
-   Semua gaya khusus laptop diawali html[data-device="desktop"].
-   ===================================================================== */
 :root{
   --bg:#fafafa; --surface:#fff; --surface-2:#f3f4f6;
   --ink:#111827; --ink-2:#4b5563; --ink-3:#6b7280;

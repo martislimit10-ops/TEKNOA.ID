@@ -1,15 +1,3 @@
-/* =====================================================================
-   LAPTOP MAKASSAR - SCRIPT HALAMAN PENGUNJUNG
-   Butuh (urutan): supabase-js -> supabase-config.js -> script.js
-   Data (produk, info toko, slider) semua dari Supabase + realtime.
-   Daftar isi:
-   1. Keadaan & pembantu     5. Foto toko + carousel katalog
-   2. Info toko              6. Halaman Toko                  10. Data Supabase
-   3. Tema & sidebar         7. Keranjang                     11. Mulai
-   4. Hero slider            8. Detail produk
-   ===================================================================== */
-
-/* ---------- 1. Keadaan & pembantu ---------- */
 const CONFIG = { ...CONFIG_AWAL };
 let PRODUK = [];
 let BANNER = [];

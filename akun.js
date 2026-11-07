@@ -1,15 +1,3 @@
-/* =====================================================================
-   TEKNOA.ID - AREA AKUN USER (dimuat SETELAH script.js)
-   Isi dialog "Akun saya": Profil, Favorit, Riwayat, Perbandingan tersimpan, Notifikasi, Pengaturan.
-   Data di Supabase (tabel profiles, view_history, saved_comparisons, notifications, wishlist);
-   isolasi antar-user dijaga RLS (lihat sql/02-fitur-user.sql), bukan oleh kode ini.
-   Memakai global dari script.js: USER, FAV, CMP, esc, rupiah, cariProduk, namaLengkap, toast, dst.
-
-   [REVISI-7]
-   - Enam tab sekarang berupa slider: klik tab -> panel bergeser mulus (CSS: .akun-track).
-   - Tidak ada lagi pesan error database. Bila tabel Supabase belum ada / tidak bisa dihubungi,
-     akun.js diam-diam memakai penyimpanan lokal perangkat (localStorage) sebagai cadangan.
-   ===================================================================== */
 (function () {
   'use strict';
   const S = { profil: null, riwayat: [], tersimpan: [], notif: [], tab: 'profil', lokal: false, terakhir: 0 };
