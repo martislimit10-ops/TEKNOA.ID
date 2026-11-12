@@ -45,7 +45,7 @@
     ['resize', 'orientationchange', 'pageshow'].forEach(function (n) { window.addEventListener(n, window.aturSkala); });
   })();
   </script>
-  <link rel="stylesheet" href="style.css?v=20261106c">
+  <link rel="stylesheet" href="style.css?v=20261112a">
   <style id="perbaikan-akun">
   /* Atribut html[data-login="1"] dipasang navbar.js saat user login */
   /* LAPTOP: tanpa ikon orang & foto. "Log in" jadi "Akun". Kanan cuma keranjang */
@@ -263,9 +263,17 @@
     </section>
 
     <!-- ============ JELAJAHI JAJARANNYA: filter + kartu geser. 100% statis (folder images/katalog/), tidak terhubung database ============ -->
-     
-
-    
+    <section id="katalogBaru" class="ap-jelajah" aria-label="Jelajahi produk">
+      <div class="ap-wadah">
+        <div class="ap-pill-bungkus">
+          <div class="ap-pill" role="group" aria-label="Filter produk">
+            <button type="button" class="ap-pill-btn" data-filter="all" aria-pressed="true">Semua produk</button>
+            <button type="button" class="ap-pill-btn" data-filter="laptop" aria-pressed="false">Laptop</button>
+            <button type="button" class="ap-pill-btn" data-filter="desktop" aria-pressed="false">Desktop</button>
+            <button type="button" class="ap-pill-btn" data-filter="display" aria-pressed="false">Layar</button>
+          </div>
+          <button type="button" id="apPillNext" class="ap-pill-next" aria-label="Filter berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
         <div id="katalogList" class="ap-kartu-list" tabindex="0" aria-roledescription="carousel" aria-label="Daftar produk, geser ke samping">
           <article class="k-kartu" data-grup="laptop">
             <div class="k-foto"><img src="images/katalog/foto1.png" alt="MacBook Neo" width="1200" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
@@ -439,25 +447,10 @@
       </div>
     </section>
 
-    <!-- ============ JELAJAHI DUNIA TEKNO (akordeon) ============ -->
-    <section class="ap-dunia" aria-labelledby="duniaJudul">
-      <div class="ap-wadah">
-        <h2 id="duniaJudul" class="ap-h2">Jelajahi</h2>
-        <a href="#lokasi" class="ap-link" data-goto="#lokasi">Lihat lokasi dan jam buka toko kami</a>
-        <div class="ap-acc">
-        <details open name="dunia">
-          <summary><span>Mac dan iPhone</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
-          <div class="isi"><p>Menjawab panggilan atau pesan dari iPhone langsung pada Mac Lihat dan kendalikan semua yang ada di iPhone Anda dari Mac Anda dengan Pencerminan iPhone dan Aktivitas Langsung. Gunakan Papan Klip Universal untuk menyalin gambar video atau teks dari iPhone lalu tempelkan ke aplikasi lain di Mac yang berdekatan Dan berkat iCloud Anda bisa mengakses file dari iPhone atau Mac Anda Dan masih banyak lagi</p><img src="images/tekno/dunia1.png" alt="iPhone dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
-        </details>
-        <details name="dunia">
-          <summary><span>Mac dan iPad</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
-          <div class="isi"><p>Buat sketsa di iPad dan gambar itu akan langsung muncul di Mac Atau gunakan iPad Anda sebagai layar kedua jadi Anda dapat bekerja di satu layar sambil melihat layar lain sebagai referensi Anda bahkan dapat memulai sesuatu di iPad seperti presentasi atau email dan melanjutkannya di Mac</p><img src="images/tekno/dunia2.png" alt="iPad dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
-        </details>
-        <details name="dunia">
-          <summary><span>Mac dan Apple Watch</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
-          <div class="isi"><p>Masuk secara otomatis ke Mac ketika Anda memakai Apple Watch dengan Buka Otomatis Tidak perlu mengetik kata sandi</p><img src="images/tekno/dunia3.png" alt="Apple Watch dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
-        </details>
-        </div>
+    <!-- ============ KUNJUNGI TOKO KAMI ============ -->
+    <section id="lokasi" class="blok lok-teks" aria-labelledby="lokasiJudul">
+      <div class="wadah">
+        <div id="galeriToko" class="galeri" aria-label="Galeri foto toko"></div>
       </div>
     </section>
 
@@ -505,10 +498,25 @@
       </div>
     </section>
 
-    <!-- ============ KUNJUNGI TOKO KAMI ============ -->
-    <section id="lokasi" class="blok lok-teks" aria-labelledby="lokasiJudul">
-      <div class="wadah">
-        <div id="galeriToko" class="galeri" aria-label="Galeri foto toko"></div>
+    <!-- ============ JELAJAHI DUNIA TEKNO (akordeon) ============ -->
+    <section class="ap-dunia" aria-labelledby="duniaJudul">
+      <div class="ap-wadah">
+        <h2 id="duniaJudul" class="ap-h2">Jelajahi</h2>
+        <a href="#lokasi" class="ap-link" data-goto="#lokasi">Lihat lokasi dan jam buka toko kami</a>
+        <div class="ap-acc">
+        <details open name="dunia">
+          <summary><span>Mac dan iPhone</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <div class="isi"><p>Menjawab panggilan atau pesan dari iPhone langsung pada Mac Lihat dan kendalikan semua yang ada di iPhone Anda dari Mac Anda dengan Pencerminan iPhone dan Aktivitas Langsung. Gunakan Papan Klip Universal untuk menyalin gambar video atau teks dari iPhone lalu tempelkan ke aplikasi lain di Mac yang berdekatan Dan berkat iCloud Anda bisa mengakses file dari iPhone atau Mac Anda Dan masih banyak lagi</p><img src="images/tekno/dunia1.png" alt="iPhone dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+        </details>
+        <details name="dunia">
+          <summary><span>Mac dan iPad</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <div class="isi"><p>Buat sketsa di iPad dan gambar itu akan langsung muncul di Mac Atau gunakan iPad Anda sebagai layar kedua jadi Anda dapat bekerja di satu layar sambil melihat layar lain sebagai referensi Anda bahkan dapat memulai sesuatu di iPad seperti presentasi atau email dan melanjutkannya di Mac</p><img src="images/tekno/dunia2.png" alt="iPad dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+        </details>
+        <details name="dunia">
+          <summary><span>Mac dan Apple Watch</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></summary>
+          <div class="isi"><p>Masuk secara otomatis ke Mac ketika Anda memakai Apple Watch dengan Buka Otomatis Tidak perlu mengetik kata sandi</p><img src="images/tekno/dunia3.png" alt="Apple Watch dan MacBook" width="800" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=window.FOTO_KOSONG"></div>
+        </details>
+        </div>
       </div>
     </section>
   </main>

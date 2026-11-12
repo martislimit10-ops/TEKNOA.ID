@@ -20,10 +20,16 @@
   hand.innerHTML = `
     <img src="images/tangan.png?v=20261106c" alt="" width="88" height="146" draggable="false">
     <span class="tangan-riak"></span>`;
-  const klip = document.createElement('div');          /* "jendela" tangan: apa pun di luar area strip terpotong */
+  /* Tangan dipasang DI DALAM isi strip yang bisa digeser: saat strip di-scroll, tangan ikut bergeser
+     bersama MacBook Pro (terkunci di tulisan "Baru"-nya). Tepi bawah strip memotong tangan. */
+  const klip = document.createElement('div');
   klip.className = 'tangan-klip';
   klip.appendChild(hand);
-  bungkus.appendChild(klip);
+  strip.appendChild(klip);
+  function ukurKlip() { klip.style.width = '0px'; klip.style.width = strip.scrollWidth + 'px'; }
+  ukurKlip();
+  window.addEventListener('resize', ukurKlip);
+  window.addEventListener('load', ukurKlip);
   if (!kurangGerak()) bungkus.classList.add('ap-ruang-tangan');   /* sediakan ruang kosong di bawah tulisan "Baru" */
   const riak = hand.querySelector('.tangan-riak');
 
@@ -77,15 +83,11 @@
   function pulihkanSemua() { berTag().forEach(it => { const b = tagDari(it); b.classList.remove('tunggu'); }); }
 
   /* ---------- bantuan posisi ---------- */
-  const bawah = () => bungkus.getBoundingClientRect().height + 6;   /* tangan bersembunyi tepat di bawah tepi klip */
-  function ujungJari(item, fx, fy) {
-    const img = item.querySelector('img') || item;
-    const r = img.getBoundingClientRect(), b = bungkus.getBoundingClientRect();
-    return { x: r.left - b.left + r.width * (fx ?? .5) - TX, y: r.top - b.top + r.height * (fy ?? .62) - TY };
-  }
-  function ujungTag(item) {                   /* ujung jari tepat di tulisan "Baru" (bukan di ikon laptop) */
-    const t = tagDari(item) || item, r = t.getBoundingClientRect(), b = bungkus.getBoundingClientRect();
-    return { x: r.left - b.left + r.width * .5 - TX, y: r.top - b.top + r.height * .62 - TY };
+  const bawah = () => strip.clientHeight + 6;   /* tangan bersembunyi tepat di bawah tepi strip */
+  function ujungTag(item) {                   /* ujung jari tepat di tulisan "Baru"; koordinat = isi strip (ikut scroll) */
+    ukurKlip();
+    const t = tagDari(item) || item, r = t.getBoundingClientRect(), b = strip.getBoundingClientRect();
+    return { x: r.left - b.left + strip.scrollLeft + r.width * .5 - TX, y: r.top - b.top + r.height * .62 - TY };
   }
   async function ketuk(item, saatTekan) {
     item.classList.add('tekan');

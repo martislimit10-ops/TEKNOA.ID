@@ -491,8 +491,8 @@ html[data-tema="gelap"] .nav-tema{color:#fff}
 
 /* ---------- Tag "Baru" di strip TEKNO + animasi tangan (lihat tangan.js) ---------- */
 .ap-strip-item{position:relative}
-.ap-baru{position:absolute;left:0;right:0;top:100%;margin-top:6px;text-align:center;font-style:normal;font-size:12px;font-weight:600;line-height:1.2;color:var(--ap-oranye)}
-@media (min-width:900px){.ap-baru{font-size:13px;margin-top:8px}}
+.ap-baru,.ap-baru-diam{position:absolute;left:0;right:0;top:100%;margin-top:6px;text-align:center;font-style:normal;font-size:12px;font-weight:600;line-height:1.2;color:var(--ap-oranye)}
+@media (min-width:900px){.ap-baru,.ap-baru-diam{font-size:13px;margin-top:8px}}
 .ap-baru.tunggu{opacity:0}
 .ap-baru.tulis{animation:tulisBaru .3s cubic-bezier(.35,.55,.3,1) both}
 @keyframes tulisBaru{0%{opacity:1;clip-path:inset(-6px 100% -6px -2px);text-shadow:0 0 10px color-mix(in srgb,var(--ap-oranye) 55%,transparent)}100%{opacity:1;clip-path:inset(-6px -4px -6px -2px);text-shadow:0 0 0 transparent}}
@@ -500,7 +500,7 @@ html[data-tema="gelap"] .nav-tema{color:#fff}
 .ap-strip-item.tekan img{transform:scale(.93)}
 
 .tangan{position:absolute;left:0;top:0;z-index:6;width:88px;height:146px;opacity:0;pointer-events:none;transform-origin:51px 2px;will-change:transform,opacity;filter:drop-shadow(0 9px 10px rgba(0,0,0,.24))}
-.tangan img{display:block;width:100%;height:100%;user-select:none;-webkit-user-drag:none}
+.tangan img{-webkit-mask-image:linear-gradient(180deg,#000 0,#000 52%,transparent 86%);mask-image:linear-gradient(180deg,#000 0,#000 52%,transparent 86%);display:block;width:100%;height:100%;user-select:none;-webkit-user-drag:none}
 .tangan.ikut{transition:transform .09s linear,opacity .22s ease}
 .tangan-riak{position:absolute;left:51px;top:2px;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;border:2px solid rgba(110,110,120,.6);background:rgba(255,255,255,.4);opacity:0;pointer-events:none}
 html[data-tema="gelap"] .tangan-riak{border-color:rgba(230,230,240,.7);background:rgba(255,255,255,.18)}
@@ -1136,10 +1136,58 @@ html[data-device="hp"] .urut span{display:none}
 html[data-device="hp"] .kartu .harga{min-height:46px}
 
 /* ---------- ruang & jendela tangan (tangan.js) ---------- */
-.tangan-klip{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:6}
-.ap-strip-bungkus.ap-ruang-tangan .ap-strip{padding-bottom:92px}
-@media (min-width:900px){.ap-strip-bungkus.ap-ruang-tangan .ap-strip{padding-bottom:100px}}
+.ap-strip{position:relative}
+.ap-strip > .tangan-klip{position:absolute;left:0;top:0;height:100%;overflow:hidden;pointer-events:none;z-index:6;scroll-snap-align:none}
+/* ruang di bawah tulisan "Baru": sengaja lebih pendek dari tangan, supaya pergelangan (potongan bawah gambar) selalu tersembunyi di balik tepi */
+.ap-strip-bungkus.ap-ruang-tangan .ap-strip{padding-bottom:64px}
+.ap-strip-bungkus.ap-ruang-tangan .ap-strip-btn{bottom:64px}
+/* tombol geser: lebih kecil & rapi */
+.ap-strip-btn{width:56px}
+.ap-strip-btn svg{width:17px;height:17px}
+.ap-panah{gap:10px;margin:32px 16px 40px 0}
+.ap-panah button{width:34px;height:34px}
+.ap-panah svg{width:16px;height:16px}
 
-/* tulisan "Baru" statis (tanpa animasi), dipasang manual di HTML */
-.ap-baru-diam{position:absolute;left:0;right:0;top:100%;margin-top:6px;text-align:center;font-style:normal;font-size:12px;font-weight:600;line-height:1.2;color:var(--ap-oranye)}
-@media (min-width:900px){.ap-baru-diam{font-size:13px;margin-top:8px}}
+/* strip ikon: hanya tombol ">" (tombol "<" disembunyikan; elemennya tetap ada supaya script.js tidak error) */
+.ap-strip-prev{display:none !important}
+
+/* kartu produk: kotak mengikuti foto persis (tanpa bingkai gelap di kiri-kanan foto) */
+.k-foto{padding:0 !important;background:transparent;display:flex;justify-content:center;align-items:center}
+.k-foto img{display:block;width:auto;max-width:100%;height:100%;border-radius:18px;object-fit:cover}
+/* section katalog: judul sudah tidak ada, jadi jarak atas tidak perlu 70px */
+.ap-jelajah{padding-top:0}
+
+/* tombol panah < > di bawah kartu dihilangkan (kartu tetap bisa digeser) */
+.ap-panah{display:none !important}
+/* filter Semua produk / Laptop / Desktop / Layar + tombol > dihilangkan: semua produk tampil */
+.ap-pill-bungkus{display:none !important}
+/* jarak strip ikon ke kartu produk: rapat tapi tidak dempet */
+.ap-kepala{padding-bottom:44px}
+/* bagian logo merek: warna latar sama dengan bagian atas & bawahnya (tidak lagi terlihat seperti pita pembatas) */
+.ap-logo{background:var(--ap-putih)}
+
+/* =====================================================================
+   [REVISI-10] Satu warna latar untuk seluruh area tengah (tanpa pita pembatas) + jarak antar bagian
+   Hanya menyentuh <main>. Footer dan direktori di bawah main tidak diubah.
+   Kartu putih (Upgrade, Sesuai kebutuhanmu, kartu merek) tetap putih supaya tetap terbaca sebagai kartu.
+   ===================================================================== */
+#konten .ap-kepala,
+#konten .ap-jelajah,
+#konten .ap-logo,
+#konten .ap-abu,
+#konten .ap-beralih,
+#konten .ap-esensial,
+#konten .ap-dunia,
+#konten .lok-teks{background:var(--bg)}
+
+/* pudar di ujung strip ikon ikut warna latar yang sama (sebelumnya putih) */
+.ap-strip-next{background:linear-gradient(90deg,transparent,var(--bg) 28%)}
+.ap-strip-prev{background:linear-gradient(270deg,transparent,var(--bg) 28%)}
+
+/* jarak: strip ikon -> kartu produk -> logo merek (sedikit lebih lega, tidak dempet) */
+.ap-kepala{padding-bottom:72px}
+.ap-jelajah{padding-top:24px;padding-bottom:32px}
+@media (min-width:900px){
+  .ap-kepala{padding-bottom:88px}
+  .ap-jelajah{padding-top:32px;padding-bottom:48px}
+}
