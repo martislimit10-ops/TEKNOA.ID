@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title> Admin TEKNOA</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32.png">
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- Pemeriksaan akun. Login hanya satu, di website utama (tombol "Log in"); panel ini tidak punya halaman login sendiri. -->
+<section id="viewCek" class="login"><div><p class="muted" id="cekPesan">Memeriksa akun...</p>
+  <button type="button" class="btn btn-garis" id="btnCobaLagi" hidden>Coba periksa lagi</button></div></section>
+
+<!-- ===== PANEL ===== -->
+<div id="viewPanel" class="app" hidden>
+  <aside class="side">
+    <div class="brand"><span class="logo">T</span><b>TEKNOA.ID</b></div>
+    <nav class="tabs" role="tablist" aria-label="Menu panel admin" aria-orientation="vertical">
+      <button role="tab" id="tab-dashboard" aria-selected="true" aria-controls="pnl-dashboard" data-tab="dashboard">Dashboard</button>
+      <span class="grup">Hero</span>
+      <button role="tab" id="tab-hero_desktop" aria-selected="false" aria-controls="pnl-hero_desktop" data-tab="hero_desktop" data-judul="Hero Desktop" tabindex="-1">Desktop</button>
+      <button role="tab" id="tab-hero_hp" aria-selected="false" aria-controls="pnl-hero_hp" data-tab="hero_hp" data-judul="Hero HP" tabindex="-1">HP</button>
+      <span class="grup">Gambar</span>
+      <button role="tab" id="tab-toko" aria-selected="false" aria-controls="pnl-toko" data-tab="toko" data-judul="Gambar: Foto Toko" tabindex="-1">Foto Toko</button>
+      <span class="grup">Lainnya</span>
+      <button role="tab" id="tab-permintaan" aria-selected="false" aria-controls="pnl-permintaan" data-tab="permintaan" data-judul="Permintaan Ketersediaan" tabindex="-1">Permintaan <i class="badge-n" id="badgePermintaan" hidden></i></button>
+      <button role="tab" id="tab-unggulan" aria-selected="false" aria-controls="pnl-unggulan" data-tab="unggulan" data-judul="Produk Unggulan (Beranda)" tabindex="-1">Unggulan</button>
+      <button role="tab" id="tab-info" aria-selected="false" aria-controls="pnl-info" data-tab="info" tabindex="-1">Info &amp; Kontak</button>
+      <button role="tab" id="tab-produk" aria-selected="false" aria-controls="pnl-produk" data-tab="produk" tabindex="-1">Produk</button>
+      <button role="tab" id="tab-admin" aria-selected="false" aria-controls="pnl-admin" data-tab="admin" data-judul="Admin &amp; Role" tabindex="-1" hidden>Admin &amp; Role</button>
+    </nav>
+    <div class="side-foot"><button type="button" id="btnKeluar" class="btn btn-garis btn-kecil">Keluar</button><small>&copy; TEKNOA.ID &middot; Panel Admin</small></div>
+  </aside>
+
+  <div class="utama">
+  <header class="top"><div class="top-in">
+    <h1 id="judulHalaman">Dashboard</h1><span id="labelPeran" class="muted"></span>
+    <div class="top-aksi"><a id="lnkSitus" href="#" target="_blank" rel="noopener" class="btn btn-kecil">Lihat Website &rarr;</a></div>
+  </div></header>
+
+  <main class="isi">
+    <section id="pnl-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
+      <div class="hero-sel"><h2>Selamat datang, Admin!</h2><p class="muted">Kelola konten website TEKNOA.ID dengan mudah dan cepat.</p></div>
+      <div class="pintas" id="pintas">
+        <button type="button" data-ke="hero_desktop"><b>Hero Desktop</b><small>Banner utama tampilan desktop</small></button>
+        <button type="button" data-ke="hero_hp"><b>Hero HP</b><small>Banner utama tampilan mobile</small></button>
+        <button type="button" data-ke="toko"><b>Gambar</b><small>Foto toko di website</small></button>
+        <button type="button" data-ke="info"><b>Info &amp; Kontak</b><small>Informasi dan kontak website</small></button>
+        <button type="button" data-ke="produk"><b>Produk</b><small>Kelola data laptop</small></button>
+      </div>
+      <div class="dash-2">
+        <div class="kartu"><div class="bagian-kepala"><h3>Permintaan Ketersediaan</h3><button type="button" class="btn btn-garis btn-kecil" data-ke="permintaan">Lihat semua</button></div><div id="dashPermintaan" class="daftar"></div></div>
+        <div class="kartu"><h3>Ringkasan Konten</h3><div id="dashRingkas" class="ringkas"></div></div>
+      </div>
+    </section>
+
+    <section id="pnl-permintaan" role="tabpanel" aria-labelledby="tab-permintaan" hidden>
+      <div class="bagian-kepala"><div><h2>Permintaan Stok</h2><p class="muted">Satu halaman untuk semua laptop yang diminta. Persetujuan mengirim notifikasi ke pemintanya.</p></div>
+        <div class="filter" id="filterPermintaan"><button type="button" data-f="menunggu" aria-pressed="true">Menunggu</button><button type="button" data-f="ditangani" aria-pressed="false">Ditangani</button><button type="button" data-f="disetujui" aria-pressed="false">Disetujui</button></div></div>
+      <div id="daftarPermintaan" class="daftar"></div>
+    </section>
+
+    <section id="pnl-unggulan" role="tabpanel" aria-labelledby="tab-unggulan" hidden>
+      <div class="bagian-kepala"><div><h2>Produk Unggulan (Beranda)</h2><p class="muted">Jelajahi jajarannya" di beranda.</p></div>
+        <button type="button" class="btn" id="btnTambahUnggulan">Tambah kartu</button></div>
+      <div id="daftarUnggulan" class="daftar"></div>
+    </section>
+
+    <section id="pnl-hero_desktop" role="tabpanel" aria-labelledby="tab-hero_desktop" data-media="hero_desktop" hidden></section>
+    <section id="pnl-hero_hp"      role="tabpanel" aria-labelledby="tab-hero_hp"      data-media="hero_hp" hidden></section>
+    <section id="pnl-toko"         role="tabpanel" aria-labelledby="tab-toko"         data-media="toko" hidden></section>
+
+    <!-- Info & Kontak -->
+    <section id="pnl-info" role="tabpanel" aria-labelledby="tab-info" hidden>
+      <div class="bagian-kepala">
+        <div><h2>Informasi &amp; Kontak Toko</h2>
+        <p class="muted">Dipakai di sidebar, footer, bagian lokasi, tombol Contact, dan pesan WhatsApp.</p></div>
+      </div>
+      <form id="formInfo" class="kartu form-grid">
+        <div class="f"><label for="i-wa">Nomor WhatsApp CS</label><input id="i-wa" name="wa" inputmode="numeric" placeholder="6285117822767"><small>Format internasional tanpa + atau spasi, contoh 6285117822767.</small></div>
+        <div class="f"><label for="i-pesan">Pesan pembuka WhatsApp (tombol Contact)</label><input id="i-pesan" name="pesan_umum"></div>
+        <div class="f f-lebar"><label for="i-alamat">Alamat</label><textarea id="i-alamat" name="alamat" rows="2"></textarea></div>
+        <div class="f"><label for="i-jam">Jam operasional</label><input id="i-jam" name="jam" placeholder="Senin - Minggu: 09.00 - 21.00 WITA"></div>
+        <div class="f"><label for="i-email">Email dukungan</label><input id="i-email" name="email" type="email"></div>
+        <div class="f"><label for="i-ig">Instagram</label><input id="i-ig" name="instagram" placeholder="laptop_makassar atau link lengkap"></div>
+        <div class="f"><label for="i-tt">TikTok</label><input id="i-tt" name="tiktok" placeholder="laptop_makassar atau link lengkap"></div>
+        <div class="f f-lebar"><label for="i-maps">Link Google Maps</label><input id="i-maps" name="maps_link" type="url" placeholder="https://maps.app.goo.gl/..."></div>
+        <div class="f f-lebar"><label for="i-peta">Link peta tersemat (embed)</label><input id="i-peta" name="peta_embed_url" type="url" placeholder="https://www.google.com/maps/embed?pb=..."><small>Google Maps &rarr; Bagikan &rarr; Sematkan peta &rarr; salin isi src="..." saja.</small></div>
+        <div class="f f-lebar"><label for="i-desk">Deskripsi singkat toko (footer)</label><textarea id="i-desk" name="deskripsi" rows="3"></textarea></div>
+        <div class="f-aksi"><button type="submit" class="btn" id="btnSimpanInfo">Simpan</button><span id="pesanInfo" class="pesan" role="status"></span></div>
+      </form>
+    </section>
+
+    <!-- Produk -->
+    <section id="pnl-produk" role="tabpanel" aria-labelledby="tab-produk" hidden>
+      <div class="bagian-kepala">
+        <div><h2>Produk</h2><p class="muted">Produk baru otomatis muncul paling depan di toko.</p></div>
+        <button type="button" class="btn" id="btnProdukBaru">+ Tambah produk</button>
+      </div>
+      <div id="daftarProduk" class="daftar"></div>
+    </section>
+
+    <!-- Admin & Role (khusus owner; dijaga RLS di database) -->
+    <section id="pnl-admin" role="tabpanel" aria-labelledby="tab-admin" hidden>
+      <div class="bagian-kepala"><div><h2>Admin &amp; Role</h2>
+        <p class="muted">Hanya Admin</p></div></div>
+      <form id="formAdmin" class="kartu form-grid">
+        <div class="f"><label for="a-email">Email Google</label><input id="a-email" type="email" required maxlength="254" placeholder="nama@gmail.com"></div>
+        <div class="f"><label for="a-role">Role</label><select id="a-role"><option value="admin">Admin</option><option value="owner">Owner</option></select></div>
+        <div class="f-aksi"><button type="submit" class="btn" id="btnTambahAdmin">Tambah</button><span id="pesanAdmin" class="pesan" role="status"></span></div>
+      </form>
+      <div id="daftarAdmin" class="daftar"></div>
+    </section>
+  </main>
+  </div>
+</div>
+
+<!-- Form produk -->
+<dialog id="dlgProduk" class="dlg" aria-labelledby="dlgProdukJudul">
+  <form id="formProduk">
+    <div class="dlg-head"><h2 id="dlgProdukJudul">Tambah produk</h2><button type="button" class="btn btn-garis btn-kecil" data-tutup>Tutup</button></div>
+    <div class="dlg-body form-grid">
+      <div class="f"><label for="p-kategori">Kategori</label><select id="p-kategori" required></select></div>
+      <div class="f"><label for="p-kondisi">Kondisi</label><select id="p-kondisi"><option value="bekas">Bekas, mulus</option><option value="baru">Baru, segel</option></select></div>
+      <div class="f"><label for="p-merek">Merek</label><input id="p-merek" required placeholder="ASUS"></div>
+      <div class="f"><label for="p-seri">Seri / model</label><input id="p-seri" required placeholder="Vivobook 14 A1400EA"></div>
+      <div class="f"><label for="p-harga">Harga Rp</label><input id="p-harga" type="number" min="0" step="1000" required></div>
+      <div class="f"><label for="p-normal">Harga normal</label><input id="p-normal" type="number" min="0" step="1000"></div>
+      <div class="f"><label for="p-proc">Processor</label><input id="p-proc" placeholder="Intel Core i5-1135G7"></div>
+      <div class="f"><label for="p-ram">RAM</label><input id="p-ram" placeholder="8 GB DDR4"></div>
+      <div class="f"><label for="p-storage">Storage</label><input id="p-storage" placeholder="512 GB SSD NVMe"></div>
+      <div class="f"><label for="p-vga">Kartu grafis (VGA)</label><input id="p-vga" placeholder="Intel Iris Xe"></div>
+      <div class="f"><label for="p-layar">Ukuran layar</label><input id="p-layar" placeholder="14 inci"></div>
+      <div class="f"><span class="lbl">Label</span><div class="cek" id="p-tags"></div></div>
+      <div class="f"><label for="p-status">Stok</label><select id="p-status"><option value="tersedia">Stok Ada</option><option value="tidak_tersedia">Stok Habis</option></select></div>
+      <div class="f f-lebar"><label for="p-desk">Deskripsi</label><textarea id="p-desk" rows="3" maxlength="2000" placeholder="Kondisi, kelengkapan, catatan khusus unit ini"></textarea></div>
+      <div class="f f-lebar"><span class="lbl">Foto produk</span>
+        <div id="p-galeri" class="galeri"></div>
+        <input id="p-foto" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-label="Tambah foto">
+        <input id="p-ganti" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+        <small>JPG, PNG, atau WebP. Maks. 10 MB per foto, maksimal 6 foto.</small></div>
+      <p id="pesanProduk" class="pesan galat f-lebar" role="alert" hidden></p>
+    </div>
+    <div class="dlg-foot"><button type="button" class="btn btn-bahaya" id="btnHapusProduk" hidden>Hapus produk</button><button type="submit" class="btn" id="btnSimpanProduk">Simpan produk</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlgUnggulan" class="dlg" aria-labelledby="dlgUnggulanJudul">
+  <form id="formUnggulan">
+    <div class="dlg-head"><h2 id="dlgUnggulanJudul">Tambah kartu unggulan</h2><button type="button" class="btn btn-garis btn-kecil" data-tutup>Tutup</button></div>
+    <div class="dlg-body form-grid">
+      <div class="f"><label for="u-judul">Nama</label><input id="u-judul" required maxlength="120"></div>
+      <div class="f"><label for="u-sub">Sub judul (opsional)</label><input id="u-sub" maxlength="80"></div>
+      <div class="f"><label for="u-label">Label kecil (opsional)</label><input id="u-label" maxlength="40" placeholder="Baru"></div>
+      <div class="f"><label for="u-grup">Grup</label><select id="u-grup"><option value="laptop">Laptop</option><option value="desktop">Desktop</option><option value="display">Display</option></select></div>
+      <div class="f"><label for="u-kat">Kategori toko</label><input id="u-kat" maxlength="40" value="macbook"></div>
+      <div class="f"><label for="u-urut">Urutan</label><input id="u-urut" type="number" min="0" step="1" value="0"></div>
+      <div class="f f-lebar"><label for="u-desk">Deskripsi singkat</label><textarea id="u-desk" rows="2" maxlength="300"></textarea></div>
+      <div class="f f-lebar"><label for="u-peng">Penjelasan</label><textarea id="u-peng" rows="3" maxlength="1200"></textarea></div>
+      <div class="f f-lebar"><label for="u-poin">Poin keunggulan</label><textarea id="u-poin" rows="3"></textarea></div>
+      <div class="f"><label class="sw"><input type="checkbox" id="u-aktif" checked> Tampilkan di website</label></div>
+      <div class="f f-lebar"><span class="lbl">Foto</span>
+        <img id="u-prev" class="u-prev" alt="" hidden>
+        <input id="u-foto" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Pilih foto">
+        <small>JPG, PNG.</small></div>
+      <p id="pesanUnggulan" class="pesan galat f-lebar" role="alert" hidden></p>
+    </div>
+    <div class="dlg-foot"><button type="button" class="btn btn-bahaya" id="btnHapusUnggulan" hidden>Hapus kartu</button><button type="submit" class="btn" id="btnSimpanUnggulan">Simpan</button></div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase-config.js"></script>
+<script src="admin-auth.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
