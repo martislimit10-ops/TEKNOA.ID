@@ -28,10 +28,9 @@
       <button role="tab" id="tab-hero_desktop" aria-selected="false" aria-controls="pnl-hero_desktop" data-tab="hero_desktop" data-judul="Hero Desktop" tabindex="-1">Desktop</button>
       <button role="tab" id="tab-hero_hp" aria-selected="false" aria-controls="pnl-hero_hp" data-tab="hero_hp" data-judul="Hero HP" tabindex="-1">HP</button>
       <span class="grup">Gambar</span>
-      <button role="tab" id="tab-toko" aria-selected="false" aria-controls="pnl-toko" data-tab="toko" data-judul="Gambar: Foto Toko" tabindex="-1">Foto Toko</button>
       <span class="grup">Lainnya</span>
       <button role="tab" id="tab-permintaan" aria-selected="false" aria-controls="pnl-permintaan" data-tab="permintaan" data-judul="Permintaan Ketersediaan" tabindex="-1">Permintaan <i class="badge-n" id="badgePermintaan" hidden></i></button>
-      <button role="tab" id="tab-unggulan" aria-selected="false" aria-controls="pnl-unggulan" data-tab="unggulan" data-judul="Produk Unggulan (Beranda)" tabindex="-1">Unggulan</button>
+      <button role="tab" id="tab-unggulan" aria-selected="false" aria-controls="pnl-unggulan" data-tab="unggulan" data-judul=tabindex="-1">Unggulan</button>
       <button role="tab" id="tab-info" aria-selected="false" aria-controls="pnl-info" data-tab="info" tabindex="-1">Info &amp; Kontak</button>
       <button role="tab" id="tab-produk" aria-selected="false" aria-controls="pnl-produk" data-tab="produk" tabindex="-1">Produk</button>
       <button role="tab" id="tab-admin" aria-selected="false" aria-controls="pnl-admin" data-tab="admin" data-judul="Admin &amp; Role" tabindex="-1" hidden>Admin &amp; Role</button>
@@ -48,7 +47,7 @@
 
   <main class="isi">
     <section id="pnl-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
-      <div class="hero-sel"><h2>Selamat datang, Admin!</h2><p class="muted">Kelola konten website TEKNOA.ID dengan mudah dan cepat.</p></div>
+      <div class="hero-sel"><h2></h2><p class="muted"></p></div>
       <div class="pintas" id="pintas">
         <button type="button" data-ke="hero_desktop"><b>Hero Desktop</b><small>Banner utama tampilan desktop</small></button>
         <button type="button" data-ke="hero_hp"><b>Hero HP</b><small>Banner utama tampilan mobile</small></button>
@@ -57,19 +56,19 @@
         <button type="button" data-ke="produk"><b>Produk</b><small>Kelola data laptop</small></button>
       </div>
       <div class="dash-2">
-        <div class="kartu"><div class="bagian-kepala"><h3>Permintaan Ketersediaan</h3><button type="button" class="btn btn-garis btn-kecil" data-ke="permintaan">Lihat semua</button></div><div id="dashPermintaan" class="daftar"></div></div>
+        <div class="kartu"><div class="bagian-kepala"><h3>Ketersediaan</h3><button type="button" class="btn btn-garis btn-kecil" data-ke="permintaan">Lihat semua</button></div><div id="dashPermintaan" class="daftar"></div></div>
         <div class="kartu"><h3>Ringkasan Konten</h3><div id="dashRingkas" class="ringkas"></div></div>
       </div>
     </section>
 
     <section id="pnl-permintaan" role="tabpanel" aria-labelledby="tab-permintaan" hidden>
-      <div class="bagian-kepala"><div><h2>Permintaan Stok</h2><p class="muted">Satu halaman untuk semua laptop yang diminta. Persetujuan mengirim notifikasi ke pemintanya.</p></div>
+      <div class="bagian-kepala"><div><h2>Permintaan Stok</h2><p class="muted"></p></div>
         <div class="filter" id="filterPermintaan"><button type="button" data-f="menunggu" aria-pressed="true">Menunggu</button><button type="button" data-f="ditangani" aria-pressed="false">Ditangani</button><button type="button" data-f="disetujui" aria-pressed="false">Disetujui</button></div></div>
       <div id="daftarPermintaan" class="daftar"></div>
     </section>
 
     <section id="pnl-unggulan" role="tabpanel" aria-labelledby="tab-unggulan" hidden>
-      <div class="bagian-kepala"><div><h2>Produk Unggulan (Beranda)</h2><p class="muted">Jelajahi jajarannya" di beranda.</p></div>
+      <div class="bagian-kepala"><div><h2>Produk Unggulan</h2><p class="muted"></p></div>
         <button type="button" class="btn" id="btnTambahUnggulan">Tambah kartu</button></div>
       <div id="daftarUnggulan" class="daftar"></div>
     </section>

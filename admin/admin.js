@@ -146,8 +146,6 @@ const KONFIG_MEDIA = {
     info: 'Tampil di laptop/PC. Gunakan foto/video LANDSCAPE 16:9 (contoh 1920×1080).' },
   hero_hp: { judul: 'Media Hero HP', maks: 8, video: true, rasio: 'r-hp',
     info: 'Tampil di HP. Gunakan foto/video POTRET 9:16 (contoh 1080×1920).' },
-  toko: { judul: 'Foto "Kunjungi Toko Kami"', maks: 4, video: false, rasio: '',
-    info: 'Khusus foto, maksimal 4. Tampil turun ke bawah di HP (lebar penuh) dan 2 kolom di laptop. Foto tampil utuh, tidak dipotong. Pakai foto beresolusi tinggi (min. lebar 1600 px).' },
 };
 
 function buatManajerMedia(root, bagian) {
