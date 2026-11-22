@@ -199,17 +199,10 @@
     <section id="hero" class="hero" aria-roledescription="carousel" aria-label="Promo Laptop Makassar">
       <div id="heroTrack" class="hero-track"></div>
 
-      <div id="heroKontrol" class="hero-kontrol" hidden>
-        <button type="button" id="heroJeda" class="bulat" aria-label="Jeda video"><svg><use href="#i-pause"/></svg></button>
-        <button type="button" id="heroSuara" class="bulat" aria-label="Nyalakan suara"><svg><use href="#i-mute"/></svg></button>
-      </div>
-
       <div class="hero-bawah">
         <p id="heroCap" class="hero-cap"></p>
         <div id="heroNav" class="hero-nav" hidden>
-          <button type="button" id="heroPrev" class="bulat" aria-label="Slide sebelumnya"><svg><use href="#i-chev-l"/></svg></button>
           <div id="heroBars" class="bars"></div>
-          <button type="button" id="heroNext" class="bulat" aria-label="Slide berikutnya"><svg><use href="#i-chev-r"/></svg></button>
         </div>
       </div>
     </section>
@@ -776,7 +769,8 @@
 <!-- ============ PERMINTAAN (notifikasi + daftar permintaan stok milik user) ============ -->
 <dialog id="permintaan" class="dlg dlg-side" aria-labelledby="mintaJudul">
   <div class="dlg-head"><h2 id="mintaJudul">Permintaan</h2><button type="button" class="ikon" data-tutup aria-label="Tutup"><svg><use href="#i-close"/></svg></button></div>
-  <div class="dlg-body" id="mintaIsi"></div>
+  <div class="minta-tab" id="mintaTab" role="tablist" aria-label="Kelompok permintaan"></div>
+  <div class="dlg-body" id="mintaIsi" role="tabpanel"></div>
 </dialog>
 
 <!-- ============ BANDINGKAN SPESIFIKASI (2 sampai 4 unit) ============ -->

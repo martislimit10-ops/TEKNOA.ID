@@ -117,7 +117,7 @@ document.addEventListener('keydown', e => {
 });
 
 /* ---------- 4. Hero slider (foto + video) ---------- */
-const hero = { slides: [], idx: 0, timer: null, jeda: false, suara: false, ditahan: false, sig: '' };
+const hero = { slides: [], idx: 0, timer: null, jeda: false, ditahan: false, sig: '' };
 const heroEl = $('#hero'), heroTrack = $('#heroTrack');
 const IKON = id => `<svg><use href="#${id}"/></svg>`;
 
@@ -137,19 +137,32 @@ function renderHero() {
 
   if (!l.length) {
     heroTrack.innerHTML = `<div class="hero-slide"><div class="hero-kosong"><b>Laptop Makassar</b><span>Laptop baru dan bekas berkualitas</span></div></div>`;
-    $('#heroNav').hidden = true; $('#heroKontrol').hidden = true; $('#heroCap').textContent = '';
+    $('#heroNav').hidden = true; $('#heroCap').textContent = '';
     return;
   }
   heroTrack.innerHTML = l.map((b, i) => `<div class="hero-slide" aria-hidden="${i !== 0}">` + (b.jenis === 'video'
-    ? `<video src="${esc(b.url)}" muted playsinline preload="${i === 0 ? 'auto' : 'metadata'}" ${l.length === 1 ? 'loop' : ''}></video>`
+    ? `<video src="${esc(b.url)}" muted playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="${i === 0 ? 'auto' : 'metadata'}" ${l.length === 1 ? 'loop' : ''}></video>`
     : `<img src="${esc(b.url)}" alt="${esc(b.judul || 'Promo Laptop Makassar')}" ${i === 0 ? '' : 'loading="lazy"'} ${fotoErr}>`) + `</div>`).join('');
   $$('video', heroTrack).forEach((v, i) => {
     v.addEventListener('ended', () => { if (hero.slides.length > 1) heroKe(hero.idx + 1); });
-    v.addEventListener('error', () => { if (hero.slides[hero.idx] && heroTrack.children[hero.idx].contains(v)) jadwalkanHero(6000); });
+    v.muted = true; v.defaultMuted = true;   /* video hero selalu tanpa suara (autoplay tidak diblokir browser) */
+    v.addEventListener('error', () => videoRusak(v));
+    /* codec tidak didukung (mis. HEVC/H.265, 10-bit): metadata terbaca tapi gambar tidak ada (lebar 0) -> layar hitam */
+    const cek = () => { if (!v.videoWidth) videoRusak(v); };
+    v.addEventListener('loadedmetadata', cek);
+    v.addEventListener('loadeddata', cek);
   });
   $('#heroBars').innerHTML = l.map((_, i) => `<button type="button" aria-label="Slide ${i + 1}" data-i="${i}"></button>`).join('');
   $('#heroNav').hidden = l.length < 2;
   heroKe(0, true);
+}
+/* video yang tidak bisa ditampilkan: ganti dengan slide kosong bermerek (bukan layar hitam) dan lanjut ke slide berikutnya */
+function videoRusak(v) {
+  const slide = v.closest('.hero-slide'); if (!slide || slide.dataset.rusak) return;
+  slide.dataset.rusak = '1';
+  const aktif = heroTrack.children[hero.idx] === slide;
+  slide.innerHTML = `<div class="hero-kosong"><b>Laptop Makassar</b><span>Laptop baru dan bekas berkualitas</span></div>`;
+  if (aktif) jadwalkanHero(3000);
 }
 function slideAktif() { return hero.slides[hero.idx]; }
 function videoAktif() { return heroTrack.children[hero.idx]?.querySelector('video') || null; }
@@ -167,21 +180,13 @@ function heroKe(i, awal = false) {
   $$('#heroBars button').forEach((b, k) => b.setAttribute('aria-current', String(k === hero.idx)));
   const s = slideAktif();
   $('#heroCap').textContent = s.judul || '';
-  /* kontrol jeda/suara HANYA untuk slide video; slide foto tanpa kontrol */
-  $('#heroKontrol').hidden = s.jenis !== 'video';
-  $$('video', heroTrack).forEach(v => { v.pause(); v.currentTime = 0; v.muted = !hero.suara; });
-  perbaruiIkonHero();
+  $$('video', heroTrack).forEach(v => { v.pause(); v.currentTime = 0; v.muted = true; });
   clearTimeout(hero.timer);
   if (s.jenis === 'video') {
     const v = videoAktif();
-    if (v && !hero.ditahan) v.play().catch(() => jadwalkanHero(6000));
+    if (v && v.closest('.hero-slide')?.dataset.rusak) jadwalkanHero(3000);
+    else if (v && !hero.ditahan) v.play().catch(() => jadwalkanHero(6000));
   } else jadwalkanHero(5500);
-}
-function perbaruiIkonHero() {
-  $('#heroJeda').innerHTML = IKON(hero.jeda ? 'i-play' : 'i-pause');
-  $('#heroJeda').setAttribute('aria-label', hero.jeda ? 'Putar video' : 'Jeda video');
-  $('#heroSuara').innerHTML = IKON(hero.suara ? 'i-vol' : 'i-mute');
-  $('#heroSuara').setAttribute('aria-label', hero.suara ? 'Matikan suara' : 'Nyalakan suara');
 }
 function heroTahan(ya) {
   hero.ditahan = ya;
@@ -192,19 +197,6 @@ function heroTahan(ya) {
     else if (slideAktif().jenis !== 'video') jadwalkanHero(5500);
   }
 }
-$('#heroJeda').addEventListener('click', () => {
-  const v = videoAktif(); if (!v) return;
-  hero.jeda = !hero.jeda;
-  if (hero.jeda) v.pause(); else v.play().catch(() => {});
-  perbaruiIkonHero();
-});
-$('#heroSuara').addEventListener('click', () => {
-  hero.suara = !hero.suara;
-  $$('video', heroTrack).forEach(v => { v.muted = !hero.suara; });
-  perbaruiIkonHero();
-});
-$('#heroPrev').addEventListener('click', () => heroKe(hero.idx - 1));
-$('#heroNext').addEventListener('click', () => heroKe(hero.idx + 1));
 $('#heroBars').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) heroKe(+b.dataset.i); });
 pasangGeser(heroEl, d => heroKe(hero.idx + d));
 document.addEventListener('visibilitychange', () => heroTahan(document.hidden || !storePage.hidden));
@@ -1099,8 +1091,8 @@ async function tarikKeranjang() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tarikKeranjang().catch(() => {}); });
 
 /* ----- permintaan ketersediaan: tombol "Minta stok" HANYA tampil untuk laptop yang stoknya habis ----- */
-const labelMinta = st => st === 'menunggu' ? 'Diminta, menunggu' : st === 'ditangani' ? 'Sedang ditangani' : 'Minta stok';
-const NAMA_STATUS_MINTA = { menunggu: 'Menunggu', ditangani: 'Sedang ditangani', disetujui: 'Disetujui' };
+const labelMinta = st => st === 'menunggu' ? 'Diminta, menunggu' : st === 'ditangani' ? 'Cek unit' : 'Minta stok';
+const NAMA_STATUS_MINTA = { menunggu: 'Menunggu', ditangani: 'Cek unit', disetujui: 'Tersedia' };
 const statusMinta = id => (MINTA.find(m => String(m.product_id) === String(id)) || {}).status || '';   /* MINTA urut terbaru dulu */
 const waktuFmt = t => { try { return new Date(t).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
 const belumDibacaJml = () => NOTIF.filter(n => !n.dibaca).length;
@@ -1142,20 +1134,32 @@ document.addEventListener('click', async e => {
 });
 document.addEventListener('visibilitychange', () => { if (!document.hidden && USER && modeUser()) Promise.all([muatMinta(), muatNotif()]).then(segarkanTanda).catch(() => {}); });
 
-/* Halaman "Permintaan" milik user: notifikasi (angka = yang belum dibaca) + daftar permintaan beserta statusnya */
+/* Halaman "Permintaan" milik user dibagi 3 tab (kiri ke kanan): Notifikasi | Tersedia | Cek unit.
+   Cek unit = status menunggu + ditangani, Tersedia = disetujui, Notifikasi = pemberitahuan (angka = yang belum dibaca). */
+let mintaTab = 'cek';
 function renderPermintaan() {
   const nb = belumDibacaJml();
-  const notif = NOTIF.length
-    ? `<h3 class="akun-sub">Notifikasi${nb ? ` (${nb} baru)` : ''}</h3>` +
-      (nb ? '<button type="button" class="btn btn-garis btn-blok" data-notif-baca>Tandai semua dibaca</button>' : '') +
-      NOTIF.map(n => `<div class="notif-baris${n.dibaca ? '' : ' baru'}"><b>${n.dibaca ? '' : '&bull; '}${esc(n.judul)}</b>${n.isi ? `<span class="muted">${esc(n.isi)}</span>` : ''}<span class="muted">${esc(waktuFmt(n.created_at))}</span></div>`).join('')
-    : '';
-  const daftar = MINTA.length
-    ? MINTA.map(m => `<div class="minta-baris"><div><b>${esc(m.nama_produk || 'Laptop')}</b><span class="muted">Diminta ${esc(waktuFmt(m.created_at))}</span></div><span class="minta-st ${esc(m.status)}">${esc(NAMA_STATUS_MINTA[m.status] || m.status)}</span>${m.status === 'menunggu' ? `<button type="button" class="btn btn-kecil btn-garis" data-minta-batal="${esc(m.id)}">Batalkan</button>` : ''}</div>`).join('')
-    : '<p class="kr-kosong">Belum ada permintaan. Pada laptop yang stoknya habis, ketuk tombol Minta stok.</p>';
-  $('#mintaIsi').innerHTML = notif + '<h3 class="akun-sub">Permintaan saya</h3>' + daftar;
+  const cek = MINTA.filter(m => m.status !== 'disetujui'), ada = MINTA.filter(m => m.status === 'disetujui');
+  const tab = [['notif', 'Notifikasi', nb], ['tersedia', 'Tersedia', ada.length], ['cek', 'Cek unit', cek.length]];
+  $('#mintaTab').innerHTML = tab.map(([k, nama, n]) =>
+    `<button type="button" role="tab" id="mintaTab-${k}" data-minta-tab="${k}" aria-selected="${mintaTab === k}">${nama}${n ? `<span class="minta-tab-n">${n}</span>` : ''}</button>`).join('');
+  const baris = m => `<div class="minta-baris"><div><b>${esc(m.nama_produk || 'Laptop')}</b><span class="muted">Diminta ${esc(waktuFmt(m.created_at))}</span></div><span class="minta-st ${esc(m.status)}">${esc(NAMA_STATUS_MINTA[m.status] || m.status)}</span>${m.status === 'menunggu' ? `<button type="button" class="btn btn-kecil btn-garis" data-minta-batal="${esc(m.id)}">Batalkan</button>` : ''}</div>`;
+  let isi;
+  if (mintaTab === 'notif') {
+    isi = NOTIF.length
+      ? (nb ? '<button type="button" class="btn btn-garis btn-blok" data-notif-baca>Tandai semua dibaca</button>' : '') +
+        NOTIF.map(n => `<div class="notif-baris${n.dibaca ? '' : ' baru'}"><b>${n.dibaca ? '' : '&bull; '}${esc(n.judul)}</b>${n.isi ? `<span class="muted">${esc(n.isi)}</span>` : ''}<span class="muted">${esc(waktuFmt(n.created_at))}</span></div>`).join('')
+      : '<p class="kr-kosong">Belum ada notifikasi.</p>';
+  } else if (mintaTab === 'tersedia') {
+    isi = ada.length ? ada.map(baris).join('') : '<p class="kr-kosong">Belum ada unit yang tersedia untukmu.</p>';
+  } else {
+    isi = cek.length ? cek.map(baris).join('') : '<p class="kr-kosong">Belum ada permintaan. Pada laptop yang stoknya habis, ketuk tombol Minta stok.</p>';
+  }
+  $('#mintaIsi').setAttribute('aria-labelledby', 'mintaTab-' + mintaTab);
+  $('#mintaIsi').innerHTML = isi;
 }
 function bukaPermintaan() {
+  mintaTab = 'cek';
   renderPermintaan(); bukaDialog($('#permintaan'));
   Promise.all([muatMinta(), muatNotif()]).then(() => { if ($('#permintaan').open) renderPermintaan(); renderBadgeAkun(); }).catch(() => {});
 }
@@ -1171,6 +1175,10 @@ const klikPermintaan = () => { if (modeUser()) bukaPermintaan(); else if (!USER)
 $('#navPermintaan').addEventListener('click', klikPermintaan);
 $('#sbPermintaanBtn').addEventListener('click', () => { tutupSidebar(false); klikPermintaan(); });
 $('#mintaIsi').addEventListener('click', e => { if (e.target.closest('[data-notif-baca]')) tandaiNotifDibaca(); });
+$('#mintaTab').addEventListener('click', e => {
+  const b = e.target.closest('[data-minta-tab]'); if (!b) return;
+  mintaTab = b.dataset.mintaTab; renderPermintaan(); $('#mintaIsi').scrollTop = 0;
+});
 $('#permintaan').addEventListener('close', () => { tandaiNotifDibaca(); });
 /* Perubahan status permintaan / notifikasi baru dari server (realtime): muat ulang data milik user saja */
 let timerAkunMinta = null;

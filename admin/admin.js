@@ -42,6 +42,21 @@ async function hapusFileStorage(url) {
   const p = pathStorage(url);
   if (p) { try { await sb.storage.from(BUCKET).remove([p]); } catch (e) { console.warn('Gagal hapus file lama:', e); } }
 }
+/* Cek video sebelum diunggah: kalau browser tidak bisa men-decode gambarnya (mis. HEVC/H.265, 10-bit), videoWidth = 0
+   dan di website hasilnya layar hitam. Video seperti itu ditolak di sini supaya tidak ikut tersimpan. */
+function videoBisaDiputar(file) {
+  return new Promise(ok => {
+    const v = document.createElement('video'), u = URL.createObjectURL(file);
+    let selesai = false;
+    const akhir = hasil => { if (selesai) return; selesai = true; clearTimeout(t); v.removeAttribute('src'); v.load(); URL.revokeObjectURL(u); ok(hasil); };
+    const t = setTimeout(() => akhir(true), 10000);   /* tidak bisa memastikan -> jangan blokir */
+    v.muted = true; v.preload = 'auto';
+    v.addEventListener('loadeddata', () => akhir(v.videoWidth > 0 && v.videoHeight > 0));
+    v.addEventListener('error', () => akhir(false));
+    v.src = u;
+  });
+}
+
 /* Validasi foto di sisi klien (cadangan). Pembatasan sungguhan ada di bucket Storage (sql/03). SVG sengaja ditolak. */
 const BATAS_FOTO_MB = 10, MAKS_GALERI = 6;
 function cekFoto(file, gif = false) {
@@ -228,17 +243,23 @@ function buatManajerMedia(root, bagian) {
     gambar();
   });
 
-  inputFile.addEventListener('change', () => {
+  inputFile.addEventListener('change', async () => {
     setPesan(elPesan, '');
-    for (const f of inputFile.files) {
+    const daftarFile = [...inputFile.files];
+    inputFile.value = '';
+    for (const f of daftarFile) {
       const video = f.type.startsWith('video/'), foto = f.type.startsWith('image/');
       if (!foto && !(video && cfg.video)) { toast(`"${f.name}" dilewati: jenis file tidak didukung`); continue; }
       if (aktifJumlah() >= cfg.maks) { toast(`Maksimal ${cfg.maks} slide. Hapus salah satu dulu.`); break; }
       if (foto) { try { cekFoto(f, true); } catch (err) { toast(err.message, 'galat'); continue; } }
       if (f.size > BATAS_MB * 1024 * 1024) { toast(`"${f.name}" lebih dari ${BATAS_MB} MB`); continue; }
+      if (video && !(await videoBisaDiputar(f))) {
+        toast(`"${f.name}" tidak bisa diputar browser (biasanya codec H.265/HEVC atau 10-bit). Convert dulu ke MP4 H.264, lalu unggah lagi.`, 'galat');
+        continue;
+      }
       items.push({ id: null, file: f, jenis: video ? 'video' : 'foto', url: URL.createObjectURL(f), judul: '', aktif: true, hapus: false });
     }
-    inputFile.value = ''; gambar();
+    gambar();
   });
 
   async function muat() {

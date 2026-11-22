@@ -1135,3 +1135,33 @@ html[data-device="hp"] .ikon-akun .avatar img{width:100%;height:100%;object-fit:
 @media (min-width:900px) and (max-height:760px){
   .k-foto{height:auto}
 }
+
+/* =====================================================================
+   [REVISI-11] Logo merek tanpa kotak (menyatu dengan latar) + "Sesuai kebutuhanmu" rata tengah
+   ===================================================================== */
+/* logo merek: tanpa kotak/bingkai/latar. multiply menghilangkan sisa latar putih bawaan file logo */
+.merek-item{border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--ink)}
+.merek-item img{mix-blend-mode:multiply}
+html[data-tema="gelap"] .merek-item img{filter:invert(1);mix-blend-mode:screen}
+
+/* judul dan kartu "Sesuai kebutuhanmu" rata tengah.
+   Kartu: laptop = 3 kartu pas selebar area (tidak terpotong); HP = tetap bisa digeser, kartu pertama/terakhir tetap di tengah bila muat */
+.ap-esensial .ap-h2{text-align:center}
+.ap-es-kartu{scroll-snap-align:center}
+.ap-es-kartu:first-child{margin-left:auto}
+.ap-es-kartu:last-child{margin-right:auto}
+@media (min-width:900px){
+  .ap-es-kartu{flex:0 0 min(calc((100% - 48px) / 3), 400px)}
+}
+/* HP: kartu pertama & terakhir berhenti tepat di tengah layar (kartu tetap bisa digeser) */
+@media (max-width:899px){
+  .ap-esensial-list{padding-inline:calc(50vw - min(298px, 72vw) / 2);scroll-padding-inline:calc(50vw - min(298px, 72vw) / 2)}
+}
+
+/* ===== Permintaan: 3 tab (Cek unit | Tersedia | Notifikasi), daftar di bawahnya yang bisa digulir ===== */
+.minta-tab{flex:none;display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--garis);background:var(--surface)}
+.minta-tab button{display:flex;align-items:center;justify-content:center;gap:6px;height:46px;padding:0 6px;border:0;border-bottom:2px solid transparent;background:none;color:var(--ink-3);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.minta-tab button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--aksen)}
+.minta-tab-n{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#dc2626;color:#fff;font-size:11px;line-height:18px;text-align:center}
+#mintaTab-cek .minta-tab-n,#mintaTab-tersedia .minta-tab-n{background:var(--ink-3)}
+#mintaIsi .minta-baris:first-child{padding-top:0}
