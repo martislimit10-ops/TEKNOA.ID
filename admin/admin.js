@@ -108,12 +108,27 @@ async function tampilkan(session) {
     return;
   }
   $('#viewCek').hidden = true; $('#viewPanel').hidden = false;
-  $('#labelPeran').textContent = '· ' + (peran === 'owner' ? 'Owner' : 'Admin');
   $('#tab-admin').hidden = peran !== 'owner';
   sudahMuat = true; muatSemuaTab(); if (peran === 'owner') muatAdmin(); toast('Berhasil masuk', 'sukses');
 }
 $('#btnCobaLagi').addEventListener('click', async () => { const { data } = await sb.auth.getSession(); tampilkan(data.session); });
 $('#btnKeluar').addEventListener('click', async () => { $('#btnKeluar').disabled = true; await AdminAuth.keluar(); keWebsite(); });
+
+/* ---------- Grup menu sidebar (buka-tutup) ----------
+   Default: semua tertutup. Grup yang berisi halaman aktif otomatis terbuka. Pilihan disimpan di localStorage. */
+const KUNCI_GRUP = 'teknoa_admin_grup';
+let statusGrup = {};
+try { statusGrup = JSON.parse(localStorage.getItem(KUNCI_GRUP)) || {}; } catch (e) { statusGrup = {}; }
+function setGrup(w, buka, simpan = true) {
+  w.classList.toggle('tutup', !buka);
+  $('.grup-btn', w).setAttribute('aria-expanded', String(buka));
+  if (simpan) { statusGrup[w.dataset.grup] = buka; try { localStorage.setItem(KUNCI_GRUP, JSON.stringify(statusGrup)); } catch (e) {} }
+}
+function bukaGrupDari(tab) { const w = tab.closest('.grup-wrap'); if (w && w.classList.contains('tutup')) setGrup(w, true); }
+$$('.grup-wrap').forEach(w => {
+  setGrup(w, statusGrup[w.dataset.grup] === true, false);
+  $('.grup-btn', w).addEventListener('click', () => setGrup(w, w.classList.contains('tutup')));
+});
 
 /* ---------- Tab ---------- */
 const tabs = $$('[role="tab"]');
@@ -123,7 +138,7 @@ function pilihTab(nama, fokus = false) {
     t.setAttribute('aria-selected', String(aktif)); t.tabIndex = aktif ? 0 : -1;
     $('#' + t.getAttribute('aria-controls')).hidden = !aktif;
     if (aktif && fokus) t.focus();
-    if (aktif) $('#judulHalaman').textContent = t.dataset.judul || t.firstChild.textContent.trim();
+    if (aktif) { $('#judulHalaman').textContent = t.dataset.judul || t.firstChild.textContent.trim(); bukaGrupDari(t); }
   });
   if (sudahMuat && nama === 'permintaan') muatPermintaan();
   if (sudahMuat && nama === 'dashboard') muatDashboard();
@@ -132,8 +147,8 @@ function pilihTab(nama, fokus = false) {
 tabs.forEach((t, i) => {
   t.addEventListener('click', () => pilihTab(t.dataset.tab));
   t.addEventListener('keydown', e => {
-    const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!k) return;
-    e.preventDefault(); const v = tabs.filter(x => !x.hidden), j = v.indexOf(t); pilihTab(v[(j + k + v.length) % v.length].dataset.tab, true);
+    const k = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 1, ArrowUp: -1 }[e.key]; if (!k) return;
+    e.preventDefault(); const v = tabs.filter(x => !x.hidden && !x.closest('.grup-wrap.tutup')), j = v.indexOf(t); pilihTab(v[(j + k + v.length) % v.length].dataset.tab, true);
   });
 });
 
@@ -146,16 +161,17 @@ const KONFIG_MEDIA = {
     info: 'Tampil di laptop/PC. Gunakan foto/video LANDSCAPE 16:9 (contoh 1920×1080).' },
   hero_hp: { judul: 'Media Hero HP', maks: 8, video: true, rasio: 'r-hp',
     info: 'Tampil di HP. Gunakan foto/video POTRET 9:16 (contoh 1080×1920).' },
+  toko: { judul: 'Foto "Kunjungi Toko Kami"', maks: 4, video: false, rasio: '',
+    info: 'Khusus foto, maksimal 4. Tampil turun ke bawah di HP (lebar penuh) dan 2 kolom di laptop. Foto tampil utuh, tidak dipotong. Pakai foto beresolusi tinggi (min. lebar 1600 px).' },
 };
 
 function buatManajerMedia(root, bagian) {
   const cfg = KONFIG_MEDIA[bagian];
+  if (!cfg) return;                 /* bagian tanpa konfigurasi dilewati (tidak boleh mematikan seluruh panel) */
   let items = [];
   let sibuk = false;
 
   root.innerHTML = `
-    <div class="bagian-kepala"><div><h2>${esc(cfg.judul)}</h2><p class="muted" data-hitung></p></div></div>
-    <p class="aturan">${esc(cfg.info)} Urutan slide mengikuti urutan daftar di bawah.${cfg.video ? ' Video maksimal ' + BATAS_MB + ' MB (disarankan MP4/H.264 di bawah 15 MB agar cepat dimuat).' : ''}</p>
     <div class="daftar" data-daftar></div>
     <div class="unggah">
       <label for="u-${bagian}">Tambah ${cfg.video ? 'foto atau video' : 'foto'}</label>
@@ -163,12 +179,11 @@ function buatManajerMedia(root, bagian) {
       <small>File baru baru dikirim setelah kamu menekan Simpan.</small>
     </div>
     <div class="bar-simpan"><button type="button" class="btn" data-simpan>Simpan</button><span class="pesan" data-pesan role="status"></span></div>`;
-  const elDaftar = $('[data-daftar]', root), elHitung = $('[data-hitung]', root), elPesan = $('[data-pesan]', root), btnSimpan = $('[data-simpan]', root), inputFile = $('input[type=file]', root);
+  const elDaftar = $('[data-daftar]', root), elPesan = $('[data-pesan]', root), btnSimpan = $('[data-simpan]', root), inputFile = $('input[type=file]', root);
 
   const aktifJumlah = () => items.filter(x => !x.hapus).length;
 
   function gambar() {
-    elHitung.textContent = `${aktifJumlah()} dari maksimal ${cfg.maks} slide`;
     if (!items.length) { elDaftar.innerHTML = '<div class="kosong">Belum ada media. Tambahkan lewat kotak di bawah.</div>'; return; }
     elDaftar.innerHTML = items.map((x, i) => `
       <div class="media ${x.file ? 'baru' : ''} ${x.hapus ? 'hapus' : ''}" data-k="${i}">
@@ -496,6 +511,7 @@ async function ambilPermintaan() {
   permintaanData = data || [];
   const n = kelompokMinta().filter(g => g.status === 'menunggu').length, bd = $('#badgePermintaan');
   bd.hidden = !n; bd.textContent = n;
+  const bl = $('#badgeLainnya'); if (bl) { bl.hidden = !n; bl.textContent = n; }
 }
 /* Satu baris per laptop: jumlah peminta, waktu permintaan terbaru, dan status gabungan
    (menunggu bila masih ada peminta yang belum diproses; lalu ditangani; disetujui bila semuanya disetujui). */
@@ -607,7 +623,7 @@ async function muatUnggulanAdmin() {
   el.innerHTML = unggulanData.map((u, i) => `<div class="req ${u.aktif ? '' : 'selesai'}" data-uid="${u.id}">
     <img class="u-thumb" src="${esc(u.foto_url.startsWith('images/') ? '../' + u.foto_url : u.foto_url)}" alt="" loading="lazy">
     <div class="req-isi"><b>${esc(u.judul)}</b><span class="muted">${esc(u.deskripsi || '')}</span></div>
-    <div class="req-aksi"><span class="tag ${u.aktif ? 'tag-ok' : ''}">${u.aktif ? 'Tampil' : 'Disembunyikan'}</span><button type="button" class="btn btn-garis btn-kecil" data-aksi="naik-u" aria-label="Naik" ${i === 0 ? 'disabled' : ''}>&uarr; Naik</button><button type="button" class="btn btn-garis btn-kecil" data-aksi="turun-u" aria-label="Turun" ${i === unggulanData.length - 1 ? 'disabled' : ''}>&darr; Turun</button><button type="button" class="btn btn-garis btn-kecil" data-aksi="ubah-u">Ubah</button></div></div>`).join('')
+    <div class="req-aksi"><span class="tag ${u.aktif ? 'tag-ok' : ''}">${u.aktif ? 'Tampil' : 'Disembunyikan'}</span><button type="button" class="btn btn-garis btn-kecil" data-aksi="ubah-u">Ubah</button></div></div>`).join('')
     || '<div class="kosong">Belum ada kartu unggulan.</div>';
 }
 function lepasPrevU() { if (prevUrl) { URL.revokeObjectURL(prevUrl); prevUrl = null; } }
@@ -618,49 +634,22 @@ function bukaFormUnggulan(u) {
   $('#u-grup').value = u?.grup || 'laptop'; $('#u-kat').value = u?.kategori_toko || 'macbook';
   $('#u-urut').value = u ? u.urutan : (unggulanData.reduce((m, x) => Math.max(m, x.urutan), 0) + 1);
   $('#u-desk').value = u?.deskripsi || ''; $('#u-peng').value = u?.penjelasan || ''; $('#u-poin').value = (u?.poin || []).join('\n');
-  $('#u-warna').value = (u?.warna || []).map(w => [w.t || '', w.c || '', w.c2 || ''].filter((x, i) => i < 2 || x).join(' | ')).join('\n');
   $('#u-aktif').checked = u ? u.aktif : true;
-  const im = $('#u-prev'); im.hidden = !u; if (u) im.src = u.foto_url.startsWith('images/') ? '../' + u.foto_url : u.foto_url;
+  const im = $('#u-prev'); $('#u-fotorusak').hidden = true; im.hidden = !u; if (u) im.src = u.foto_url.startsWith('images/') ? '../' + u.foto_url : u.foto_url;
+  $('#u-fotonama').textContent = 'JPG, PNG, atau WebP. Foto otomatis dipotong dan diperbesar agar pas dengan kotak kartu di website.';
   $('#btnHapusUnggulan').hidden = !u; setPesan($('#pesanUnggulan'), '');
   dlgU.showModal();
 }
 $('#btnTambahUnggulan').addEventListener('click', () => bukaFormUnggulan(null));
-/* "Nama | #hex [| #hex2]" per baris -> [{t,c,c2}] (kode warna dicek supaya tidak ada nilai aneh masuk ke CSS) */
-function parseWarna(teks) {
-  const hex = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i, hasil = [];
-  for (const baris of teks.split('\n')) {
-    const b = baris.trim(); if (!b) continue;
-    const [t, c, c2] = b.split('|').map(x => x.trim());
-    if (!hex.test(c || '')) throw new Error(`Kode warna "${c || ''}" tidak valid. Pakai format #e3e4e6 (baris: ${b})`);
-    const w = { c: c.toLowerCase(), t: (t || '').slice(0, 30) };
-    if (c2) { if (!hex.test(c2)) throw new Error(`Kode warna ke-2 "${c2}" tidak valid.`); w.c2 = c2.toLowerCase(); }
-    hasil.push(w);
-  }
-  return hasil.slice(0, 12);
-}
-let sedangUrut = false;
-async function geserUnggulan(id, arah) {
-  if (sedangUrut) return;
-  const l = unggulanData.slice(), i = l.findIndex(x => x.id === id), j = i + arah;
-  if (i < 0 || j < 0 || j >= l.length) return;
-  sedangUrut = true;
-  [l[i], l[j]] = [l[j], l[i]];
-  /* nomor urut dirapikan 1..n supaya tidak ada urutan kembar; hanya baris yang berubah yang disimpan */
-  const ubah = l.map((x, k) => ({ x, n: k + 1 })).filter(o => o.x.urutan !== o.n);
-  let gagal = null;
-  for (const o of ubah) {
-    const { data, error } = await sb.from('produk_unggulan').update({ urutan: o.n }).eq('id', o.x.id).select('id');
-    if (error || !data || !data.length) { gagal = error ? pesanGalat(error) : 'tidak ada data yang berubah (periksa izin admin)'; break; }
-  }
-  sedangUrut = false;
-  if (gagal) toast('Urutan belum tersimpan: ' + gagal, 'galat'); else toast('Urutan tersimpan. Website terbarui otomatis.', 'sukses');
-  muatUnggulanAdmin();
-}
+/* Foto yang tidak bisa dimuat (file hilang): beri tahu, jangan diam saja */
+$('#u-prev').addEventListener('error', () => { $('#u-prev').hidden = true; $('#u-fotorusak').hidden = false; });
+$('#daftarUnggulan').addEventListener('error', e => {
+  const im = e.target; if (!im.classList || !im.classList.contains('u-thumb')) return;
+  im.classList.add('rusak'); im.removeAttribute('src'); im.alt = 'Foto hilang';
+}, true);
 $('#daftarUnggulan').addEventListener('click', e => {
   const b = e.target.closest('[data-aksi]'), row = e.target.closest('[data-uid]'); if (!b || !row) return;
   const id = Number(row.dataset.uid);
-  if (b.dataset.aksi === 'naik-u') return geserUnggulan(id, -1);
-  if (b.dataset.aksi === 'turun-u') return geserUnggulan(id, 1);
   if (b.dataset.aksi === 'ubah-u') bukaFormUnggulan(unggulanData.find(x => x.id === id));
 });
 $$('[data-tutup]', dlgU).forEach(b => b.addEventListener('click', () => dlgU.close()));
@@ -670,7 +659,7 @@ $('#u-foto').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { e.target.value = ''; return setPesan($('#pesanUnggulan'), 'Foto harus JPG, PNG, atau WebP.', true); }
   fotoUnggulanBaru = f; lepasPrevU(); prevUrl = URL.createObjectURL(f);
-  const im = $('#u-prev'); im.src = prevUrl; im.hidden = false; setPesan($('#pesanUnggulan'), '');
+  const im = $('#u-prev'); im.src = prevUrl; im.hidden = false; $('#u-fotorusak').hidden = true; $('#u-fotonama').textContent = 'Foto baru dipilih: ' + f.name + '. Tekan Simpan untuk menerapkan.'; setPesan($('#pesanUnggulan'), '');
 });
 formU.addEventListener('submit', async e => {
   e.preventDefault();
@@ -684,7 +673,7 @@ formU.addEventListener('submit', async e => {
       judul: $('#u-judul').value.trim(), sub_judul: $('#u-sub').value.trim() || null, label: $('#u-label').value.trim() || null,
       grup: $('#u-grup').value, kategori_toko: $('#u-kat').value.trim() || 'macbook', urutan: parseInt($('#u-urut').value, 10) || 0,
       deskripsi: $('#u-desk').value.trim() || null, penjelasan: $('#u-peng').value.trim() || null,
-      poin: $('#u-poin').value.split('\n').map(x => x.trim()).filter(Boolean).slice(0, 8), warna: parseWarna($('#u-warna').value), aktif: $('#u-aktif').checked
+      poin: $('#u-poin').value.split('\n').map(x => x.trim()).filter(Boolean).slice(0, 8), aktif: $('#u-aktif').checked
     };
     if (!isi.judul) throw new Error('Nama wajib diisi.');
     if (urlBaru) isi.foto_url = urlBaru;

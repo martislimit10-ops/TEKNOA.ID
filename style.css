@@ -433,9 +433,14 @@ html[data-tema="gelap"] .tangan-riak{border-color:rgba(230,230,240,.7);backgroun
    [REVISI-2] Gambar selalu pas dengan bingkai (mode "zoom": object-fit cover, tanpa kotak kosong)
    HP: 1 slide per layar; layar lebar: beberapa slide berdampingan.
    ===================================================================== */
-html .galeri .galeri-item{aspect-ratio:4/3}
-html .galeri .galeri-item img{width:100%;height:100%;max-height:none;object-fit:cover}
-html .galeri .galeri-item:last-child:nth-child(odd){aspect-ratio:16/9}
+/* Galeri toko: bingkai lebih tinggi (tidak pipih), foto mengisi penuh dan dipusatkan */
+html .galeri .galeri-item{aspect-ratio:1/1}
+html .galeri .galeri-item img{width:100%;height:100%;max-height:none;object-fit:cover;object-position:center}
+html .galeri .galeri-item:last-child:nth-child(odd){aspect-ratio:1/1}
+@media (min-width:900px){
+  html[data-device="desktop"] .galeri .galeri-item,
+  html[data-device="desktop"] .galeri .galeri-item:last-child:nth-child(odd){aspect-ratio:1/1}
+}
 
 /* =====================================================================
    AKUN GOOGLE, FAVORIT, BANDINGKAN (fitur login)
@@ -608,8 +613,6 @@ html[data-tema="gelap"] .ap-strip-prev{background:linear-gradient(270deg,transpa
 .k-kartu[hidden]{display:none}
 .k-foto{aspect-ratio:266/180;display:grid;place-items:center;padding:10px;overflow:hidden;border-radius:18px;background:var(--ap-kartu)}
 .k-foto img{width:100%;height:100%;object-fit:contain}
-.k-warna{display:flex;gap:7px;min-height:14px;margin-top:40px}
-.k-titik{display:block;position:relative;width:14px;height:14px;padding:0;border:0;border-radius:50%;background:var(--c,#ccc);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);pointer-events:none;cursor:default}
 .k-sub{margin-top:6px;font-size:21px;font-weight:600;line-height:1.2;color:var(--ap-ink)}
 .k-isi{display:flex;flex:1;flex-direction:column;margin-top:40px}
 .k-label{font-size:15px;font-weight:600;line-height:1.2;color:var(--ap-oranye)}
@@ -708,7 +711,6 @@ html[data-tema="gelap"] .ap-strip-prev{background:linear-gradient(270deg,transpa
   .ap-kartu-list{gap:28px;margin-inline:-32px;padding-inline:32px;scroll-padding-inline:32px}
   .k-kartu{flex-basis:min(33vw,460px);align-items:stretch;text-align:center}
   .k-foto{aspect-ratio:460/300;padding:20px}
-  .k-warna{justify-content:center;margin-top:36px}
   .k-isi{align-items:center;margin-top:36px}
   .k-judul{font-size:32px;min-height:0;margin-top:14px}
   .k-desk{font-size:19px;font-weight:400;min-height:4em;margin-top:14px;max-width:34ch}
@@ -752,15 +754,13 @@ html[data-tema="gelap"] .ap-strip-prev{background:linear-gradient(270deg,transpa
 .info-tutup{position:sticky;top:0;float:right;z-index:2;width:36px;height:36px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:var(--ap-pill);color:var(--ap-ink);cursor:pointer}
 .info-tutup svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .info-foto{clear:both;aspect-ratio:3/2;display:grid;place-items:center;margin:4px -8px 18px;border-radius:18px;background:var(--ap-kartu);overflow:hidden}
-.info-foto img{width:100%;height:100%;object-fit:contain}
+.info-foto img{width:100%;height:100%;object-fit:cover}
 .info-label{min-height:1em;font-size:15px;font-weight:600;color:var(--ap-oranye)}
 .info-judul{margin-top:6px;font-size:30px;font-weight:600;letter-spacing:-.015em;line-height:1.14}
 .info-ringkas{margin-top:12px;font-size:17px;line-height:1.45}
 .info-poin{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:10px}
 .info-poin li{position:relative;padding-left:22px;font-size:16px;line-height:1.4}
 .info-poin li::before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--ap-biru)}
-.info-warna{margin-top:16px;font-size:15px;color:var(--ap-ink2)}
-.info-warna:empty{display:none}
 .info-aksi{padding-top:26px}
 .info-batal{border:0;background:none;color:var(--ap-link);font-size:17px;cursor:pointer}
 .info-batal:hover{text-decoration:underline}
@@ -777,7 +777,6 @@ body:has(.info-modal[open]){overflow:hidden}
   .k-kartu{flex-basis:calc((100% - 3 * clamp(18px,2vw,28px)) / 3.25)}
   .k-foto{display:block;aspect-ratio:auto;height:clamp(150px,27vh,300px);padding:clamp(8px,1.4vh,20px);box-sizing:border-box}
   .k-foto img{display:block;width:100%;height:100%;object-fit:contain}
-  .k-warna{margin-top:clamp(16px,3vh,32px)}
   .k-isi{margin-top:clamp(14px,2.6vh,30px)}
   .k-label{font-size:clamp(12px,1.1vw,15px)}
   .k-judul{font-size:clamp(20px,2.1vw,30px);margin-top:clamp(6px,1vh,12px)}
@@ -1030,7 +1029,7 @@ html[data-device="hp"] .kartu .harga{min-height:46px}
 
 /* kartu produk: kotak mengikuti foto persis (tanpa bingkai gelap di kiri-kanan foto) */
 .k-foto{padding:0 !important;background:transparent;display:flex;justify-content:center;align-items:center}
-.k-foto img{display:block;width:auto;max-width:100%;height:100%;border-radius:18px;object-fit:cover}
+.k-foto img{display:block;width:100%;max-width:100%;height:100%;border-radius:18px;object-fit:cover}
 /* section katalog: judul sudah tidak ada, jadi jarak atas tidak perlu 70px */
 .ap-jelajah{padding-top:0}
 
@@ -1121,4 +1120,18 @@ html[data-device="hp"] .ikon-akun .avatar img{width:100%;height:100%;object-fit:
     margin:0!important;width:30px!important;height:30px!important;border-radius:50%!important;
     background-size:cover;background-position:center;overflow:hidden}
   .ikon-akun .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+}
+
+/* [REVISI] Kartu produk di beranda: kotak foto rasio 3:2 (sama seperti foto di popup "Selengkapnya"),
+   tidak lagi panjang gepeng, dan jarak antar kartu serta ke teks dibuat lebih lega. */
+@media (min-width:900px){
+  .ap-kartu-list{gap:clamp(32px,3.4vw,52px)}
+  .k-kartu{flex-basis:calc((100% - 3 * clamp(32px,3.4vw,52px)) / 3.25)}
+  .k-foto{height:auto;aspect-ratio:3/2}
+  .k-isi{margin-top:clamp(24px,3.6vh,38px)}
+  .k-judul{margin-top:clamp(10px,1.4vh,16px)}
+  .k-desk{margin-top:clamp(10px,1.8vh,18px)}
+}
+@media (min-width:900px) and (max-height:760px){
+  .k-foto{height:auto}
 }

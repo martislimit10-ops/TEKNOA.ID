@@ -303,7 +303,6 @@ if (apPill) {
   });
 }
 
-/* Titik warna di kartu hanya hiasan (tidak bisa diklik), seperti di apple.com/mac */
 
 /* Popup "Selengkapnya": penjelasan produk, TIDAK ke toko/keranjang. Tombol "Beli" yang ke toko. */
 const PRODUK_INFO = {
@@ -345,9 +344,6 @@ function bukaInfo(id, pemicu) {
   $('#infoRingkas').textContent = p.ringkas;
   $('#infoPoin').innerHTML = p.poin.map(x => '<li>' + esc(x) + '</li>').join('');
   $('#infoBeli').dataset.kategori = p.kategori;
-  const kartu = pemicu && pemicu.closest('.k-kartu');
-  const warna = kartu ? $$('.k-titik', kartu).map(x => x.title).filter(Boolean) : [];
-  $('#infoWarna').textContent = warna.length ? 'Pilihan warna: ' + warna.join(', ') : '';
   infoModal.dataset.pemicu = id;
   if (!infoModal.open) infoModal.showModal();
 }
@@ -359,20 +355,10 @@ function bukaInfo(id, pemicu) {
    UNGGULAN === []    : admin menyembunyikan semua kartu -> seksi disembunyikan. */
 let UNGGULAN = null, sigUnggulan = '';
 const fotoUnggulan = u => /^(https:\/\/|images\/)/.test(String(u || '')) ? u : window.FOTO_KOSONG;
-const hexAman = c => /^#[0-9a-fA-F]{3,8}$/.test(String(c || '')) ? c : '';
-function titikWarna(w) {
-  const l = (Array.isArray(w) ? w : []).slice(0, 12).map(x => {
-    const c = hexAman(x && x.c), c2 = hexAman(x && x.c2); if (!c) return '';
-    const bg = c2 ? `;background:linear-gradient(90deg,${c} 0,${c} 38%,${c2} 62%,${c2} 100%)` : '';
-    return `<span class="k-titik" style="--c:${c}${bg}" title="${esc((x && x.t) || '')}"></span>`;
-  }).join('');
-  return l ? `<div class="k-warna" aria-hidden="true">${l}</div>` : '<div class="k-warna k-warna-kosong" aria-hidden="true"></div>';
-}
 function kartuUnggulan(r) {
   const nama = r.judul || '';
   return `<article class="k-kartu" data-grup="${esc(r.grup)}">
     <div class="k-foto"><img src="${esc(fotoUnggulan(r.foto_url))}" alt="${esc(nama)}" width="1200" height="800" loading="lazy" decoding="async" ${fotoErr}></div>
-    ${titikWarna(r.warna)}
     <div class="k-isi">
       <p class="k-label"${r.label ? '' : ' aria-hidden="true"'}>${r.label ? esc(r.label) : '&nbsp;'}</p>
       <h3 class="k-judul">${esc(nama)}</h3>
