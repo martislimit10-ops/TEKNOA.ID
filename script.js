@@ -932,7 +932,7 @@ function isiAkunDialog() {
    Sign up  = popup pilih akun Google (One Tap); bila tidak muncul, lembar Log in terbuka.
    Log in   = lembar pilihan: Google, Facebook, Email di layar awal; sisanya di "Lanjutkan dengan cara lain". */
 const MASUK = { lihat: 'lain', asal: 'lain', email: '', timerUlang: null };
-const JUDUL_MASUK = { awal: 'Masuk atau daftar dalam hitungan detik', lain: 'Lanjutkan ke Laptop Makassar', email: 'Masuk dengan email', kode: 'Cek emailmu' };
+const JUDUL_MASUK = { awal: 'Masuk atau daftar dalam hitungan detik', lain: 'Log in', email: 'Masuk dengan email', kode: 'Cek emailmu' };
 const providerAktif = p => typeof LOGIN_PROVIDER === 'undefined' || LOGIN_PROVIDER[p] !== false;
 const pesanMasuk = (teks, info) => { const e = $('#masukPesan'); e.textContent = teks || ''; e.hidden = !teks; e.classList.toggle('info', !!info); };
 
