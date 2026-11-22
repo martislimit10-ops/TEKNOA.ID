@@ -2,19 +2,15 @@ const CONFIG = { ...CONFIG_AWAL };
 let PRODUK = [];
 let BANNER = [];
 const DEVICE = window.LM_HP ? 'hp' : 'desktop';
-const PAGE = 12;   /* kelipatan 3: grid 3 kolom di laptop */
+const PAGE = 12;   /* jumlah produk per halaman; sisanya lewat tombol "Lainnya" */
 const MAKS_QTY = 5;
 const KEY_KERANJANG = 'lm_keranjang';
-const KEY_BANDING = 'lm_bandingkan';
-const MAKS_BANDING = 4;
 /* Akun user. Admin yang baru login diarahkan ke /admin/ (peran dari database); keamanan data tetap di RLS. */
 let USER = null, IS_ADMIN = false, PERAN_PASTI = false;   /* PERAN_PASTI: peran (admin/user) sudah diketahui -> baru tampilkan fitur user */
-const modeUser = () => !!USER && !IS_ADMIN && PERAN_PASTI;  /* fitur user (Akun saya, Permintaan, Bandingkan) HANYA untuk user biasa, tidak untuk admin */
+const modeUser = () => !!USER && !IS_ADMIN && PERAN_PASTI;  /* fitur user (Akun saya, Permintaan) HANYA untuk user biasa, tidak untuk admin */
 function bukaPanelAdmin() { location.assign((typeof SITUS_ADMIN === 'string' && SITUS_ADMIN) || 'admin/'); }
 let MINTA = [];                                  /* permintaan ketersediaan milik user (tabel permintaan_stok) */
 let NOTIF = [];                                  /* notifikasi milik user (tabel notifications), terbaru di depan */
-let CMP = (() => { try { const a = JSON.parse(localStorage.getItem(KEY_BANDING) || '[]'); return Array.isArray(a) ? a.map(String).slice(0, MAKS_BANDING) : []; } catch (e) { return []; } })();
-const adaBanding = id => !!USER && CMP.includes(String(id));
 const kurangGerak = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fotoErr = `onerror="this.onerror=null;this.src=window.FOTO_KOSONG"`;
 const waLink = teks => `https://wa.me/${String(CONFIG.wa || '').replace(/\D/g, '')}?text=${encodeURIComponent(teks)}`;
@@ -53,7 +49,6 @@ function tautanSosmed(nilai, dasar) {
   if (/^https?:\/\//i.test(v)) return v;
   return dasar + encodeURIComponent(v.replace(/^@/, ''));
 }
-const handle = v => '@' + String(v || '').trim().replace(/^https?:\/\/[^/]+\/@?/i, '').replace(/^@/, '').replace(/\/$/, '');
 
 $('#tahun').textContent = new Date().getFullYear();
 
@@ -62,14 +57,9 @@ function terapkanConfig() {
   $$('[data-fill]').forEach(el => { el.textContent = CONFIG[el.dataset.fill] ?? ''; });
   $$('[data-wa]').forEach(a => { a.href = waLink(CONFIG.pesan_umum); });
   $$('[data-ig]').forEach(a => { a.href = tautanSosmed(CONFIG.instagram, 'https://www.instagram.com/'); });
-  $$('[data-ig-text]').forEach(s => { s.textContent = handle(CONFIG.instagram); });
   $$('[data-tt]').forEach(a => { a.href = tautanSosmed(CONFIG.tiktok, 'https://www.tiktok.com/@'); });
-  $$('[data-tt-text]').forEach(s => { s.textContent = handle(CONFIG.tiktok); });
   $$('[data-maps]').forEach(a => { a.href = CONFIG.maps_link; });
   $$('[data-mail]').forEach(a => { a.href = CONFIG.email ? 'mailto:' + CONFIG.email : '#'; a.hidden = !CONFIG.email; });
-  const peta = $('#peta');
-  if (peta && CONFIG.peta_embed_url && peta.getAttribute('src') !== CONFIG.peta_embed_url) peta.src = CONFIG.peta_embed_url;
-  if (peta) peta.closest('.peta').hidden = !CONFIG.peta_embed_url;
 }
 
 /* ---------- 3. Tema & sidebar ---------- */
@@ -117,9 +107,8 @@ document.addEventListener('keydown', e => {
 });
 
 /* ---------- 4. Hero slider (foto + video) ---------- */
-const hero = { slides: [], idx: 0, timer: null, jeda: false, ditahan: false, sig: '' };
+const hero = { slides: [], idx: 0, timer: null, ditahan: false, sig: '' };
 const heroEl = $('#hero'), heroTrack = $('#heroTrack');
-const IKON = id => `<svg><use href="#${id}"/></svg>`;
 
 function daftarHero() {
   const utama = DEVICE === 'hp' ? 'hero_hp' : 'hero_desktop';
@@ -132,7 +121,7 @@ function renderHero() {
   const l = daftarHero();
   const sig = JSON.stringify(l.map(b => [b.id, b.url, b.jenis, b.judul, b.urutan]));
   if (sig === hero.sig) return;
-  hero.sig = sig; hero.slides = l; hero.idx = 0; hero.jeda = false;
+  hero.sig = sig; hero.slides = l; hero.idx = 0;
   clearTimeout(hero.timer);
 
   if (!l.length) {
@@ -168,12 +157,11 @@ function slideAktif() { return hero.slides[hero.idx]; }
 function videoAktif() { return heroTrack.children[hero.idx]?.querySelector('video') || null; }
 function jadwalkanHero(ms) {
   clearTimeout(hero.timer);
-  if (hero.slides.length < 2 || hero.ditahan || hero.jeda) return;
+  if (hero.slides.length < 2 || hero.ditahan) return;
   hero.timer = setTimeout(() => heroKe(hero.idx + 1), ms);
 }
 function heroKe(i, awal = false) {
   const n = hero.slides.length; if (!n) return;
-  if (!awal) hero.jeda = false;
   hero.idx = ((i % n) + n) % n;
   heroTrack.style.transform = `translateX(-${hero.idx * 100}%)`;
   $$('.hero-slide', heroTrack).forEach((s, k) => s.setAttribute('aria-hidden', String(k !== hero.idx)));
@@ -193,7 +181,7 @@ function heroTahan(ya) {
   const v = videoAktif();
   if (ya) { clearTimeout(hero.timer); if (v) v.pause(); }
   else if (slideAktif()) {
-    if (v && !hero.jeda) v.play().catch(() => {});
+    if (v) v.play().catch(() => {});
     else if (slideAktif().jenis !== 'video') jadwalkanHero(5500);
   }
 }
@@ -233,99 +221,44 @@ function renderSliderToko() {
    database (lihat 5c, tabel produk_unggulan, diatur di panel admin); kartu statis di index.html hanya cadangan.
    Tombol "Beli" membuka halaman Toko + keranjang, langsung terfilter ke kategori kartu. */
 
-/* Pembantu carousel horizontal: panah, status disabled, sembunyikan panah kalau muat semua */
-function pasangCarousel(list, prev, next, nav) {
-  if (!list || !prev || !next) return () => {};
-  const upd = () => {
-    const muat = list.scrollWidth > list.clientWidth + 4;
-    if (nav) nav.hidden = !muat;
-    prev.disabled = list.scrollLeft < 4;
-    next.disabled = list.scrollLeft + list.clientWidth >= list.scrollWidth - 4;
-  };
+/* Pembantu carousel horizontal: tombol panah kiri/kanan di keyboard menggeser daftar satu kartu */
+function pasangCarousel(list) {
+  if (!list) return;
   const geser = arah => {
     const k = [...list.children].find(c => c.offsetParent !== null);
     const gap = parseFloat(getComputedStyle(list).columnGap) || 0;
     const langkah = k ? k.getBoundingClientRect().width + gap : list.clientWidth * .8;
     list.scrollBy({ left: arah * langkah, behavior: kurangGerak() ? 'auto' : 'smooth' });
   };
-  prev.addEventListener('click', () => geser(-1));
-  next.addEventListener('click', () => geser(1));
-  list.addEventListener('scroll', () => requestAnimationFrame(upd), { passive: true });
   list.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') { e.preventDefault(); geser(1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); geser(-1); }
   });
-  $$('img', list).forEach(im => im.addEventListener('load', upd));
-  return upd;
 }
 const katalogList = $('#katalogList');
-const updKatalog = pasangCarousel(katalogList, $('#katalogPrev'), $('#katalogNext'), $('#katalogNav'));
-const updEsensial = pasangCarousel($('#esensialList'), $('#esensialPrev'), $('#esensialNext'), $('#esensialNav'));
+pasangCarousel(katalogList);
+pasangCarousel($('#esensialList'));
 
-/* Strip ikon di bawah judul TEKNO: panah kanan/kiri muncul sesuai posisi geser */
-const apStrip = $('#apStrip'), stripPrev = $('#apStripPrev'), stripNext = $('#apStripNext');
+/* Strip ikon di bawah judul TEKNO: panah kanan muncul bila masih ada ikon di sebelah kanan */
+const apStrip = $('#apStrip'), stripNext = $('#apStripNext');
 function updStrip() {
   if (!apStrip) return;
   const luber = apStrip.scrollWidth > apStrip.clientWidth + 4;
-  stripPrev.hidden = !luber || apStrip.scrollLeft < 4;
   stripNext.hidden = !luber || apStrip.scrollLeft + apStrip.clientWidth >= apStrip.scrollWidth - 4;
 }
 if (apStrip) {
   apStrip.addEventListener('scroll', () => requestAnimationFrame(updStrip), { passive: true });
-  const stripGeser = a => apStrip.scrollBy({ left: a * apStrip.clientWidth * .7, behavior: kurangGerak() ? 'auto' : 'smooth' });
-  stripPrev.addEventListener('click', () => stripGeser(-1));
-  stripNext.addEventListener('click', () => stripGeser(1));
-}
-
-/* Pill filter: Semua produk | Laptop | Desktop | Layar */
-const apPill = $('#apPill'), apPillNext = $('#apPillNext');
-function updPill() {
-  if (!apPill) return;
-  apPillNext.hidden = apPill.scrollWidth <= apPill.clientWidth + 4 || apPill.scrollLeft + apPill.clientWidth >= apPill.scrollWidth - 4;
-}
-if (apPill) {
-  apPill.addEventListener('scroll', () => requestAnimationFrame(updPill), { passive: true });
-  apPillNext.addEventListener('click', () => apPill.scrollBy({ left: 140, behavior: kurangGerak() ? 'auto' : 'smooth' }));
-  apPill.addEventListener('click', e => {
-    const b = e.target.closest('[data-filter]'); if (!b) return;
-    const f = b.dataset.filter;
-    $$('.ap-pill-btn', apPill).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    $$('.k-kartu', katalogList).forEach(c => { c.hidden = f !== 'all' && c.dataset.grup !== f; });
-    katalogList.scrollLeft = 0; updKatalog();
-  });
+  stripNext.addEventListener('click', () => apStrip.scrollBy({ left: apStrip.clientWidth * .7, behavior: kurangGerak() ? 'auto' : 'smooth' }));
 }
 
 
 /* Popup "Selengkapnya": penjelasan produk, TIDAK ke toko/keranjang. Tombol "Beli" yang ke toko. */
-const PRODUK_INFO = {
-  'neo': { foto: 1, judul: 'MacBook Neo', ringkas: 'Keajaiban Mac dengan harga mengejutkan. Cocok buat yang mau masuk ke dunia Mac tanpa bikin kantong jebol.',
-    poin: ['Pintu masuk paling terjangkau ke keluarga MacBook', 'Ringan dan praktis untuk kuliah, sekolah, dan kerja harian', 'Tampil dalam 4 warna segar'] },
-  'air': { foto: 2, judul: 'MacBook Air 13″ dan 15″', ringkas: 'Tipis, cepat, andal, dan portabel. Laptop paling pas buat dibawa ke mana-mana.',
-    poin: ['Tersedia ukuran layar 13″ dan 15″', 'Desain sangat tipis dan ringan', 'Tenaga cukup untuk kerja, kuliah, dan kreatif sehari-hari'] },
-  'pro-m6': { foto: 3, judul: 'MacBook Pro 14″ dan 16″', label: '14″ baru dengan M6', ringkas: 'Laptop bertenaga untuk tiap tipe pro, kini hadir versi 14″ baru dengan chip M6.',
-    poin: ['Pilihan ukuran 14″ dan 16″', 'Chip M6 pada model 14″ baru', 'Dibuat untuk alur kerja berat: editing, desain, dan pengembangan'] },
-  'pro-xdr': { foto: 4, judul: 'MacBook Pro 14″ dan 16″', label: 'Baru · Layar PROLED XDR', ringkas: 'MacBook Pro paling canggih dengan layar laptop terbaik di dunia.',
-    poin: ['Layar PROLED XDR dengan kualitas gambar kelas atas', 'Pilihan ukuran 14″ dan 16″', 'Untuk kreator dan profesional yang butuh akurasi warna'] },
-  'imac': { foto: 5, judul: 'iMac', label: 'Baru', ringkas: 'Desktop lengkap untuk kreativitas dan produktivitas. Layar, komputer, dan desain jadi satu.',
-    poin: ['Desktop all-in-one: tinggal colok dan pakai', 'Layar Retina yang tajam dan cerah', 'Tersedia dalam 7 warna'] },
-  'mini': { foto: 6, judul: 'Mac mini', label: 'Baru', ringkas: 'Desktop Mac paling mini dan terjangkau. Ukurannya kecil, tenaganya tidak.',
-    poin: ['Paling ringkas dan paling terjangkau di antara desktop Mac', 'Muat di meja sempit atau mudah dibawa', 'Pakai monitor, keyboard, dan mouse pilihanmu'] },
-  'studio': { foto: 7, judul: 'Mac Studio', label: 'Baru', ringkas: 'Performa dan konektivitas andal untuk profesional.',
-    poin: ['Tenaga besar untuk render, editing video, dan kerja berat', 'Banyak port untuk perangkat dan layar tambahan', 'Desain ringkas, cocok untuk meja kerja studio'] },
-  'display': { foto: 8, judul: 'Studio Display', ringkas: 'Layar Retina 5K yang sempurna untuk Mac.',
-    poin: ['Resolusi Retina 5K, gambar dan teks sangat tajam', 'Dirancang serasi dengan Mac', 'Enak dipakai kerja seharian'] },
-  'display-xdr': { foto: 9, judul: 'Studio Display XDR', ringkas: 'Layar Retina XDR 5K terbaik untuk alur kerja kreatif dan pro.',
-    poin: ['Layar Retina XDR 5K dengan kecerahan dan kontras tinggi', 'Untuk editing foto, video, dan grading warna', 'Pilihan tertinggi untuk alur kerja profesional'] }
-};
 const infoModal = $('#infoModal');
-/* Data popup: kartu dari database (id "u<angka>") atau kartu statis cadangan (PRODUK_INFO) */
+/* Data popup "Selengkapnya": diambil dari kartu produk unggulan (database), id kartu berbentuk "u<angka>" */
 function dataInfo(id) {
-  if (/^u\d+$/.test(id)) {
-    const r = (UNGGULAN || []).find(x => 'u' + x.id === id); if (!r) return null;
-    return { foto: fotoUnggulan(r.foto_url), judul: r.judul, label: r.label || '', ringkas: r.penjelasan || r.deskripsi || '', poin: Array.isArray(r.poin) ? r.poin : [], kategori: r.kategori_toko || 'macbook' };
-  }
-  const p = PRODUK_INFO[id]; if (!p) return null;
-  return { foto: 'images/katalog/foto' + p.foto + '.png', judul: p.judul, label: p.label || '', ringkas: p.ringkas, poin: p.poin, kategori: 'macbook' };
+  if (!/^u\d+$/.test(id)) return null;
+  const r = (UNGGULAN || []).find(x => 'u' + x.id === id); if (!r) return null;
+  return { foto: fotoUnggulan(r.foto_url), judul: r.judul, label: r.label || '', ringkas: r.penjelasan || r.deskripsi || '', poin: Array.isArray(r.poin) ? r.poin : [], kategori: r.kategori_toko || 'macbook' };
 }
 function bukaInfo(id, pemicu) {
   const p = dataInfo(id); if (!p || !infoModal) return;
@@ -343,13 +276,13 @@ function bukaInfo(id, pemicu) {
 /* ---------- 5c. Produk unggulan ("Jelajahi jajarannya") dari database ----------
    Info (nama, deskripsi, label, grup, poin) ada di tabel produk_unggulan; foto di Supabase Storage (bucket media).
    Diatur admin lewat panel > Produk Unggulan; perubahan tampil otomatis (realtime).
-   UNGGULAN === null  : tabel belum ada / gagal dimuat -> kartu statis di index.html tetap dipakai (cadangan).
+   UNGGULAN === null  : tabel belum ada / gagal dimuat -> daftar dibiarkan kosong.
    UNGGULAN === []    : admin menyembunyikan semua kartu -> seksi disembunyikan. */
 let UNGGULAN = null, sigUnggulan = '';
 const fotoUnggulan = u => /^(https:\/\/|images\/)/.test(String(u || '')) ? u : window.FOTO_KOSONG;
 function kartuUnggulan(r) {
   const nama = r.judul || '';
-  return `<article class="k-kartu" data-grup="${esc(r.grup)}">
+  return `<article class="k-kartu">
     <div class="k-foto"><img src="${esc(fotoUnggulan(r.foto_url))}" alt="${esc(nama)}" width="1200" height="800" loading="lazy" decoding="async" ${fotoErr}></div>
     <div class="k-isi">
       <p class="k-label"${r.label ? '' : ' aria-hidden="true"'}>${r.label ? esc(r.label) : '&nbsp;'}</p>
@@ -370,10 +303,6 @@ function renderUnggulan() {
   sigUnggulan = sig;
   const seksi = katalogList.closest('section'); if (seksi) seksi.hidden = !UNGGULAN.length;
   katalogList.innerHTML = UNGGULAN.map(kartuUnggulan).join('');
-  const aktif = apPill && $('.ap-pill-btn[aria-pressed="true"]', apPill), f = (aktif && aktif.dataset.filter) || 'all';
-  $$('.k-kartu', katalogList).forEach(c => { c.hidden = f !== 'all' && c.dataset.grup !== f; });
-  $$('img', katalogList).forEach(im => im.addEventListener('load', updKatalog));
-  updKatalog();
 }
 async function muatUnggulan() {
   const { data, error } = await sb.from('produk_unggulan').select('*').eq('aktif', true).order('urutan', { ascending: true }).order('id', { ascending: true });
@@ -430,7 +359,7 @@ mqFoot.addEventListener('change', sinkronFoot);
 $$('.apf-grup > summary').forEach(s => s.addEventListener('click', e => { if (mqFoot.matches) e.preventDefault(); }));
 sinkronFoot();
 
-function perbaruiSemuaGeser() { updStrip(); updPill(); updKatalog(); updEsensial(); }
+function perbaruiSemuaGeser() { updStrip(); }
 window.addEventListener('resize', () => requestAnimationFrame(perbaruiSemuaGeser));
 window.addEventListener('load', perbaruiSemuaGeser);
 
@@ -446,9 +375,9 @@ window.addEventListener('load', perbaruiSemuaGeser);
 })();
 
 /* ---------- 6. Halaman Toko (#toko) ---------- */
-const storePage = $('#storePage'), storeCari = $('#storeCari');
-/* Filter sidebar: kat/tag = himpunan pilihan; stok = 'ada' | 'habis'; hMin/hMax = null (tanpa batas) */
-const state = { kat: new Set(), tag: new Set(), stok: new Set(), hMin: null, hMax: null, urut: 'terbaru', q: '', semua: false };
+const storePage = $('#storePage');
+/* Filter katalog dari tautan menu (data-ke-toko): kat = kategori, tag = label. semua = tampilkan seluruh produk */
+const state = { kat: new Set(), tag: new Set(), semua: false };
 let tokoDariDalam = false;
 
 function sinkronToko() {
@@ -472,127 +401,17 @@ $('#btnToko').addEventListener('click', bukaToko);
 $('#storeBack').addEventListener('click', tutupToko);
 $$('a[href="#toko"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); bukaToko(); }));
 
-storeCari.addEventListener('input', () => { state.q = storeCari.value.trim(); state.semua = false; renderKatalog(); });
-
-/* ---- Sidebar filter (gaya referensi): kategori, ketersediaan, harga, label ---- */
-const fKat = $('#fKategori'), fTag = $('#fLabel'), fStok = $('#fStok');
-const hRMin = $('#hRMin'), hRMax = $('#hRMax'), hMin = $('#hMin'), hMax = $('#hMax');
-let HARGA_BATAS = [0, 0];
-const cek = (grup, nilai, teks, on, jml) => `<li><label class="fcek"><input type="checkbox" name="${grup}" value="${esc(nilai)}"${on ? ' checked' : ''}><span class="kotak" aria-hidden="true"></span><span class="teks">${esc(teks)}</span>${jml == null ? '' : `<span class="jml">(${jml})</span>`}</label></li>`;
-
-function renderFilter() {
-  const sebelum = fKat.scrollTop;
-  fKat.innerHTML = cek('f-kat', 'all', 'Semua', !state.kat.size, PRODUK.length)
-    + KATEGORI.map(k => cek('f-kat', k.id, k.label, state.kat.has(k.id), PRODUK.filter(p => p.kategori === k.id).length)).join('');
-  fTag.innerHTML = Object.entries(LABEL_TAG).map(([id, t]) => cek('f-tag', id, t, state.tag.has(id), PRODUK.filter(p => p.tags.includes(id)).length)).join('');
-  $$('input', fStok).forEach(i => { i.checked = state.stok.has(i.value); });
-  $('[data-jml="ada"]').textContent = `(${PRODUK.filter(p => p.tersedia).length})`;
-  $('[data-jml="habis"]').textContent = `(${PRODUK.filter(p => !p.tersedia).length})`;
-  fKat.scrollTop = sebelum;
-  /* Rentang harga dari data produk asli (Rupiah) */
-  const hrg = PRODUK.map(p => p.harga).filter(h => h > 0);
-  const lo = hrg.length ? Math.floor(Math.min(...hrg) / 10000) * 10000 : 0;
-  const hi = hrg.length ? Math.ceil(Math.max(...hrg) / 10000) * 10000 : 0;
-  HARGA_BATAS = [lo, hi];
-  [hRMin, hRMax].forEach(r => { r.min = lo; r.max = hi; r.step = 10000; r.disabled = lo === hi; });
-  hMin.placeholder = String(lo); hMax.placeholder = String(hi);
-  $('#hCap').textContent = hi ? `Harga tertinggi ${rupiah(hi)}` : 'Harga tertinggi';
-  sinkronHarga();
-  sinkronJmlFilter();
-}
-function sinkronHarga() {
-  const [lo, hi] = HARGA_BATAS;
-  const a = state.hMin == null ? lo : state.hMin, b = state.hMax == null ? hi : state.hMax;
-  hRMin.value = a; hRMax.value = b;
-  if (document.activeElement !== hMin) hMin.value = state.hMin == null ? '' : state.hMin;
-  if (document.activeElement !== hMax) hMax.value = state.hMax == null ? '' : state.hMax;
-  const rentang = hi - lo || 1;
-  const isi = $('#hIsi'); isi.style.left = ((a - lo) / rentang * 100) + '%'; isi.style.right = (100 - (b - lo) / rentang * 100) + '%';
-}
-function sinkronCek() {   /* sinkron centang tanpa menggambar ulang (fokus keyboard tetap) */
-  $$('input', fKat).forEach(i => { i.checked = i.value === 'all' ? !state.kat.size : state.kat.has(i.value); });
-  $$('input', fTag).forEach(i => { i.checked = state.tag.has(i.value); });
-  $$('input', fStok).forEach(i => { i.checked = state.stok.has(i.value); });
-}
-function sinkronJmlFilter() {
-  const n = state.kat.size + state.tag.size + state.stok.size + (state.hMin != null || state.hMax != null ? 1 : 0);
-  const b = $('#filterJml'); b.hidden = !n; b.textContent = n ? ` (${n})` : '';
-}
-function terapkanFilter() { state.semua = false; sinkronCek(); sinkronHarga(); sinkronJmlFilter(); renderKatalog(); }
 function aturFilterDari({ kat, tag } = {}) {
   state.kat = new Set(kat ? [kat] : []); state.tag = new Set(tag ? [tag] : []);
-  state.stok = new Set(); state.hMin = state.hMax = null; state.q = ''; storeCari.value = '';
-  state.semua = false; renderFilter(); renderKatalog();
+  state.semua = false; renderKatalog();
 }
-
-fKat.addEventListener('change', e => {
-  const i = e.target.closest('input'); if (!i) return;
-  if (i.value === 'all') state.kat.clear();
-  else if (i.checked) state.kat.add(i.value); else state.kat.delete(i.value);
-  terapkanFilter();
-});
-fTag.addEventListener('change', e => {
-  const i = e.target.closest('input'); if (!i) return;
-  if (i.checked) state.tag.add(i.value); else state.tag.delete(i.value);
-  terapkanFilter();
-});
-fStok.addEventListener('change', e => {
-  const i = e.target.closest('input'); if (!i) return;
-  if (i.checked) state.stok.add(i.value); else state.stok.delete(i.value);
-  terapkanFilter();
-});
-function hargaDariInput(el, kunci) {
-  const v = el.value.trim(); const n = v === '' ? null : Math.max(0, Number(v));
-  state[kunci] = (n == null || isNaN(n)) ? null : n;
-  terapkanFilter();
-}
-hMin.addEventListener('input', () => hargaDariInput(hMin, 'hMin'));
-hMax.addEventListener('input', () => hargaDariInput(hMax, 'hMax'));
-hRMin.addEventListener('input', () => { const v = Math.min(Number(hRMin.value), Number(hRMax.value)); state.hMin = v <= HARGA_BATAS[0] ? null : v; hMin.value = state.hMin ?? ''; terapkanFilter(); });
-hRMax.addEventListener('input', () => { const v = Math.max(Number(hRMax.value), Number(hRMin.value)); state.hMax = v >= HARGA_BATAS[1] ? null : v; hMax.value = state.hMax ?? ''; terapkanFilter(); });
-
-$('#tokoSide').addEventListener('click', e => {
-  const r = e.target.closest('[data-reset]');
-  if (r) {
-    const k = r.dataset.reset;
-    if (k === 'kat') state.kat.clear(); else if (k === 'tag') state.tag.clear(); else if (k === 'stok') state.stok.clear();
-    else { state.hMin = state.hMax = null; hMin.value = hMax.value = ''; }
-    terapkanFilter(); return;
-  }
-  const l = e.target.closest('[data-lipat]');
-  if (l) { const buka = l.getAttribute('aria-expanded') !== 'true'; l.setAttribute('aria-expanded', buka); l.closest('.fcard').classList.toggle('lipat', !buka); }
-});
-$('#btnFilter').addEventListener('click', () => {
-  const buka = $('#tokoSide').classList.toggle('buka');
-  $('#btnFilter').setAttribute('aria-expanded', buka);
-});
-$('#storeUrut').addEventListener('change', e => { state.urut = e.target.value; state.semua = false; renderKatalog(); });
 
 function daftarTerfilter() {
-  let l = PRODUK.filter(p => {
+  return PRODUK.filter(p => {
     if (state.kat.size && !state.kat.has(p.kategori)) return false;
     if (state.tag.size && !p.tags.some(t => state.tag.has(t))) return false;
-    if (state.stok.size === 1 && state.stok.has('ada') !== !!p.tersedia) return false;
-    if (state.hMin != null && p.harga < state.hMin) return false;
-    if (state.hMax != null && p.harga > state.hMax) return false;
     return true;
-  });
-  if (state.q) {
-    const q = state.q.toLowerCase();
-    l = l.filter(p => [namaLengkap(p), p.kategori, ...Object.values(p.spek || {})].join(' ').toLowerCase().includes(q));
-  }
-  const u = state.urut, urut = {
-    terlaris: (a, b) => (b.tags.includes('terlaris') - a.tags.includes('terlaris')),
-    termurah: (a, b) => a.harga - b.harga,
-    termahal: (a, b) => b.harga - a.harga,
-    nama: (a, b) => namaLengkap(a).localeCompare(namaLengkap(b), 'id')
-  }[u];
-  return urut ? [...l].sort(urut) : l;   /* "terbaru" = urutan dari database (created_at menurun) */
-}
-function rincianSpek(p) {
-  const sp = p.spek || {};
-  return [['Processor', sp.processor], ['RAM', sp.ram], ['Storage', sp.storage], ['VGA', sp.vga], ['Layar', sp.layar], ['Kondisi', (KONDISI[p.kondisi] || KONDISI.bekas).label]]
-    .filter(r => r[1]).map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('');
+  });   /* urutan = dari database (created_at menurun) */
 }
 /* Indikator stok: hijau = tersedia, merah = habis (berlaku untuk semua laptop) */
 const htmlStok = p => `<span class="stok-ind ${p.tersedia ? 'ada' : 'habis'}"><i aria-hidden="true"></i>${p.tersedia ? 'Stok tersedia' : 'Stok habis'}</span>`;
@@ -602,27 +421,25 @@ function kartuProduk(p) {
   const lencana = p.tags.filter(t => LABEL_TAG[t]).map(t => `<span class="${t === 'promo' ? 'promo' : ''}">${esc(LABEL_TAG[t])}</span>`).join('');
   const ringkas = [sp.processor, sp.ram && `RAM ${sp.ram}`, sp.storage].filter(Boolean).map(esc).join(', ');
   const hemat = p.hargaNormal && p.hargaNormal > p.harga ? p.hargaNormal - p.harga : 0;
+  /* Baris tombol: stok ada = "+ Keranjang" | Lihat; stok habis = "Minta stok" | Lihat */
+  const tombolUtama = p.tersedia
+    ? `<button type="button" class="btn btn-kecil" data-tambah="${esc(p.id)}" aria-label="Tambah ${esc(nama)} ke keranjang">+ Keranjang</button>`
+    : htmlMinta(p);
   return `
   <article class="kartu">
     <div class="kartu-foto" data-open="${esc(p.id)}">
       <img src="${esc(p.foto)}" alt="${esc(nama)}" loading="lazy" ${fotoErr}>
-      ${lencana ? `<div class="lencana">${lencana}</div>` : ''}
-      ${htmlMinta(p)}
     </div>
     <div class="kartu-isi">
+      ${lencana ? `<div class="lencana">${lencana}</div>` : ''}
       <h3 data-open="${esc(p.id)}">${esc(nama)}</h3>
       <p class="ringkas">${ringkas}</p>
-      <details class="spec-box">
-        <summary>Spesifikasi lengkap<svg viewBox="0 0 24 24"><use href="#i-chev-r"/></svg></summary>
-        <dl>${rincianSpek(p) || '<p class="ringkas">Belum ada rincian.</p>'}</dl>
-      </details>
       <p class="harga">${rupiah(p.harga)}${hemat ? `<s>${rupiah(p.hargaNormal)}</s>` : ''}</p>
       ${hemat ? `<p class="hemat">Hemat ${rupiah(hemat)}</p>` : '<p class="hemat" aria-hidden="true">&nbsp;</p>'}
       <p class="stok-baris">${htmlStok(p)}</p>
       <div class="kartu-aksi">
-        <button type="button" class="btn btn-kecil" data-tambah="${esc(p.id)}" aria-label="Tambah ${esc(nama)} ke keranjang" ${p.tersedia ? '' : 'disabled'}>${p.tersedia ? '+ Keranjang' : 'Stok habis'}</button>
+        ${tombolUtama}
         <button type="button" class="btn btn-kecil" data-open="${esc(p.id)}">Lihat</button>
-        <button type="button" class="cmp-toggle${adaBanding(p.id) ? ' aktif' : ''}" data-cmp="${esc(p.id)}">${adaBanding(p.id) ? 'Batal bandingkan' : '+ Bandingkan'}</button>
       </div>
     </div>
   </article>`;
@@ -631,9 +448,6 @@ let sedangMemuat = true, gagalMemuat = false;
 function renderKatalog() {
   const semua = daftarTerfilter();
   const tampil = state.semua ? semua : semua.slice(0, PAGE);
-  $('#status').textContent = sedangMemuat ? 'Memuat katalog...'
-    : gagalMemuat && !PRODUK.length ? 'Katalog belum bisa dimuat.'
-    : semua.length ? `Menampilkan ${tampil.length} dari ${semua.length} laptop` : 'Belum ada laptop yang cocok';
 
   if (sedangMemuat) {
     $('#grid').innerHTML = Array.from({ length: 4 }, () => '<div class="skel"></div>').join('');
@@ -656,7 +470,6 @@ $('#more').addEventListener('click', e => {
 $('#grid').addEventListener('click', e => {
   if (e.target.closest('#ulangMuat')) { muatSemua(); return; }
   const mt = e.target.closest('[data-minta]'); if (mt) { e.stopPropagation(); mintaStok(mt.dataset.minta); return; }
-  const c = e.target.closest('[data-cmp]'); if (c) { toggleBanding(c.dataset.cmp); return; }
   const t = e.target.closest('[data-tambah]'); if (t) { tambahKeranjang(t.dataset.tambah); return; }
   const o = e.target.closest('[data-open]'); if (o) bukaDetail(o.dataset.open);
 });
@@ -771,10 +584,7 @@ function bukaDetail(id) {
       <p class="detail-harga">${rupiah(p.harga)}${hemat ? `<s>${rupiah(p.hargaNormal)}</s>` : ''}</p>
       ${hemat ? `<p class="hemat">Hemat ${rupiah(p.hargaNormal - p.harga)}</p>` : ''}
       <p class="stok-baris">${htmlStok(p)}</p>
-      <div class="detail-aksi">
-        ${htmlMinta(p, true)}
-        <button type="button" class="btn btn-kecil btn-garis${adaBanding(p.id) ? ' aktif' : ''}" data-cmp="${esc(p.id)}">${adaBanding(p.id) ? 'Batal bandingkan' : '+ Bandingkan'}</button>
-      </div>
+      ${p.tersedia ? '' : `<div class="detail-aksi">${htmlMinta(p, true)}</div>`}
       <p class="detail-slogan">Dicek menyeluruh. Bergaransi toko. Harga jujur.</p>
       <h3>Spesifikasi</h3>
       ${spekBesar(sp)}
@@ -801,7 +611,6 @@ $('#detailBody').addEventListener('click', e => {
   const g = e.target.closest('[data-galeri]');
   if (g) { $('#detailFotoUtama').src = g.dataset.galeri; $$('.detail-thumb', $('#detailBody')).forEach(t => t.classList.toggle('aktif', t === g)); return; }
   const mt = e.target.closest('[data-minta]'); if (mt) { e.stopPropagation(); mintaStok(mt.dataset.minta); return; }
-  const c = e.target.closest('[data-cmp]'); if (c) toggleBanding(c.dataset.cmp);
 });
 
 /* ---------- 10. Data dari Supabase ---------- */
@@ -848,7 +657,7 @@ async function muatSemua() {
   hasil.forEach(h => { if (h.status === 'rejected') console.error('Gagal memuat dari Supabase:', h.reason); });
   gagalMemuat = hasil[0].status === 'rejected';
   sedangMemuat = false; terakhirMuat = Date.now();
-  renderFilter(); renderKatalog(); terapkanConfig(); renderHero(); renderSliderToko(); renderUnggulan(); isiStatistik(); bersihkanKeranjang();
+  renderKatalog(); terapkanConfig(); renderHero(); renderSliderToko(); renderUnggulan(); bersihkanKeranjang();
   const pd = detail.open && detailId !== null ? cariProduk(detailId) : null;
   if (pd && sigDetail(pd) !== detailSig) { const atas = $('#detailBody').scrollTop; bukaDetail(detailId); $('#detailBody').scrollTop = atas; }   /* stok/harga berubah saat detail terbuka */
   tutupSplash();
@@ -861,20 +670,11 @@ try {
   sb.channel('perubahan-toko')
     .on('postgres_changes', { event: '*', schema: 'public' }, p => {
       if (p && (p.table === 'permintaan_stok' || p.table === 'notifications')) { jadwalMuatAkunMinta(); return; }   /* data akun: bukan data katalog */
-      if (p && ['cart_items', 'wishlist', 'profiles', 'view_history', 'saved_comparisons'].includes(p.table)) return;
+      if (p && ['cart_items', 'profiles'].includes(p.table)) return;
       clearTimeout(timerRealtime); timerRealtime = setTimeout(muatSemua, 400);
     })
     .subscribe();
 } catch (e) { console.warn('Realtime tidak aktif:', e); }
-
-/* ---------- 10b. Angka statistik di seksi (diisi dari data nyata) ---------- */
-function isiStatistik() {
-  const set = (k, v) => $$(`[data-stat="${k}"]`).forEach(el => { el.textContent = v; });
-  set('merek', $$('.merek-item').length || 11);
-  set('kategori', KATEGORI.length);
-  set('produk', PRODUK.length);
-  $$('[data-stat="produk"]').forEach(el => { const st = el.closest('.stat'); if (st) st.hidden = !PRODUK.length; });
-}
 
 /* ---------- 10c. Layar muat: hilang setelah data pertama masuk (maks. 3 detik) ---------- */
 const splash = $('#splash'), splashMulai = Date.now();
@@ -886,7 +686,7 @@ function tutupSplash() {
 }
 setTimeout(tutupSplash, 3000);
 
-/* ---------- 10d. Akun Google, keranjang cloud, permintaan stok, bandingkan ---------- */
+/* ---------- 10d. Akun Google, keranjang cloud, permintaan stok ---------- */
 /* Satu login untuk semua. Admin atau bukan ditentukan database (LMAuth.cekAdmin -> is_admin()).
    Admin yang baru saja login otomatis diarahkan ke /admin/; user biasa tetap di katalog. */
 let sinkronUser = null;                 /* id user yang keranjangnya sudah disinkronkan */
@@ -912,14 +712,13 @@ function renderAkun() {
   document.documentElement.dataset.masuk = USER ? '1' : '0';
   document.documentElement.dataset.peran = adm ? 'admin' : '';
   $('#navPermintaan').hidden = !modeUser(); $('#sbPermintaan').hidden = !modeUser();   /* teks "Permintaan" di navbar utama (antara Gelap dan Akun); hanya user login biasa */
-  if (USER) { av.innerHTML = avatarHtml(USER); av.hidden = false; ik.hidden = true; b.setAttribute('aria-label', adm ? 'Panel admin' : 'Akun saya: ' + namaUser(USER)); }
-  else { av.innerHTML = ''; av.hidden = true; ik.hidden = false; b.setAttribute('aria-label', 'Masuk'); }
+  if (USER) { av.innerHTML = avatarHtml(USER); av.hidden = false; ik.toggleAttribute('hidden', true); b.setAttribute('aria-label', adm ? 'Panel admin' : 'Akun saya: ' + namaUser(USER)); }
+  else { av.innerHTML = ''; av.hidden = true; ik.toggleAttribute('hidden', false); b.setAttribute('aria-label', 'Masuk'); }
   isiAkunDialog(); renderBadgeAkun();
 }
 function renderBadgeAkun() {
   const set = (sel, n) => $$(sel).forEach(b => { b.textContent = n; b.hidden = !n; });
   set('[data-minta-badge]', modeUser() ? belumDibacaJml() : 0);   /* angka = notifikasi yang belum dibaca */
-  set('[data-cmp-badge]', USER ? CMP.length : 0);
 }
 function isiAkunDialog() {
   const el = $('#akunIsi');
@@ -1101,7 +900,7 @@ function htmlMinta(p, detail) {
   if (USER && !modeUser()) return '';          /* admin tidak melihat tombol ini */
   const st = statusMinta(p.id), nama = namaLengkap(p);
   const kelas = st === 'menunggu' || st === 'ditangani' ? ' ' + st : '';
-  return `<button type="button" class="${detail ? 'btn btn-kecil btn-garis' : 'kartu-fav'} minta${kelas}" data-minta="${esc(p.id)}" aria-label="Minta ketersediaan ${esc(nama)}"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg><span>${labelMinta(st)}</span></button>`;
+  return `<button type="button" class="btn btn-kecil${detail ? ' btn-garis' : ''} minta${kelas}" data-minta="${esc(p.id)}" aria-label="Minta ketersediaan ${esc(nama)}"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg><span>${labelMinta(st)}</span></button>`;
 }
 async function muatMinta() {
   const { data, error } = await sb.from('permintaan_stok').select('id,product_id,nama_produk,status,created_at,handled_at').order('created_at', { ascending: false });
@@ -1188,63 +987,11 @@ function jadwalMuatAkunMinta() {
   timerAkunMinta = setTimeout(() => { Promise.all([muatMinta(), muatNotif()]).then(() => { if (USER && modeUser()) segarkanTanda(); }).catch(() => {}); }, 300);
 }
 
-/* ----- bandingkan 2 sampai 4 unit (disimpan di perangkat) ----- */
-function simpanBanding() { try { localStorage.setItem(KEY_BANDING, JSON.stringify(CMP)); } catch (e) {} }
-function toggleBanding(id) {
-  if (!USER) { perluLogin('Masuk dulu untuk membandingkan laptop'); return; }
-  id = String(id);
-  if (CMP.includes(id)) CMP = CMP.filter(x => x !== id);
-  else {
-    if (CMP.length >= MAKS_BANDING) { toast(`Maksimal ${MAKS_BANDING} unit untuk dibandingkan`); return; }
-    CMP = [...CMP, id];
-    toast(CMP.length < 2 ? 'Pilih 1 unit lagi untuk membandingkan' : `${CMP.length} unit siap dibandingkan`);
-  }
-  simpanBanding(); segarkanTanda();
-}
-const BARIS_BANDING = [
-  ['Harga', p => rupiah(p.harga)],
-  ['Kondisi', p => (KONDISI[p.kondisi] || KONDISI.bekas).label],
-  ['Processor', p => p.spek.processor],
-  ['RAM', p => p.spek.ram],
-  ['Storage', p => p.spek.storage],
-  ['VGA', p => p.spek.vga],
-  ['Layar', p => p.spek.layar],
-  ['Garansi', p => (KONDISI[p.kondisi] || KONDISI.bekas).garansi]
-];
-function renderBanding() {
-  const l = CMP.map(cariProduk).filter(Boolean);
-  $('#bdgFoot').hidden = !l.length;
-  if (!l.length) { $('#bdgIsi').innerHTML = '<p class="kr-kosong">Belum ada laptop yang dipilih. Ketuk "+ Bandingkan" pada 2 sampai 4 laptop.</p>'; return; }
-  const termurah = Math.min(...l.map(p => p.harga));
-  const hargaBeda = new Set(l.map(p => p.harga)).size > 1;
-  const kepala = l.map(p => `<th scope="col"><div class="cmp-foto"><img src="${esc(p.foto)}" alt="" ${fotoErr}></div><p class="kr-nama">${esc(namaLengkap(p))}</p><button type="button" class="kr-hapus" data-cmp-hapus="${esc(p.id)}">Hapus</button></th>`).join('');
-  const baris = BARIS_BANDING.map(([label, fn]) => {
-    const v = l.map(p => fn(p) || '-');
-    const beda = l.length > 1 && new Set(v.map(x => String(x).toLowerCase())).size > 1;
-    return `<tr class="${beda ? 'beda' : ''}"><th scope="row">${label}</th>${v.map((x, i) => `<td class="${label === 'Harga' && hargaBeda && l[i].harga === termurah ? 'terbaik' : ''}">${esc(x)}${label === 'Harga' && hargaBeda && l[i].harga === termurah ? '<small>Termurah</small>' : ''}</td>`).join('')}</tr>`;
-  }).join('');
-  const aksi = l.map(p => `<td><button type="button" class="btn btn-kecil" data-tambah="${esc(p.id)}">+ Keranjang</button><button type="button" class="btn btn-kecil btn-garis" data-open="${esc(p.id)}">Detail</button></td>`).join('');
-  $('#bdgIsi').innerHTML =
-    (l.length < 2 ? '<p class="cmp-info">Pilih minimal 2 unit agar bisa dibandingkan berdampingan.</p>' : '<p class="cmp-info">Baris berlatar abu-abu = ada perbedaan antar unit.</p>') +
-    `<div class="cmp-wrap"><table class="cmp"><thead><tr><th></th>${kepala}</tr></thead><tbody>${baris}<tr><th scope="row"></th>${aksi}</tr></tbody></table></div>`;
-}
-function bukaBanding() { renderBanding(); bukaDialog($('#bandingkan')); }
-$('#bdgIsi').addEventListener('click', e => {
-  const h = e.target.closest('[data-cmp-hapus]');
-  if (h) { CMP = CMP.filter(x => x !== String(h.dataset.cmpHapus)); simpanBanding(); segarkanTanda(); return; }
-  const t = e.target.closest('[data-tambah]'); if (t) { tambahKeranjang(t.dataset.tambah); return; }
-  const o = e.target.closest('[data-open]'); if (o) { $('#bandingkan').close(); bukaDetail(o.dataset.open); }
-});
-$('#bdgKosongkan').addEventListener('click', () => { CMP = []; simpanBanding(); segarkanTanda(); });
-$('#storeBandingkan').addEventListener('click', () => { if (USER) bukaBanding(); else perluLogin('Masuk dulu untuk membandingkan laptop'); });
-
-/* Menyamakan semua tombol minta stok / bandingkan, lencana, dan dialog yang sedang terbuka */
+/* Menyamakan semua tombol minta stok, lencana, dan dialog yang sedang terbuka */
 function segarkanTanda() {
   $$('[data-minta]').forEach(b => { const st = statusMinta(b.dataset.minta); b.classList.remove('menunggu', 'ditangani'); if (st === 'menunggu' || st === 'ditangani') b.classList.add(st); const sp = $('span', b); if (sp) sp.textContent = labelMinta(st); });
-  $$('[data-cmp]').forEach(b => { const a = adaBanding(b.dataset.cmp); b.classList.toggle('aktif', a); b.textContent = a ? 'Batal bandingkan' : '+ Bandingkan'; });
   renderBadgeAkun(); isiAkunDialog();
   if ($('#permintaan').open) renderPermintaan();
-  if ($('#bandingkan').open) renderBanding();
 }
 
 /* ----- sesi ----- */
@@ -1257,7 +1004,7 @@ async function terapkanSesi(evt, session) {
     if (idLama && evt === 'SIGNED_OUT') {
       const sengaja = LMAuth.keluarSengaja; LMAuth.keluarSengaja = false;
       if (!sengaja) toast('Sesi kamu berakhir. Silakan masuk lagi.', 'info');   /* bukan tombol Keluar -> sesi habis / keluar dari tab lain */
-      KERANJANG = []; simpanLokal(); CMP = []; simpanBanding(); renderKeranjang();
+      KERANJANG = []; simpanLokal(); renderKeranjang();
       if (window.AkunUser) AkunUser.bersih();
     }   /* perangkat bersama: bersihkan data akun */
     renderAkun(); renderKatalog(); segarkanTanda();
@@ -1282,7 +1029,7 @@ async function terapkanSesi(evt, session) {
    ADMIN  : bukan akun user. Tidak memuat permintaan/notifikasi user, teks "Log in" jadi "Admin"
             yang membuka panel admin saat diklik. Admin TIDAK dilempar otomatis ke panel (baru login atau kembali dari panel),
             jadi bisa bolak-balik website <-> panel dengan klik "Admin" / "Lihat website".
-   LAINNYA: user biasa -> fitur user (permintaan stok, notifikasi, bandingkan). */
+   LAINNYA: user biasa -> fitur user (permintaan stok, notifikasi). */
 async function tetapkanPeran(u, loginBaru, percobaan) {
   const admin = await LMAuth.cekAdmin();                             /* true / false / null (gagal diperiksa) */
   if (!USER || USER.id !== u.id) return;                             /* user berganti/keluar saat memeriksa */
@@ -1319,22 +1066,6 @@ renderHero();
 renderSliderToko();
 renderDaftarKategori();
 perbaruiSemuaGeser();
-isiStatistik();
 renderKeranjang();
 muatSemua();
 sinkronToko();
-
-/* Spesifikasi lengkap di kartu: hanya satu yang terbuka sekaligus */
-document.addEventListener('toggle', e => {
-  const d = e.target;
-  if (!d || !d.matches || !d.matches('.spec-box') || !d.open) return;
-  document.querySelectorAll('.spec-box[open]').forEach(x => { if (x !== d) x.open = false; });
-}, true);
-
-/* Klik di luar panel spesifikasi / tekan Esc: panel menutup */
-document.addEventListener('click', e => {
-  document.querySelectorAll('.spec-box[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; });
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.spec-box[open]').forEach(d => { d.open = false; });
-});

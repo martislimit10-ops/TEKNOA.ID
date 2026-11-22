@@ -130,18 +130,14 @@ $('#btnCobaLagi').addEventListener('click', async () => { const { data } = await
 $('#btnKeluar').addEventListener('click', async () => { $('#btnKeluar').disabled = true; await AdminAuth.keluar(); keWebsite(); });
 
 /* ---------- Grup menu sidebar (buka-tutup) ----------
-   Default: semua tertutup. Grup yang berisi halaman aktif otomatis terbuka. Pilihan disimpan di localStorage. */
-const KUNCI_GRUP = 'teknoa_admin_grup';
-let statusGrup = {};
-try { statusGrup = JSON.parse(localStorage.getItem(KUNCI_GRUP)) || {}; } catch (e) { statusGrup = {}; }
-function setGrup(w, buka, simpan = true) {
+   Selalu tertutup saat admin dibuka. */
+function setGrup(w, buka) {
   w.classList.toggle('tutup', !buka);
   $('.grup-btn', w).setAttribute('aria-expanded', String(buka));
-  if (simpan) { statusGrup[w.dataset.grup] = buka; try { localStorage.setItem(KUNCI_GRUP, JSON.stringify(statusGrup)); } catch (e) {} }
 }
 function bukaGrupDari(tab) { const w = tab.closest('.grup-wrap'); if (w && w.classList.contains('tutup')) setGrup(w, true); }
 $$('.grup-wrap').forEach(w => {
-  setGrup(w, statusGrup[w.dataset.grup] === true, false);
+  setGrup(w, false);   /* selalu tertutup saat admin dibuka; tidak disimpan */
   $('.grup-btn', w).addEventListener('click', () => setGrup(w, w.classList.contains('tutup')));
 });
 
@@ -722,7 +718,7 @@ function muatSemuaTab() { Object.values(manajer).forEach(m => m.muat()); muatInf
 
 (async function mulai() {
   const nama = location.hash.slice(1);
-  if (tabs.some(t => t.dataset.tab === nama)) pilihTab(nama);
+  if (tabs.some(t => t.dataset.tab === nama)) { pilihTab(nama); $$('.grup-wrap').forEach(w => setGrup(w, false)); }
   const { data } = await sb.auth.getSession();
   tampilkan(data.session);
   sb.auth.onAuthStateChange((evt, session) => {

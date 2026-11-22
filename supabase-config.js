@@ -50,7 +50,6 @@ const CONFIG_AWAL = {
   tiktok: 'laptop_makassar',
   email: 'ibnrfy01@gmail.com',
   maps_link: 'https://maps.app.goo.gl/CrUqGD1NqXt19Kpy9',
-  peta_embed_url: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3973.8058219468516!2d119.4925!3d-5.1353!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMDgnMQuMSJTIDExOWKwDI5JzMzLjAiRQ!5e0!3m2!1sid!2sid!4v1650000000000!5m2!1sid!2sid',
   pesan_umum: 'Assalamualaikum, Laptop Makassar',
   deskripsi: 'Toko laptop baru dan bekas berkualitas di Makassar dan Gowa. Semua unit sudah dicek, bergaransi, dan harganya jujur.'
 };

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   /* Akun pengguna (disederhanakan): hanya foto, nama, email, dan tombol Logout (data profil dibaca dari tabel profiles bila ada).
-     Permintaan, riwayat, banding, dan notifikasi TIDAK lagi ada di dalam akun:
+     Permintaan, riwayat, dan notifikasi TIDAK lagi ada di dalam akun:
      permintaan + notifikasi ada di halaman "Permintaan" (script.js, tombol di navbar utama). */
   const S = { profil: null, lokal: false, terakhir: 0 };
   const api = { S };

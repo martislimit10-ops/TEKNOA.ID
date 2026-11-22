@@ -11,7 +11,7 @@ Situs statis, tanpa build. Satu repo GitHub, satu project hosting (Netlify, Clou
 - Deploy **seluruh repo** (publish directory = root). Tidak ada lagi project/subdomain `admin.teknoa.id` yang terpisah; bila sudah ada, hapus saja.
 - `supabase-config.js` dan folder `images/` dipakai bersama (admin memuatnya lewat `../`). Cukup ubah di satu tempat.
 - **service_role key tidak boleh ada di repo.** Satu-satunya secret server: `GEMINI_API_KEY` (Edge Function `cari-ai`).
-- `_headers` (Netlify/Cloudflare Pages) memberi header keamanan khusus `/admin/*`. `robots.txt` melarang indeks `/admin/` dan `/sql/`. Di GitHub Pages `_headers` tidak berlaku (tidak masalah, halaman admin sudah `noindex` dan data dijaga RLS).
+- `robots.txt` melarang indeks `/admin/` dan `/sql/`. Halaman admin sudah `noindex` dan data dijaga RLS di database (file `_headers` khusus Netlify/Cloudflare sudah dihapus karena tidak berlaku di GitHub Pages).
 - Folder `sql/` hanya untuk dijalankan di Supabase SQL Editor; boleh dihapus dari hosting bila mau.
 
 ## Supabase > Authentication > URL Configuration
