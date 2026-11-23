@@ -123,11 +123,11 @@ async function tampilkan(session) {
     return;
   }
   $('#viewCek').hidden = true; $('#viewPanel').hidden = false;
-  $('#tab-admin').hidden = peran !== 'owner';
+  $('#tab-admin').hidden = peran !== 'owner'; $('#pintasAdmin').hidden = peran !== 'owner';
   sudahMuat = true; muatSemuaTab(); if (peran === 'owner') muatAdmin(); toast('Berhasil masuk', 'sukses');
 }
 $('#btnCobaLagi').addEventListener('click', async () => { const { data } = await sb.auth.getSession(); tampilkan(data.session); });
-$('#btnKeluar').addEventListener('click', async () => { $('#btnKeluar').disabled = true; await AdminAuth.keluar(); keWebsite(); });
+$$('[data-keluar]').forEach(b => b.addEventListener('click', async () => { $$('[data-keluar]').forEach(x => { x.disabled = true; }); await AdminAuth.keluar(); keWebsite(); }));
 
 /* ---------- Grup menu sidebar (buka-tutup) ----------
    Selalu tertutup saat admin dibuka. */
@@ -151,10 +151,20 @@ function pilihTab(nama, fokus = false) {
     if (aktif && fokus) t.focus();
     if (aktif) { $('#judulHalaman').textContent = t.dataset.judul || t.firstChild.textContent.trim(); bukaGrupDari(t); }
   });
+  $('#btnKembaliDash').hidden = nama === 'dashboard';
+  $('#aksiDashboard').hidden = nama !== 'dashboard';   /* "Lihat Website" hanya di Dashboard */
   if (sudahMuat && nama === 'permintaan') muatPermintaan();
   if (sudahMuat && nama === 'dashboard') muatDashboard();
   try { history.replaceState(null, '', '#' + nama); } catch (e) {}
 }
+/* HP: ketuk logo "T" -> muncul tombol Keluar. Pindah halaman lewat kotak di Dashboard, dan tombol "Dashboard" untuk kembali. */
+const btnBrand = $('#btnBrand'), popAkun = $('#popAkun');
+function setPopAkun(buka) { popAkun.hidden = !buka; btnBrand.setAttribute('aria-expanded', String(buka)); }
+btnBrand.addEventListener('click', e => { e.stopPropagation(); setPopAkun(popAkun.hidden); });
+document.addEventListener('click', e => { if (!popAkun.hidden && !popAkun.contains(e.target)) setPopAkun(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setPopAkun(false); });
+$('#btnKembaliDash').addEventListener('click', () => pilihTab('dashboard'));
+
 tabs.forEach((t, i) => {
   t.addEventListener('click', () => pilihTab(t.dataset.tab));
   t.addEventListener('keydown', e => {
@@ -529,6 +539,7 @@ async function ambilPermintaan() {
   const n = kelompokMinta().filter(g => g.status === 'menunggu').length, bd = $('#badgePermintaan');
   bd.hidden = !n; bd.textContent = n;
   const bl = $('#badgeLainnya'); if (bl) { bl.hidden = !n; bl.textContent = n; }
+  const bp = $('#badgePintas'); if (bp) { bp.hidden = !n; bp.textContent = n; }
 }
 /* Satu baris per laptop: jumlah peminta, waktu permintaan terbaru, dan status gabungan
    (menunggu bila masih ada peminta yang belum diproses; lalu ditangani; disetujui bila semuanya disetujui). */

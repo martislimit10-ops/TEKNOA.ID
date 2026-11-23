@@ -63,18 +63,18 @@ function terapkanConfig() {
 }
 
 /* ---------- 3. Tema & sidebar ---------- */
-const saklar = $('#saklarTema');
+const temaGelap = () => document.documentElement.getAttribute('data-tema') === 'gelap';
 function setTema(gelap, simpan = true) {
-  document.documentElement.toggleAttribute('data-tema', gelap);
-  if (gelap) document.documentElement.setAttribute('data-tema', 'gelap');
-  saklar.setAttribute('aria-checked', String(gelap));
-  const tn = document.getElementById('btnTemaNav');   /* katalog laptop: teks = mode tujuan */
+  if (gelap) document.documentElement.setAttribute('data-tema', 'gelap'); else document.documentElement.removeAttribute('data-tema');
+  /* Teks tombol = mode tujuan (laptop: "Gelap"/"Terang", menu HP: "Mode Gelap"/"Mode Terang") */
+  const tn = $('#btnTemaNav'), tm = $('#btnTemaMenu');
   if (tn) tn.textContent = gelap ? 'Terang' : 'Gelap';
+  if (tm) tm.textContent = gelap ? 'Mode Terang' : 'Mode Gelap';
   $('meta[name="theme-color"]').content = gelap ? '#0f1115' : '#fafafa';
   if (simpan) { try { localStorage.setItem('lm_tema', gelap ? 'gelap' : 'terang'); } catch (e) {} }
 }
-setTema(document.documentElement.getAttribute('data-tema') === 'gelap', false);
-saklar.addEventListener('click', () => setTema(saklar.getAttribute('aria-checked') !== 'true'));
+setTema(temaGelap(), false);
+$$('#btnTemaNav, #btnTemaMenu').forEach(b => b.addEventListener('click', () => setTema(!temaGelap())));
 
 const sidebar = $('#sidebar'), btnMenu = $('#btnMenu');
 function bukaSidebar() {
@@ -363,15 +363,13 @@ function perbaruiSemuaGeser() { updStrip(); }
 window.addEventListener('resize', () => requestAnimationFrame(perbaruiSemuaGeser));
 window.addEventListener('load', perbaruiSemuaGeser);
 
-/* Navigasi laptop di header + tombol mode gelap */
+/* Navigasi laptop di header */
 (function () {
   const nav = $('.hdr-nav');
   if (nav) nav.addEventListener('click', e => {
     const go = e.target.closest('[data-goto]');
     if (go) { e.preventDefault(); gulirKe(go.dataset.goto); }
   });
-  const t = $('#btnTemaNav');
-  if (t) t.addEventListener('click', () => setTema(saklar.getAttribute('aria-checked') !== 'true'));
 })();
 
 /* ---------- 6. Halaman Toko (#toko) ---------- */
@@ -707,7 +705,6 @@ function renderAkun() {
   $('#authBtns').hidden = !!USER;            /* belum login: Sign up + Log in; sudah login: foto akun */
   nav.hidden = !USER || !PERAN_PASTI;        /* laptop: item "Akun" (admin: "Admin") di katalog tengah */
   nav.textContent = adm ? 'Admin' : 'Akun';
-  $('#sbAuth').hidden = !!USER;              /* menu HP: Sign up + Log in hanya saat belum login */
   b.hidden = false;                          /* ikon orang selalu tampil: belum login = buka Log in */
   document.documentElement.dataset.masuk = USER ? '1' : '0';
   document.documentElement.dataset.peran = adm ? 'admin' : '';
@@ -776,9 +773,6 @@ $('#btnDaftar').addEventListener('click', () => mulaiLogin());
 $('#btnMasuk').addEventListener('click', () => bukaMasuk());
 $('#btnAkun').addEventListener('click', () => { if (!USER) bukaMasuk(); else if (IS_ADMIN) bukaPanelAdmin(); else if (PERAN_PASTI) bukaDialog($('#akun')); });
 $('#navAkun').addEventListener('click', () => { if (IS_ADMIN) bukaPanelAdmin(); else if (modeUser()) bukaDialog($('#akun')); });
-/* Tombol Sign up / Log in di dalam menu HP: tutup menu dulu, lalu jalankan alur yang sama dengan header */
-$('#btnDaftarMenu').addEventListener('click', () => { tutupSidebar(false); mulaiLogin(); });
-$('#btnMasukMenu').addEventListener('click', () => { tutupSidebar(false); bukaMasuk(); });
 
 $('#masuk').addEventListener('close', resetMasuk);
 $('#masukKembali').addEventListener('click', () => {
@@ -890,8 +884,8 @@ async function tarikKeranjang() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tarikKeranjang().catch(() => {}); });
 
 /* ----- permintaan ketersediaan: tombol "Minta stok" HANYA tampil untuk laptop yang stoknya habis ----- */
-const labelMinta = st => st === 'menunggu' ? 'Diminta, menunggu' : st === 'ditangani' ? 'Cek unit' : 'Minta stok';
-const NAMA_STATUS_MINTA = { menunggu: 'Menunggu', ditangani: 'Cek unit', disetujui: 'Tersedia' };
+const labelMinta = st => st === 'menunggu' ? 'Diminta, menunggu' : st === 'ditangani' ? 'Cek unit..' : 'Minta stok';
+const NAMA_STATUS_MINTA = { menunggu: 'Menunggu', ditangani: 'Cek unit..', disetujui: 'Tersedia' };
 const statusMinta = id => (MINTA.find(m => String(m.product_id) === String(id)) || {}).status || '';   /* MINTA urut terbaru dulu */
 const waktuFmt = t => { try { return new Date(t).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
 const belumDibacaJml = () => NOTIF.filter(n => !n.dibaca).length;

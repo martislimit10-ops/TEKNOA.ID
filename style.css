@@ -123,14 +123,9 @@ html[data-tema="gelap"] .logo-gelap{display:block}
 }
 .sb.buka{opacity:1;transform:none;visibility:visible;transition-delay:0s}
 .sb-nav ul{display:grid}
-.sb-utama li, .sb-auth{opacity:0;transform:translateY(10px)}
-.sb.buka .sb-utama li, .sb.buka .sb-auth{animation:menuMasuk .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 45ms + 60ms)}
-.sb.buka .sb-auth{animation-delay:calc(var(--i,4) * 45ms + 60ms)}
+.sb-utama li{opacity:0;transform:translateY(10px)}
+.sb.buka .sb-utama li{animation:menuMasuk .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 45ms + 60ms)}
 @keyframes menuMasuk{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.saklar{position:relative;flex:none;width:52px;height:30px;padding:0;border:0;border-radius:15px;background:#c4c8cf;transition:background .2s}
-.saklar span{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.saklar[aria-checked="true"]{background:#2997ff}
-.saklar[aria-checked="true"] span{transform:translateX(22px)}
 
 /* ---------- Halaman Toko ---------- */
 .store{position:fixed;inset:0;z-index:50;overflow-y:auto;overscroll-behavior:contain}
@@ -454,13 +449,6 @@ html[data-device="hp"] .dlg-masuk::before{content:"";flex:none;width:44px;height
    ===================================================================== */
 
 /* ---------- Menu HP: teks mengalir, tanpa garis/kotak; Sign up + Log in di paling bawah, rata tengah ---------- */
-.sb-btn{flex:1 1 0;max-width:180px;height:48px;padding:0 20px;border-radius:980px;border:1px solid transparent;font-size:16px;font-weight:600;transition:opacity .15s,background .15s}
-.sb-btn-isi{background:var(--aksen);border-color:var(--aksen);color:var(--aksen-ink)}
-.sb-btn-isi:hover{opacity:.88}
-.sb-btn-garis{background:transparent;border-color:var(--ink-3);color:var(--ink)}
-.sb-btn-garis:hover{background:var(--surface-2)}
-/* Tombol auth di header hanya untuk laptop lebar; di HP/layar sempit pindah ke menu */
-@media (min-width:900px){ html:not([data-device="hp"]) .sb-auth{display:none} }
 
 /* Menu HP: latar solid (tidak tembus ke konten halaman di belakangnya) */
 .sb{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -474,8 +462,6 @@ html[data-device="hp"] .dlg-masuk::before{content:"";flex:none;width:44px;height
 .sb-utama{gap:0;margin:0}
 .sb-besar{display:block;padding:8px 0;font-size:clamp(26px,7.6vw,32px);font-weight:600;letter-spacing:-.022em;line-height:1.2;color:var(--ink)}
 a.sb-besar:hover{color:var(--ink-3)}
-.sb-tema{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0}
-.sb-auth{flex:none;display:flex;justify-content:center;gap:12px;width:100%;max-width:760px;margin:0 auto;padding:14px 32px calc(22px + env(safe-area-inset-bottom,0px));background:var(--bg)}
 @media (min-width:900px){
   html[data-device="desktop"] .sb-besar{font-size:32px}
   html[data-device="desktop"] .sb-nav{padding-top:20px}
@@ -503,8 +489,7 @@ html[data-tema="gelap"]{--ap-putih:var(--bg);--ap-abu:var(--surface);--ap-kartu:
 .ap-strip{display:flex;align-items:flex-start;gap:42px;margin:0 -26px;padding:0 26px 28px;list-style:none;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:26px}
 .ap-strip::-webkit-scrollbar{display:none}
 .ap-strip li{flex:0 0 auto;scroll-snap-align:start}
-.ap-strip-item{display:flex;flex-direction:column;align-items:center;gap:17px;min-width:96px;color:var(--ap-ink);font-size:17px;font-weight:500;line-height:1.2;text-decoration:none;opacity:.86;transition:opacity .15s}
-.ap-strip-item:hover{opacity:1}
+.ap-strip-item{display:flex;flex-direction:column;align-items:center;gap:17px;min-width:96px;color:var(--ap-ink);font-size:17px;font-weight:500;line-height:1.2;opacity:.86;pointer-events:none;user-select:none;-webkit-user-select:none;cursor:default}
 .ap-strip-item img{height:44px;width:auto;max-width:120px;object-fit:contain}
 .ap-strip-btn{position:absolute;top:0;bottom:0;display:flex;align-items:center;padding:0;border:0;color:var(--ap-ink2)}
 .ap-strip-next{right:-26px;justify-content:flex-start;padding-left:14px;}
@@ -835,6 +820,8 @@ html[data-device="hp"] .kartu-aksi .btn{font-size:13px}
 
 /* jarak: strip ikon -> kartu produk -> logo merek (sedikit lebih lega, tidak dempet) */
 .ap-kepala{padding-bottom:72px}
+/* HP: ikon laptop kecil diturunkan ke tengah ruang putih (jarak atas ~ jarak bawah) */
+@media (max-width:899px){ .ap-kepala{padding-top:104px;padding-bottom:24px} }
 .ap-jelajah{padding-top:24px;padding-bottom:32px}
 @media (min-width:900px){
   .ap-kepala{padding-bottom:88px}
@@ -866,7 +853,8 @@ html[data-tema="gelap"] .notif-baris.baru{background:#1e293b;border-color:#33415
 /* Permintaan di navbar utama: angka diberi jarak dari teks (tidak menumpuk) */
 .nav-minta{gap:7px}
 .badge.badge-nav{position:static;flex:none;margin:0 0 0 2px;transform:none}
-.sb-minta{display:inline-flex;align-items:center;gap:10px;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.sb-tombol{display:flex;align-items:center;gap:10px;width:100%;margin:0;background:none;border:0;font-family:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sb-tombol:hover{color:var(--ink-3)}
 
 /* ===== Tampilan akun di header (dulu blok <style id="perbaikan-akun"> di index.html; harus tetap paling akhir) ===== */
 /* Atribut html[data-login="1"] dipasang navbar.js saat user login */

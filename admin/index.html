@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=20261122e">
+  <link rel="stylesheet" href="admin.css?v=20261123d">
 </head>
 <body>
 
@@ -21,8 +21,9 @@
 <!-- ===== PANEL ===== -->
 <div id="viewPanel" class="app" hidden>
   <aside class="side">
-    <div class="brand"><span class="logo">T</span><b>TEKNOA.ID</b></div>
-    <nav class="tabs" role="tablist" aria-label="Menu panel admin" aria-orientation="vertical">
+    <button type="button" class="brand" id="btnBrand" aria-haspopup="true" aria-expanded="false" aria-controls="popAkun"><span class="logo">T</span><b>TEKNOA.ID</b></button>
+    <div class="akun-pop" id="popAkun" hidden><button type="button" class="btn btn-garis" data-keluar>Keluar</button></div>
+    <nav class="tabs" id="menuAdmin" role="tablist" aria-label="Menu panel admin" aria-orientation="vertical">
       <button role="tab" id="tab-dashboard" aria-selected="true" aria-controls="pnl-dashboard" data-tab="dashboard">Dashboard</button>
       <div class="grup-wrap tutup" data-grup="hero">
         <button type="button" class="grup-btn" id="gb-hero" aria-expanded="false" aria-controls="gi-hero"><span>Hero</span><svg class="chev" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -48,14 +49,15 @@
       </div>
       <button role="tab" id="tab-admin" aria-selected="false" aria-controls="pnl-admin" data-tab="admin" data-judul="Admin &amp; Role" tabindex="-1" hidden>Admin &amp; Role</button>
     </nav>
-    <div class="side-foot"><button type="button" id="btnKeluar" class="btn btn-garis btn-kecil">Keluar</button><small>Admin TEKNOA.ID</small></div>
+    <div class="side-foot" id="footAdmin"><button type="button" id="btnKeluar" class="btn btn-garis btn-kecil" data-keluar>Keluar</button><small>Admin TEKNOA.ID</small></div>
   </aside>
 
 
   <div class="utama">
   <header class="top"><div class="top-in">
+    <button type="button" id="btnKembaliDash" class="btn btn-garis btn-kecil" data-ke="dashboard" aria-label="Kembali ke Dashboard" hidden>&lsaquo; Dashboard</button>
     <h1 id="judulHalaman">Dashboard</h1>
-    <div class="top-aksi"><a id="lnkSitus" href="#" target="_blank" rel="noopener" class="btn btn-kecil">Utama</a></div>
+    <div class="top-aksi" id="aksiDashboard"><a id="lnkSitus" href="#" target="_blank" rel="noopener" class="btn btn-kecil">Lihat Website</a><button type="button" class="btn btn-bahaya btn-kecil btn-keluar-hp" data-keluar>Keluar</button></div>
   </div></header>
 
   <main class="isi">
@@ -67,6 +69,9 @@
         <button type="button" data-ke="toko"><b>Gambar</b><small>Foto toko di website</small></button>
         <button type="button" data-ke="info"><b>Info &amp; Kontak</b><small>Informasi dan kontak website</small></button>
         <button type="button" data-ke="produk"><b>Produk</b><small>Kelola data laptop</small></button>
+        <button type="button" data-ke="permintaan"><b>Permintaan <i class="badge-n" id="badgePintas" hidden></i></b><small>Permintaan stok dari pembeli</small></button>
+        <button type="button" data-ke="unggulan"><b>Unggulan</b><small>Kartu produk unggulan</small></button>
+        <button type="button" data-ke="admin" id="pintasAdmin" hidden><b>Admin &amp; Role</b><small>Kelola akses admin</small></button>
       </div>
       <div class="dash-2">
         <div class="kartu"><div class="bagian-kepala"><h3>Ketersediaan</h3><button type="button" class="btn btn-garis btn-kecil" data-ke="permintaan">Lihat semua</button></div><div id="dashPermintaan" class="daftar"></div></div>
@@ -189,6 +194,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase-config.js"></script>
 <script src="admin-auth.js?v=20261122e"></script>
-<script src="admin.js?v=20261122e"></script>
+<script src="admin.js?v=20261123d"></script>
 </body>
 </html>
