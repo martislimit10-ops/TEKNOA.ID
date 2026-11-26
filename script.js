@@ -1,5 +1,6 @@
 const CONFIG = { ...CONFIG_AWAL };
-let PRODUK = [];
+let PRODUK = [];                               /* semua laptop (objek Produk), dipakai keranjang & detail */
+const katalog = new KatalogToko(sb);            /* OOP: semua pembacaan produk dari Supabase lewat objek ini (oop.js) */
 let BANNER = [];
 const DEVICE = window.LM_HP ? 'hp' : 'desktop';
 const PAGE = 12;   /* jumlah produk per halaman; sisanya lewat tombol "Lainnya" */
@@ -374,9 +375,10 @@ window.addEventListener('load', perbaruiSemuaGeser);
 
 /* ---------- 6. Halaman Toko (#toko) ---------- */
 const storePage = $('#storePage');
-/* Filter katalog dari tautan menu (data-ke-toko): kat = kategori, tag = label. semua = tampilkan seluruh produk */
-const state = { kat: new Set(), tag: new Set(), semua: false };
-let tokoDariDalam = false;
+/* Filter halaman Toko. kategori: 'all' atau id kategori (lihat KATEGORI). tag: label (promo/baru/terlaris) dari tautan menu.
+   hasil: daftar produk dari Supabase untuk filter aktif (null = belum ada, pakai PRODUK). */
+const state = { kategori: 'all', tag: '', semua: false, hasil: null, memuat: false, gagal: false };
+let tokoDariDalam = false, nomorFilter = 0;
 
 function sinkronToko() {
   const buka = location.hash === '#toko';
@@ -399,26 +401,61 @@ $('#btnToko').addEventListener('click', bukaToko);
 $('#storeBack').addEventListener('click', tutupToko);
 $$('a[href="#toko"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); bukaToko(); }));
 
-function aturFilterDari({ kat, tag } = {}) {
-  state.kat = new Set(kat ? [kat] : []); state.tag = new Set(tag ? [tag] : []);
-  state.semua = false; renderKatalog();
+/* Tombol filter kategori (HANYA di halaman Toko): Semua Laptop + 6 kategori */
+function renderFilterKategori() {
+  const el = $('#filterKat'); if (!el) return;
+  el.innerHTML = katalog.kategori.map(k =>
+    `<button type="button" class="chip-kat" data-kat="${esc(k.id)}" aria-pressed="${k.id === state.kategori}">${esc(k.label)}</button>`).join('');
+}
+function renderInfoFilter(n) {
+  const el = $('#filterInfo'); if (!el) return;
+  const bagian = [katalog.labelKategori(state.kategori), state.tag && LABEL_TAG[state.tag]].filter(Boolean);
+  el.textContent = (state.memuat || state.gagal) ? '' : `${bagian.join(' · ')}: ${n} laptop`;
 }
 
+/* Ambil produk sesuai filter aktif LANGSUNG dari Supabase (KatalogToko.ambil, tabel produk, kolom kategori) */
+async function muatFilter(diam = false) {
+  const nomor = ++nomorFilter;
+  state.gagal = false;
+  if (!diam) { state.memuat = true; renderKatalog(); }
+  try {
+    const r = await katalog.ambil({ kat: state.kategori, tag: state.tag || null });   /* overloading bentuk objek */
+    if (nomor !== nomorFilter) return;                  /* klik filter yang lebih baru sudah jalan: abaikan hasil lama */
+    state.hasil = r.data;
+  } catch (e) {
+    if (nomor !== nomorFilter) return;
+    console.error('Gagal memuat kategori dari Supabase:', e);
+    state.gagal = true;
+  }
+  state.memuat = false; renderKatalog();
+}
+function pilihKategori(id) {
+  state.kategori = id; state.semua = false;
+  renderFilterKategori();
+  return muatFilter();
+}
+/* Dipanggil tautan menu / kartu beranda (data-ke-toko): membuka Toko langsung pada kategori/label tertentu */
+function aturFilterDari({ kat, tag } = {}) {
+  state.tag = tag || '';
+  return pilihKategori(kat || 'all');
+}
+$('#filterKat').addEventListener('click', e => {
+  const b = e.target.closest('[data-kat]'); if (!b) return;
+  state.tag = '';                                        /* memilih kategori sendiri = label menu (Promo dst.) dilepas */
+  pilihKategori(b.dataset.kat);
+});
+
 function daftarTerfilter() {
-  return PRODUK.filter(p => {
-    if (state.kat.size && !state.kat.has(p.kategori)) return false;
-    if (state.tag.size && !p.tags.some(t => state.tag.has(t))) return false;
-    return true;
-  });   /* urutan = dari database (created_at menurun) */
+  if (state.hasil) return state.hasil;                   /* urutan = dari database (terbaru di depan) */
+  return PRODUK.filter(p => (state.kategori === 'all' || p.kategori === state.kategori) && (!state.tag || p.punyaTag(state.tag)));
 }
 /* Indikator stok: hijau = tersedia, merah = habis (berlaku untuk semua laptop) */
 const htmlStok = p => `<span class="stok-ind ${p.tersedia ? 'ada' : 'habis'}"><i aria-hidden="true"></i>${p.tersedia ? 'Stok tersedia' : 'Stok habis'}</span>`;
 function kartuProduk(p) {
-  const sp = p.spek || {};
-  const nama = namaLengkap(p);
+  const nama = p.nama;
   const lencana = p.tags.filter(t => LABEL_TAG[t]).map(t => `<span class="${t === 'promo' ? 'promo' : ''}">${esc(LABEL_TAG[t])}</span>`).join('');
-  const ringkas = [sp.processor, sp.ram && `RAM ${sp.ram}`, sp.storage].filter(Boolean).map(esc).join(', ');
-  const hemat = p.hargaNormal && p.hargaNormal > p.harga ? p.hargaNormal - p.harga : 0;
+  const ringkas = esc(p.ringkasSpek());
+  const hemat = p.hemat();
   /* Baris tombol: stok ada = "+ Keranjang" | Lihat; stok habis = "Minta stok" | Lihat */
   const tombolUtama = p.tersedia
     ? `<button type="button" class="btn btn-kecil" data-tambah="${esc(p.id)}" aria-label="Tambah ${esc(nama)} ke keranjang">+ Keranjang</button>`
@@ -447,10 +484,14 @@ function renderKatalog() {
   const semua = daftarTerfilter();
   const tampil = state.semua ? semua : semua.slice(0, PAGE);
 
-  if (sedangMemuat) {
+  renderInfoFilter(semua.length);
+  if (sedangMemuat || state.memuat) {
     $('#grid').innerHTML = Array.from({ length: 4 }, () => '<div class="skel"></div>').join('');
     $('#more').innerHTML = '';
-  } else if (gagalMemuat && !PRODUK.length) {
+  } else if (state.gagal) {
+    $('#grid').innerHTML = `<div class="kosong"><p><b>Laptop kategori ini belum bisa dimuat.</b></p><p>Periksa koneksi internet, lalu coba lagi.</p><button type="button" class="btn" id="ulangMuat">Muat ulang</button></div>`;
+    $('#more').innerHTML = '';
+  } else if (gagalMemuat && !PRODUK.length && !state.hasil) {
     $('#grid').innerHTML = `<div class="kosong"><p><b>Data laptop belum bisa dimuat.</b></p><p>Periksa koneksi internet, lalu coba lagi.</p><button type="button" class="btn" id="ulangMuat">Muat ulang</button></div>`;
     $('#more').innerHTML = '';
   } else {
@@ -466,7 +507,7 @@ $('#more').addEventListener('click', e => {
   const k = $('#grid').children[PAGE]; if (k) k.querySelector('button').focus();
 });
 $('#grid').addEventListener('click', e => {
-  if (e.target.closest('#ulangMuat')) { muatSemua(); return; }
+  if (e.target.closest('#ulangMuat')) { if (state.gagal) muatFilter(); else muatSemua(); return; }
   const mt = e.target.closest('[data-minta]'); if (mt) { e.stopPropagation(); mintaStok(mt.dataset.minta); return; }
   const t = e.target.closest('[data-tambah]'); if (t) { tambahKeranjang(t.dataset.tambah); return; }
   const o = e.target.closest('[data-open]'); if (o) bukaDetail(o.dataset.open);
@@ -482,8 +523,7 @@ function simpanKeranjang() { simpanLokal(); renderKeranjang(); jadwalSinkronKera
 function beliSekarang(id) {
   const p = cariProduk(id); if (!p) return;
   if (p.tersedia === false) { toast('Maaf, produk ini sedang tidak tersedia', 'info'); return; }
-  const teks = `Halo Laptop Makassar, saya ingin membeli:\n\n${namaLengkap(p)}\nHarga: ${rupiah(p.harga)}\n\nMohon info ketersediaan unit dan cara pembayarannya. Terima kasih.`;
-  window.open(waLink(teks), '_blank', 'noopener');
+  window.open(waLink(p.pesanBeli()), '_blank', 'noopener');   /* teks pesan dari objek produk (LaptopBekas / LaptopBaru menimpanya) */
 }
 function tambahKeranjang(id) {
   id = String(id);
@@ -569,7 +609,7 @@ function spekBesar(sp) {
 function bukaDetail(id) {
   const p = cariProduk(id); if (!p) return;
   detailId = p.id; detailSig = sigDetail(p);
-  const k = KONDISI[p.kondisi] || KONDISI.bekas, sp = p.spek || {}, nama = namaLengkap(p);
+  const k = p.infoKondisi(), sp = p.spek, nama = p.nama;
   const baris = (n, v) => `<div><dt>${n}</dt><dd>${esc(v || '-')}</dd></div>`;
   const hemat = p.hargaNormal && p.hargaNormal > p.harga;
   $('#detailBody').innerHTML = `
@@ -612,28 +652,8 @@ $('#detailBody').addEventListener('click', e => {
 });
 
 /* ---------- 10. Data dari Supabase ---------- */
-function dariDb(r) {
-  let spek = r.spek;
-  if (typeof spek === 'string') { try { spek = JSON.parse(spek); } catch { spek = {}; } }
-  let tags = r.tags;
-  if (typeof tags === 'string') { try { tags = JSON.parse(tags); } catch { tags = []; } }
-  let tambahan = r.foto_tambahan;
-  if (typeof tambahan === 'string') { try { tambahan = JSON.parse(tambahan); } catch { tambahan = []; } }
-  const foto = r.foto || window.FOTO_KOSONG;
-  const galeri = [foto, ...(Array.isArray(tambahan) ? tambahan.filter(u => typeof u === 'string' && /^https?:\/\//i.test(u)) : [])];
-  return {
-    id: r.id, kategori: r.kategori, deskripsi: String(r.deskripsi || '').trim(), tersedia: r.status !== 'tidak_tersedia', galeri, merek: r.merek || '', seri: r.seri || '',
-    harga: Number(r.harga) || 0, hargaNormal: r.harganormal ? Number(r.harganormal) : null,
-    tags: Array.isArray(tags) ? tags : [], kondisi: KONDISI[r.kondisi] ? r.kondisi : 'bekas',
-    foto: r.foto || window.FOTO_KOSONG, spek: spek || {}
-  };
-}
 async function muatProduk() {
-  /* Produk terbaru selalu di depan. Jika kolom created_at belum ada, pakai id terbesar. */
-  let r = await sb.from('produk').select('*').order('created_at', { ascending: false });
-  if (r.error) r = await sb.from('produk').select('*').order('id', { ascending: false });
-  if (r.error) throw r.error;
-  PRODUK = (r.data || []).map(dariDb);
+  PRODUK = await katalog.muatSemua();     /* objek Produk (LaptopBekas / LaptopBaru), terbaru di depan */
 }
 async function muatConfig() {
   const { data, error } = await sb.from('config').select('*').order('id', { ascending: true }).limit(1);
@@ -656,6 +676,7 @@ async function muatSemua() {
   gagalMemuat = hasil[0].status === 'rejected';
   sedangMemuat = false; terakhirMuat = Date.now();
   renderKatalog(); terapkanConfig(); renderHero(); renderSliderToko(); renderUnggulan(); bersihkanKeranjang();
+  if (state.hasil || state.kategori !== 'all' || state.tag) muatFilter(true);   /* filter Toko ikut diperbarui dari database (tanpa kedip) */
   const pd = detail.open && detailId !== null ? cariProduk(detailId) : null;
   if (pd && sigDetail(pd) !== detailSig) { const atas = $('#detailBody').scrollTop; bukaDetail(detailId); $('#detailBody').scrollTop = atas; }   /* stok/harga berubah saat detail terbuka */
   tutupSplash();
@@ -1059,6 +1080,7 @@ terapkanConfig();
 renderHero();
 renderSliderToko();
 renderDaftarKategori();
+renderFilterKategori();
 perbaruiSemuaGeser();
 renderKeranjang();
 muatSemua();

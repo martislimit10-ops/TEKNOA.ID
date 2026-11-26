@@ -926,3 +926,19 @@ html[data-tema="gelap"] .merek-item img{filter:invert(1);mix-blend-mode:screen}
 .kartu-aksi .btn.minta.ditangani,.kartu-aksi .btn.minta.ditangani:hover:not([disabled]),.kartu-aksi .btn.minta.ditangani:focus-visible,.kartu-aksi .btn.minta.ditangani:active{border:1px solid #1d4ed8;background:#dbeafe;color:#1e40af}
 html[data-tema="gelap"] .kartu-aksi .btn.minta.menunggu,html[data-tema="gelap"] .kartu-aksi .btn.minta.menunggu:hover:not([disabled]){background:#252a33;color:#d1d5db;border-color:#6b7280}
 html[data-tema="gelap"] .kartu-aksi .btn.minta.ditangani,html[data-tema="gelap"] .kartu-aksi .btn.minta.ditangani:hover:not([disabled]){background:#1e3a8a;color:#dbeafe;border-color:#3b82f6}
+
+/* =====================================================================
+   Filter kategori di halaman Toko (#filterKat). Hanya ada di dalam .store, tidak tampil di beranda.
+   Memakai variabel warna & bentuk tombol pil yang sama dengan tombol kartu produk.
+   ===================================================================== */
+.filter-kat{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;margin:0 0 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.filter-kat::-webkit-scrollbar{display:none}
+.chip-kat{flex:0 0 auto;height:38px;padding:0 16px;border:1px solid var(--tk-garis);border-radius:999px;background:var(--tk-card);color:#555;font:400 12.5px Poppins,var(--font);white-space:nowrap;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+html[data-tema="gelap"] .chip-kat{color:var(--tk-ink)}
+.chip-kat:hover,.chip-kat:focus-visible{border-color:var(--tk-ink);color:var(--tk-ink)}
+.chip-kat[aria-pressed="true"]{background:#000;border-color:#000;color:#fff}
+html[data-tema="gelap"] .chip-kat[aria-pressed="true"]{background:#fff;border-color:#fff;color:#111}
+.filter-info{min-height:1.4em;margin:0 0 14px;text-align:center;font-size:12px;color:var(--tk-abu)}
+@media (min-width:900px){
+  html[data-device="desktop"] .filter-kat{justify-content:center;flex-wrap:wrap;overflow:visible}
+}
